@@ -1,0 +1,23 @@
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode and Swift build products
+DerivedData/
+*.xcresult
+.build/
+.swiftpm/
+xcuserdata/
+*.moved-aside
+
+# Local logs and private smoke fixtures
+Flightlogs/
+
+# Local editor and temporary files
+*.swp
+*.swo
+*.tmp
+*.log
+
+# macOS metadata inside private assets
+Assets/.DS_Store

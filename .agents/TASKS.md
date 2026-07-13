@@ -1,0 +1,285 @@
+# Planning Tasks
+
+## Near Term
+
+- Current app shell slice is implemented:
+  - `Airframe/App/Airframe.xcodeproj` exists.
+  - App target/product/display name is `Airframe`.
+  - Bundle ID is `com.kumkju.airframe`.
+  - Local package products from `Airframe/Packages` are linked through the Xcode project.
+  - `AirframeUI` package exists for shared SwiftUI metadata UI.
+  - The app uses `DocumentGroup` and a read-only `LogDocument`.
+  - `.bbl` and `.bfl` are registered as viewer document types.
+  - `.txt` and `.log` are intentionally not registered.
+  - English string catalog and placeholder asset catalog are present.
+  - Team ID is configured through `Base.xcconfig`; final icon is deferred.
+- Current unit-formatting slice is implemented:
+  - `AirframeUnits` is a dependency-free Swift package for duration, frequency, integer, and percent formatting.
+  - `AirframeUI` provides `DurationText`, `FrequencyText`, `IntegerText`, and `PercentText` value views.
+  - Document timing/sidebar/count values use these views; progress and issue strings use focused formatters.
+- `Airframe/Packages/Logging` is implemented as a copied local infrastructure package:
+  - `Logging` target writes to `os.Logger` and keeps an in-memory session buffer.
+  - `ErrorReporting` and Sentry were removed; the package has no external dependencies.
+  - The `Logging` package product is linked into the `Airframe` app target.
+  - `BlackboxReader`, `BlackboxAnalysis`, `AirframeUI`, and `AirframeCLI` consume it through package-local `PackageLog` categories. `BlackboxCore` intentionally remains logging-free.
+  - Current categories: `blackbox.reader`, `blackbox.stream`, `blackbox.analysis`, `airframe.documents`, and `airframe.cli`.
+  - `swift test` passed in the Airframe copy with 14 Swift Testing tests in 1 suite.
+- Completed product slice: `AirframeCLI` executable package with command `airframe`.
+- `AirframeCLI` uses the approved `apple/swift-argument-parser` dependency.
+- `AirframeCLI` is split into testable `AirframeCLIKit` library target and a thin executable target.
+- CLI includes `--help`, `--version`, `--completion bash|zsh|fish`, `logs`, `header`, `info`, `schema`, `validate`, `fields`, `issues`, `events`, `data`, and `csv`.
+- CLI `info` output renders a Reader-owned semantic setup report for quad/setup metadata. `BlackboxReader` owns header-name recognition, canonical keys, derived values, and section semantics; `AirframeCLI` only formats sections and rows. Modern sections include D-Term / PID, Feedforward, RPM Filter, GPS / Rescue, Altitude / Autopilot, and Flight Modes when values exist. Default output hides empty rows/sections; `--show-empty` restores them.
+- CLI data extraction treats `I`, `P`, `S`, `G`, and `H` as first-class frames for schema, validation, data extraction, and CSV. `E` is event output, not numeric series.
+- CLI `schema` keeps JSON structured while text output labels each frame marker with a colon, e.g. `I: ...`, `G: ...`, `H: ...`.
+- CLI filtering starts with simple flags and presets, not a full query language. It includes exact fields, globs, marker filters, presentation groups, case-insensitive name contains, known/unknown filters, queryable-only, and presets for current, motor, rpm, gps, and power.
+- CLI `issues` exposes import, header, compatibility, stream, range, selector, and optional CSV issues as text/JSON so tools do not need to parse unrelated command output.
+- CLI `events` exposes decoded event frames as human-readable timeline text by default and JSON/NDJSON for tool consumers, with event type, payload, byte range, ordinal, and time/context fields for later timeline/UI and script consumers. Text output uses relative seconds from the first valid main frame, readable event labels such as `Disarm` and `End of log`, robust firmware-version parsing for full Betaflight revision strings, and the currently active primary flight mode such as `Flight mode Angle` or `Flight mode Acro` instead of changed-flag `on`/`off` lists.
+- CLI JSON contract decision: omit source file names from machine JSON; use `source`, `log`, and offsets as stable identity.
+- CLI snapshot/output tests now cover `info`, `schema`, `fields`, `validate`, `issues`, and `events`; events also has default text-output and CSV-rejection coverage.
+- Local CLI smoke script passed against `Flightlogs/small/`: `logs`, `header`, `info`, `schema`, `fields`, `csv`, `validate`, `issues`, and `events` completed for all 3 staged logs. The script intentionally ignores `validate`'s exit code for real local logs because its purpose is command-completion smoke coverage, not asserting every staged private log is issue-free.
+- Reader all-frame field table and CSV layer exists for `I`, `P`, `S`, `G`, and `H`.
+- Reader golden frame-stream snapshot validation exists for `single-log-basic`, `gps-home-flow`, and `event-flow`.
+- External validation with `blackbox-tools` / `blackbox_decode` is intentionally deferred. Use as little upstream behavior as possible for the next slices.
+- Reader lazy decoded-log API exists: `DecodedLog`, `ReaderLogSchema`, `ReaderFrameSchema`, `ReaderField`, `NamedReaderFrame`, `decodedLogs(in:)`, `decodedLog(for:in:)`, and `namedFrame(_:using:)`.
+- Reader memory-light summary API exists: `DecodedLogSummary`, `ReaderEventSummary`, `DecodedLogSummaryResult`, `DecodedLog.summarize()`, and `BlackboxReader.summaries(in:)`.
+- Reader fast header-preview API exists: `ReaderHeaderPreviewOptions`, `ReaderHeaderPreview`, `DecodedLogHeaderInfo`, `DecodedLog.headerInfo`, `BlackboxReader.headerInfos(in:)`, and `BlackboxReader.previewHeaders(fileAt:options:)`.
+- Reader header catalog and semantic report API exists: `ReaderHeaderKey`, `ReaderHeaderDefinition`, `ReaderHeaderValueKind`, `ReaderHeaderSemanticKey`, `ReaderHeaderSemanticValue`, header lookup helpers on `DecodedLogHeaderInfo`, and `DecodedLogFlightInfo.infoReport(showEmpty:)`. `ReaderInfoRow` exposes `displayValue`, `rawValue`, and `typedValue`; legacy `value` remains a display alias.
+- Reader scan-backed flight-info API exists: `DecodedLogFlightInfo`, `DecodedLogFlightInfoResult`, `DecodedLog.flightInfo(using:)`, and `BlackboxReader.flightInfos(in:)`.
+- Reader syncpoint index API exists: `ReaderLogIndex`, `ReaderSyncPoint`, `ReaderLogIndex.Error`, and `DecodedLog.makeIndex()`.
+- Reader single-pass metadata/index scan API exists: `DecodedLogScan`, `DecodedLogScanProgress`, and `DecodedLog.scan(progressHandler:)`.
+- Reader partial main-frame range API exists: `ReaderMainFrameRange`, `ReaderMainFrameRange.Error`, extended `ReaderSyncPoint` state, and `DecodedLog.mainFrames(fromMainFrameTime:throughMainFrameTime:using:)`.
+- Reader all-frame range API exists: `ReaderFrameRange`, `ReaderFrameRange.Error`, and `DecodedLog.allFrames(fromMainFrameTime:throughMainFrameTime:using:)`.
+- Reader selected main-frame field-range API exists: `ReaderFieldSelector`, `ReaderFieldSample`, `ReaderFieldRange`, and `DecodedLog.mainFrameFields(...)`.
+- Reader consumer series API exists: `ReaderSeriesID`, `ReaderSeriesDescriptor`, `ReaderSeriesFrameGroup`, `ReaderSeriesCatalog`, `ReaderSeriesSelector`, `ReaderSeriesTable`, `ReaderViewportResult`, `ReaderSeriesCSV`, `ReaderSeriesRequest`, and `DecodedLog` helpers for catalog, table, viewport, and CSV generation.
+- Reader series presentation API exists: `ReaderSeriesPresentation`, `ReaderSeriesUnit`, `ReaderSeriesPresentationGroup`, `ReaderSeriesAxisHint`, `ReaderSeriesValueScale`, `ReaderSeriesDescriptor.presentation`, `ReaderSeriesCatalog.presentation(for:)`, and `ReaderSeriesCatalog.presentedDescriptors(for:)`.
+- Series presentation is project-owned metadata for raw Reader series. It provides labels, short labels, groups, conservative units, precision, axis hints, raw scale metadata, and known/unknown status without adding upstream graph/config concepts, decoded-value scaling, derived fields, or UI.
+- Reader display-value API exists: `ReaderSeriesDisplayValue`, `ReaderSeriesDisplayContext`, and `ReaderSeriesPresentation.displayValue(for:context:)`. It currently scales `time` to seconds and GPS coordinate integers to coordinate degrees; all uncertain fields remain raw.
+- `BlackboxAnalysis` package exists and depends on `BlackboxReader`.
+- Analysis app-facing facade exists through `BlackboxAnalysisWorkspace`, `AnalysisSeriesCatalog`, `AnalysisSeriesTable`, and `AnalysisViewportResult`.
+- Analysis catalog unifies raw Reader passthrough, display-scaled raw values, and first derived series so app consumers do not need to know which package owns each value.
+- First Analysis derived series implemented: motor minimum, motor maximum, motor average, PID sum per qualifying axis, and debug raw descriptors with debug-mode label context.
+- GPS distance/azimuth/local coordinates and attitude series are represented in `AnalysisDerivedSeriesKind` but are prerequisite-gated and currently omitted from the catalog when alignment/scaling is not proven.
+- Keep `BlackboxCore` limited to parser primitives. `BlackboxReader` is now the separate package for file loading, lazy decoded-log access, full frame-stream iteration, recovery/resync, import assembly, multi-file import behavior, and compatibility status handling.
+- Local-only summary smoke/performance checks on `Flightlogs/small/` passed: 3 files, 3 decoded logs, 0 import issues, 0 stream issues, 0 corrupt frames, baseline open `0.0101s`, batch summaries `0.3362s`, max RSS `10.9MB`.
+- Local-only index smoke checks on `Flightlogs/small/` passed: 3 files, 3 decoded logs, 0 import issues, syncpoints `29`, `28`, and `117`, 0 index issues.
+- Local-only range smoke checks on `Flightlogs/small/` passed: bounded main-frame output matched full-stream filtered output exactly for all 3 logs, with 0 range issues.
+- Local-only scan smoke checks on `Flightlogs/small/` passed: `DecodedLog.scan()` matched separate `summarize()` plus `makeIndex()` for all 3 logs, with 0 import issues, 0 total issues, and 174 total syncpoints.
+- Local-only header-preview smoke checks on `Flightlogs/small/` passed using only `BlackboxReader().previewHeaders(fileAt:)`: Barney read `33,554/33,554` bytes, Flip read `49,152/49,152` bytes, and Puck read `65,536/174,080` bytes while returning complete headers.
+- Local-only flight-info/field-range smoke checks on `Flightlogs/small/` passed using `scan()`, `flightInfo(using:)`, and `mainFrameFields(... using: scan.index)`: selected samples were Barney `204`, Flip `507`, and Puck `249`, all with 0 issues.
+- Local-only series smoke checks on `Flightlogs/small/` passed using `scan()`, `seriesCatalog`, `seriesTable(for:using:)`, `viewportSeries(for:using:)`, and `seriesCSV(for:using:)`: Barney `groups=5`, `mainSeries=96`, `rows=731`, `viewportPoints=458`, `csvRows=731`, `issues=0`; Flip `groups=3`, `mainSeries=68`, `rows=1770`, `viewportPoints=456`, `csvRows=1770`, `issues=0`; Puck `groups=5`, `mainSeries=106`, `rows=3723`, `viewportPoints=634`, `csvRows=3723`, `issues=0`.
+- Local range performance benchmark on 8MB to 30MB private logs showed 1% all-frame ranges around `12ms...48ms`, 5% all-frame ranges around `61ms...236ms`, and near-identical `mainFrames(...)` / `allFrames(...)` timings.
+- Local scan performance benchmark showed `DecodedLog.scan()` is about `2x` faster than current separate `summarize()` plus `makeIndex()` calls, and about `1.6x` faster than the earlier pre-scan Summary+Index baseline on larger private logs.
+- Cache decision: defer chunk cache. `DecodedLog.scan()` now handles the measured duplicate full-log decoding case when callers need both summary and index.
+- First security-hardening slice completed before UI/chart work:
+  - Core checked arithmetic and bounded scanner/interpreter limits are implemented.
+  - Reader configuration budgets are implemented for import/source/header/event/issue/index/range/sample/selector/CSV/preview/concurrency surfaces.
+  - Event log-end messages are bounded.
+  - Issue floods are capped while preserving total issue counts.
+  - Range, field, selector, syncpoint, viewport, and CSV output limits are enforced.
+  - Analysis aggregate sums avoid `Int` overflow traps.
+  - Hostile-input/limit tests cover oversized in-memory sources, header limits, event string caps, retained issue caps, range and selector limits, CSV row/byte limits, scanner limits, field-count limits, and predictor overflow.
+- Aggressive permanent hostile-input smoke coverage completed:
+  - Core covers deterministic random bytes, marker spam, hostile scanner headers, and hostile interpreter definitions.
+  - Reader covers deterministic random imports, oversized input rejection, mutated valid fixtures through stream and scan paths, hostile header preview files, and range/series output pressure.
+  - External coverage-guided fuzzing is deferred and parked in `.agents/BACKLOG.md`.
+- First pre-commit audit fixes are implemented and covered:
+  - Reader log-end event string byte-limit edges.
+  - Reader suspicious logging-resume issue before any main-frame baseline.
+  - Header-preview truncated-tail tolerance.
+  - CLI absolute-path sanitization in error messages.
+- Current automated coverage after frame-level progress:
+  - `BlackboxCore`: 94 Swift Testing tests in 12 suites.
+  - `Logging`: 14 Swift Testing tests in 1 suite.
+  - `BlackboxReader`: 164 Swift Testing tests in 24 suites.
+  - `BlackboxAnalysis`: 8 Swift Testing tests in 3 suites.
+  - `AirframeUI`: 5 Swift Testing tests in 1 suite.
+  - `AirframeCLI`: 26 Swift Testing tests in 2 suites.
+  - `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-frame-progress-test-dd` passed after frame-level progress.
+- Current progressive document-opening slice is implemented:
+  - `LogDocument` now stores source name, bytes, byte count, and identity only.
+  - `DocumentView` owns `AirframeDocumentOpenModel` and starts async loading from `.task(id:)`.
+  - `AirframeUI` exposes `AirframeDocumentOpenState`, `AirframeDocumentSnapshot`, and per-log `AirframeLogDetailState`.
+  - Header/log metadata appears from the fast Reader open/header path before scan-backed `flightInfo()` details finish.
+  - The left list stays focused on file/log identity without scan status.
+  - While a log is scanning, the right detail view shows Summary plus one determinate progress row; timing/frame-count sections appear after the scan finishes.
+  - The progress bar now advances during each log scan from `DecodedLogScanProgress` emitted after every decoded frame. Percent is byte-range based; text includes decoded frame count. UI progress is clamped and monotonically applied to avoid transient values above 100%.
+  - Progress, timing metadata, main-frame counts, and issue numbers use locale-aware number formatting instead of direct numeric string interpolation.
+  - Empty/non-Blackbox documents still surface import issues in the document window.
+  - Verification passed: `swift test` in `Airframe/Packages/BlackboxReader`; `swift test` in `Airframe/Packages/AirframeUI`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-frame-progress-test-dd`.
+- Current state-restoration slice is implemented:
+  - `DocumentGroup` has macOS minimum/default document sizing. System state restoration should restore the most recent window size after that initial default.
+  - `DocumentHomeView` persists `NavigationSplitView` column visibility with `@SceneStorage`.
+  - The selected log row is restored per scene with `@SceneStorage`.
+  - The sidebar has stable `navigationSplitViewColumnWidth(min:ideal:max:)` values.
+  - Exact persistence of manually dragged sidebar widths is not custom-implemented; keep using SwiftUI restoration unless real macOS testing shows it is insufficient.
+  - Verification passed: `swift test` in `Airframe/Packages/AirframeUI`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-state-restoration-test-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-state-restoration-macos-test-dd`.
+- Current iPhone full-screen fix is implemented:
+  - Added the minimal `UILaunchScreen` dictionary to the manual app `Info.plist`.
+  - Before the fix, the iPhone 17 simulator showed Airframe letterboxed inside the screen.
+  - After reinstalling the rebuilt app, the screenshot used the full screen; the remaining large rounded card is the system `DocumentGroup` document browser design.
+  - Verification passed: `xcodebuild build -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-fullscreen-fix-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-fullscreen-fix-test-dd`; simulator launch screenshot `/tmp/airframe-iphone-fullscreen-fix.png`.
+- Current iOS no-document-browser slice is implemented:
+  - iOS now uses `WindowGroup { HomeView() }` instead of `DocumentGroup` as the root scene.
+  - `HomeView` provides a direct empty state, toolbar open button, `fileImporter`, and `onOpenURL` handling.
+  - `LogDocument(fileAt:)` reads security-scoped file URLs for importer/external-open flows.
+  - macOS still uses `DocumentGroup` and document-window sizing from `AirframeApp`.
+  - Verification passed: `xcodebuild build -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-no-document-browser-dd`; iPhone simulator screenshot `/tmp/airframe-no-document-browser.png`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-no-document-browser-test-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-no-document-browser-macos-test-dd`.
+- Current UI-test infrastructure slice is implemented:
+  - `AirframeLaunchContext` detects UI-test runs through `--airframe-ui-testing` or `AIRFRAME_UI_TESTING=1`.
+  - UI-test fixture injection supports launch arguments `--airframe-ui-test-fixture-name` and `--airframe-ui-test-fixture-base64`, plus equivalent environment keys.
+  - `AirframeUITests` exists as an XCUITest target with bundled compact fixtures `native-single-log.bbl` and `native-gps-flow.bfl`.
+  - The iOS/iPadOS UI test opens a bundled fixture without using the system file picker and verifies visible firmware, compatibility, and main-frame metadata.
+  - The macOS UI test source uses bundled fixture bytes, staged inside the app sandbox before native document opening. It is opt-in with `AIRFRAME_ENABLE_MACOS_UI_TESTS=1` because the current local host starts the app as `Running Background` under macOS XCUITest.
+  - Normal macOS Debug and Release launches use `DocumentGroup`.
+  - Explicit macOS UI-test fixture injection is Debug-only, requires UI-test mode, and opens the staged fixture through native document infrastructure after launch.
+  - Verification passed: `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-uitests-ios-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-uitests-macos-dd` with the macOS direct-file UI test skipped by default; `xcodebuild build-for-testing -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-uitests-macos-build-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -skip-testing:AirframeUITests -derivedDataPath /tmp/airframe-uitests-macos-unit-dd`; `swift test` in `Airframe/Packages/AirframeUI`; `swift test` in `Airframe/Packages/BlackboxReader`.
+  - macOS UI-test execution got past the initial Automation permission issue after the user accepted the dialog, but still times out at app activation with `Failed to activate application ... (current state: Running Background)`. Keep the test opt-in until the host/Xcode runner issue is resolved.
+- Current App Store sandbox/iCloud document-state slice is implemented:
+  - macOS app signing enables App Sandbox and read-only user-selected-file access; iOS/macOS signing enables iCloud Key-Value Storage.
+  - `DocumentStateRepository` mirrors only the per-document LRU buffer to iCloud, merges updates by timestamp, and remains local-only when iCloud is unavailable.
+  - Open windows intentionally ignore remote state updates; only later windows consume merged state.
+  - No security-scoped bookmarks or document URLs are stored.
+  - macOS UI-test fixture injection uses in-memory data staged in the app sandbox's temporary directory before native document opening; it does not rely on arbitrary external file paths.
+- Current macOS launch behavior slice is implemented:
+  - Quit/login never restore prior document windows.
+  - Reopening a window-free running app presents the native Open dialog.
+  - Closing the final document leaves no window open.
+- Current document diagnostics slice is implemented:
+  - `airframe.documents` logs identity calculation, local state hits/misses, unchanged state skips, local saves, iCloud synchronization, merges, and saves.
+  - Diagnostics use only source names, byte/state counts, and shortened identity prefixes.
+- Current iPhone document navigation fix is implemented:
+  - `HomeView` shows the opened `DocumentView` directly instead of embedding it inside the home `NavigationStack`.
+  - This avoids nested home/document navigation that could leave iPhone portrait blank immediately after importer-open until the device was rotated.
+  - The document split view no longer sets a redundant `Airframe` navigation title.
+  - Log sidebar rows render selected state explicitly with Accent Color background and `.primary` text.
+  - Verification passed: `swift test` in `Airframe/Packages/AirframeUI`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-ios-nav-fix-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-macos-nav-fix-dd`; manual iPhone simulator open-url screenshot `/tmp/airframe-ios-openurl-nav-fix.png`.
+- Current document view architecture cleanup is implemented:
+  - App-specific document views were moved out of `AirframeUI` and into the app target.
+  - `DocumentHomeView` in `Airframe/App/Airframe/App` is the single document `NavigationSplitView` owner.
+  - Document loading/opening/opened/failed states now change sidebar/detail content inside the same split view.
+  - The old unused `DocumentSummaryView` wrapper and package-level document view file were removed.
+  - App-specific view types no longer use the redundant product prefix; the home and document wrapper views are now `HomeView` and `DocumentView`.
+  - `AirframeUI` now contains document/opening state models and number formatting, but no SwiftUI view types.
+  - Verification passed: `swift test` in `Airframe/Packages/AirframeUI`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-ui-boundary-ios-dd-2`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-ui-boundary-macos-dd`.
+- Current SwiftUI preview coverage slice is implemented:
+  - `AirframeUI` exposes debug-only `makeDebug...` factories for document/opening display state models.
+  - `DocumentHomeView.swift` has previews for opened, scanning, empty, and failed document states.
+  - `DocumentView.swift` has loaded and loading previews through minimal debug preview-state injection.
+  - `HomeView.swift` has empty and opened-document previews through minimal debug preview-state injection.
+  - Current `AirframeUI` sources still contain no SwiftUI view files.
+  - Verification passed: `swift build` and `swift test` in `Airframe/Packages/AirframeUI`; iOS simulator Debug app build; macOS Debug app build; macOS Release app build.
+- Current macOS log data-view structure slice is implemented:
+  - The document sidebar now shows file identity/basic file facts and log selection only.
+  - The selected log's main content is a `LogDataView` with `Overview`, `Table`, `Graph`, and `Spectrum` views.
+  - View selection uses a top-toolbar segmented picker, persisted `@AppStorage`, and macOS menu commands with `Command-1` through `Command-4`.
+  - Per-view files are grouped under `DocumentHome/Content/Overview`, `Table`, `Graph`, and `Spectrum`, with unique Swift basenames per Xcode target.
+  - `LogContext` is injected through SwiftUI environment and can provide `AirframeLogSummary`, optional `DecodedLog`, `BlackboxAnalysisWorkspace`, issues, and progress.
+  - `Overview` contains the existing summary/timing/status/issues sections.
+  - `Table` and `Graph` have placeholder primary content plus a lower timeline split region.
+  - `Table`, `Graph`, and `Spectrum` have placeholder macOS inspectors. The implementation now uses a custom macOS detail split instead of SwiftUI's native `.inspector`, because native inspector resizing could still collapse the document sidebar.
+  - While a selected log is still scanning, the main data view shows centered progress instead of placeholder content.
+  - macOS document windows now have minimum size 1180x660 points and default size 1280x760 points.
+  - The sidebar list has a 300-point minimum width; log titles truncate in the middle and duration labels keep their intrinsic width so resize operations cannot squeeze rows down to unreadable fragments.
+  - Inspector widths are persisted per data view and clamped to 300...460 points; the main data surface keeps a 560-point minimum before the inspector is shown. The custom split computes the content, handle, and inspector widths explicitly so child views cannot overflow left under the sidebar.
+  - `AirframeDocumentOpenModel` retains decoded logs by ID so the app can build an analysis workspace for the selected log.
+  - Verification passed: `swift test` in `Airframe/Packages/AirframeUI`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 13 mini,OS=26.5' -derivedDataPath /tmp/airframe-log-views-ios-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-log-views-macos-dd`.
+  - Layout hardening verification passed: `git diff --check`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-layout-fix-macos-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 13 mini,OS=26.5' -derivedDataPath /tmp/airframe-layout-fix-ios-dd`.
+  - Custom inspector split verification passed: `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-custom-inspector-macos-dd-3`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 13 mini,OS=26.5' -derivedDataPath /tmp/airframe-custom-inspector-ios-dd`.
+  - Custom inspector overflow fix verification passed: `git diff --check`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-inspector-width-macos-dd`.
+- Current timeline slice is implemented (2026-07-12), six standalone commits:
+  - `BlackboxAnalysis`: `motorAveragePercent` derived series + `AnalysisMotorOutputRange` resolver (`548adf3`).
+  - `AirframeUI`: reusable Canvas `AreaGraph` with `GraphSample`/`GraphDomain`/`GraphProjection`/styles (`5bdc1fc`).
+  - Retained `DecodedLogFlightInfo` in `AirframeDocumentOpenModel`, exposed through `LogContext.flightInfo` (`7f636a9`).
+  - Per-log current position (main-frame µs) in `DocumentStateStore`/`DocumentStateRepository` (`6849b8c`).
+  - `LogTimeline.Model` loader: 512-point min/max viewport reusing the retained index, event markers capped at 256 (`1fbbcf6`).
+  - `LogTimeline` UI: area graph, event lines, draggable position line, per-window model cache (`2f1cccf`).
+  - Verification passed per step: `swift test` in `BlackboxAnalysis` (16 tests) and `AirframeUI` (13 tests); `xcodebuild test` iPhone 13 mini / iOS 26.5 and macOS with isolated DerivedData; macOS Release build; simulator screenshots `/tmp/airframe-timeline-overview.png` and `/tmp/airframe-timeline-synthetic.png` (synthetic dynamic-motor fixture confirms area curve, event lines, and position line; the two small private staging logs are idle logs whose flat ~5% curve was CLI-verified as correct).
+  - Drag interaction on macOS still needs a manual user check; simctl cannot send touches.
+  - Follow-up fixes (2026-07-12, commits `6367ac1`, `2b4b155`):
+    - Performance: series-table rows re-resolved `decodedLog.headerInfo` (full header reparse per access), re-sorted schema fields, and re-looked-up presentations per row. A 5.7 MB log took 23.6 s (release) for one motor-percent viewport; user saw minutes in Debug. `BlackboxAnalysisWorkspace` now builds one per-request `RowContext` (display context, motor field names, motor range, reader presentations, PID component fields); same log now 0.75 s. Verified with a /tmp release benchmark against two ~5.7 MB private logs.
+    - Styling: timeline plot has 10 pt horizontal/bottom margins, 8 pt corner radius, and a per-log grid (10 equal duration segments vertical, every 20 percent horizontal) via `Style.gridLine` + model-derived `GraphGridStyle`.
+    - `Localizable.xcstrings` auto-synced the new timeline string during builds; committed with the styling change.
+  - Third follow-up round (2026-07-13, commit `d6cad5a`): the timeline beachball root cause was MainActor isolation, not data volume. `LogTimeline` conforms to `View` (MainActor protocol), so the static `makeModel` was isolated and the detached load task executed the entire model build (viewport + event decode) on the main thread. Verified by process samples before (100% build on `com.apple.main-thread`) and after (build on the cooperative pool) with the user's exact log. Builders are now `nonisolated`. Remaining known cost: the timeline still decodes the log twice more after the open scan (viewport pass + `events()` pass); a one-pass design (collect decimated series and event times during the open scan in Reader) is the proposed next slice, since the scan already visits every frame. Debug builds are ~20x slower on the parser; release total for a 5.7 MB log is roughly 2 s across all three passes.
+  - Second follow-up round (2026-07-12, commits `7513711`, `64fc075`):
+    - Beachball fix: `DocumentProgressRelay` forwarded one main-actor snapshot update per decoded frame during scanning; large logs queued hundreds of thousands of main-thread jobs and unbounded `stateHistory` growth. Relay now throttles to ~256 byte-delta-gated updates per log; regression test bounds applied updates for a 20k-frame log (`openModelThrottlesScanProgressUpdates`).
+    - Timeline padding extended to all four sides (gap to the divider above).
+    - User directive recorded in MEMORY: data preparation always off the main actor; throttle high-frequency progress into main-actor state.
+- One-pass scan slice implemented (2026-07-13), five commits:
+  - `3b61d63`: scan loop reads the summary time by field index instead of a per-frame name projection; release scan 0.77 s -> 0.54 s on a 5.7 MB log.
+  - `046ac33`: `ReaderScanOverview` collected during `scan()` (decimated full-layout main-frame samples via adaptive stride, all event records with truncation flag, `Configuration.maxScanOverviewSampleCount` = 1024, hostile-input coverage). Scan overhead within noise (~5%).
+  - `768ef17`: `BlackboxAnalysisWorkspace.overviewPoints(for:in:)` projects overview samples into series points (raw I-fields + motor-derived kinds; typed errors).
+  - `dec5496`: timeline model is a pure overview projection — no viewport query, no event pass; timeline data cost 1.2 s -> 5.6 ms release on the 5.7 MB log; rendered output unchanged (test expectations identical).
+  - `430969b`: document logs scan concurrently in a task group capped by `maxConcurrentLogTasks`; per-log results/progress apply against the latest snapshot.
+  - Verification: `swift test` green in BlackboxReader (170), BlackboxAnalysis (21), AirframeUI (15), AirframeCLI (26); app `xcodebuild test` green on iPhone 13 mini / iOS 26.5 and macOS; simulator visual check of the timeline unchanged. Second benchmark log (Maya 5.8 MB): scan 0.60 s, projection 11 ms.
+- Main-stream resync + defect marker slice implemented (2026-07-13), three commits:
+  - `9992f3a`: initial FrameStream pending-anchor resync (rejected I frame becomes candidate; new `mainStreamResynchronized` issue; switch extensions in CLI/AirframeUI/snapshot helper). Its overly permissive ~762 s result on `…/1 Filter/LOG00002 Q700.BFL` is superseded by the later local-anchor refinement below.
+  - `d14a8e1`: pipeline regression test — syncpoints/overview/range queries span a recovered gap.
+  - `03f2c4f`: defects as timeline markers via `ReaderLogIndex.nearestMainFrameTime(atOffset:)`, `Model.Marker` with event/issue kind, orange `issueLine` style; simulator-verified with a synthetic 25 s gap log (two orange markers at the gap boundaries).
+  - Verification: BlackboxReader 178 tests, all other package suites, app suites on iPhone 13 mini / iOS 26.5 and macOS, CLI checks on the real log.
+- Main-stream recovery refinement completed (2026-07-13): `FrameStream` holds a rejected absolute `I` frame and its following main frames until two consecutive plausible `P` frames confirm it. Failed candidates restore committed history; `P` frames cannot establish a baseline. An untrusted out-of-window I/P sequence may be used only as decoder context while seeking another absolute I anchor; it is withheld from all consumers. A confirmed anchor must be temporally local (six normal time-jump windows). Full Reader suite passes (180 tests). Private Maya `LOG00002 Q700.BFL` validation recovers at `23.035302 s`, stops log 1 at `60.541099 s` (matching Upstream's ~01:00 end), and rejects the former false `693.490837 s` continuation; log 2 scans independently from `104.486025` to `127.427661 s`.
+- Next concrete slice: return to the minimal native chart prototype that consumes `BlackboxAnalysisWorkspace`, unless another security hardening topic is explicitly prioritized.
+- Next concrete app slice after the shell: choose between native Swift Charts prototype, richer document metadata/issue UI, or remaining App Store project cleanup such as final icon and launch-screen/orientation metadata.
+- Identify or collect representative Blackbox log fixtures:
+  - Betaflight 4.4.3+ logs, which are the initial supported baseline.
+  - Older Betaflight logs only when explicitly expanding compatibility.
+  - Recent Betaflight 4.5/2025/2026 logs if available.
+  - Logs with GPS.
+  - Logs with multiple flights in one file.
+  - Multiple separate logs that can be loaded as one import set.
+  - Logs with dropped/corrupt frames.
+- Use the user's private local logs as local-only fixture candidates:
+  - `/Users/daniel/Library/Mobile Documents/com~apple~CloudDocs/Drohnen/Betaflight/Barney/Logs/6. IFT/LOG00002.BFL` (~33 KB)
+  - `/Users/daniel/Library/Mobile Documents/com~apple~CloudDocs/Drohnen/Betaflight/Flip/Filter/Session 1/btfl_001.bbl` (~48 KB)
+  - `/Users/daniel/Library/Mobile Documents/com~apple~CloudDocs/Drohnen/Betaflight/Puck/Tuning/1 Filter/1 Default/btfl_001.bbl` (~170 KB)
+  - Do not commit these logs or derived fixture extracts without explicit approval.
+- Current `BlackboxReader` package fixtures include synthetic `.bbfixture` files, native `.bbl`/`.bfl` files, and selected golden frame-stream snapshots under `Tests/BlackboxReaderTests/Fixtures/`. They are package-local and documented.
+- Keep `blackbox-tools` as a possible later oracle, but do not add it now.
+- Inspect the Betaflight firmware repository's `src/main/blackbox/` sources and unit tests as writer-side references for Blackbox log generation.
+- Expand golden-output coverage for Betaflight `4.4.3+` before claiming more compatibility.
+- Decision from scan slice: combined summary/index scanning is implemented as a per-log public API and benchmarked; no batch scan API yet because there are no consumers.
+- Decide whether to create a new git repo/project or keep planning in this workspace first.
+- Define the initial SemVer version and the xcconfig layout, including `Base.xcconfig` with `MARKETING_VERSION`.
+- Define testing standards before implementation: fixture strategy, golden outputs, corruption cases, performance tests, and package-level API tests.
+- Keep Swift package manifests on Swift 5.9 language mode and modern Swift Testing test targets.
+- Add a later model/API plan for multi-file imports and multi-flight logs before implementing header/log splitting.
+- Keep `Airframe/doc/blackbox-log-format.md` updated when implementing headers, predictors, encodings, frame types, and fixture findings.
+
+## Questions To Resolve
+
+- Should the first Swift prototype target macOS only for faster iteration, then iOS, or start as Universal immediately?
+- What exact Swift Package boundaries should be used for parser, model, indexing, and analysis?
+- Should efficient transformed/persisted log data be part of the first core design or introduced after profiling?
+- What stable identity should distinguish imported files, Blackbox logs within a file, and individual flights/sessions?
+- Which latest stable iOS and macOS deployment targets should be chosen when app targets are introduced?
+- Should charts use Swift Charts, SwiftUI `Canvas`, Core Graphics, or Metal?
+- Should Map use MapKit instead of OSM/Leaflet-style tiles?
+- Should video sync/export be an MVP requirement or a later milestone?
+- How important is compatibility with Cleanflight/INAV/EmuFlight compared with Betaflight-only first?
+- Which local tool/MCP setup should be used once Swift implementation starts?
+
+## Risks
+
+- Blackbox format compatibility across firmware versions.
+- Lack of strong upstream parser tests.
+- Performance for large logs on mobile devices.
+- Recreating browser Canvas graph behavior natively may take more work than parser MVP.
+- Spectrum analysis and video export can expand scope quickly.
+- External dependencies must not be introduced without explicit user approval, so any dependency proposal needs justification and an approval step.
+- Version drift is not allowed: Swift Packages and Xcode targets must keep the same SemVer version, with Xcode targets inheriting `MARKETING_VERSION` from `Base.xcconfig`.
+
+## Tooling Candidates
+
+Useful tools or MCP servers to consider once implementation starts:
+
+- Xcode itself is only needed in individual special cases; prefer CLI-first workflows.
+- `xcodeproj` for Xcode project file inspection or edits.
+- `swift build` and `swift test` for Swift Package work.
+- `xcodebuild` for Swift packages and app schemes when needed.
+- `xcrun simctl` for simulator lifecycle, install, launch, screenshots, and logs.
+- When running simulator-related `xcodebuild`, do not pipe output to `grep`; write robust logs, wait for completion, then inspect the log files.
+- Apple's built-in Xcode MCP server, if the installed Xcode version supports it and a task specifically benefits from it.
+- XcodeBuildMCP for build, test, simulator, and device workflows through MCP if CLI-only workflows become cumbersome.
+- SourceKit-LSP for Swift semantic indexing, diagnostics, and navigation.
+- SourceKit-LSP-based MCP servers such as SwiftLens or Swift MCP Server, if they prove reliable locally.
+- Standard CLI tools remain important: `xcode-select`, `swift-format`, and `swiftlint` if adopted.
+- For UI verification, simulator screenshots and XCTest/UI tests will matter more than generic web tooling.

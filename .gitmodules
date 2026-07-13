@@ -1,0 +1,12 @@
+[submodule "Airframe"]
+	path = Airframe
+	url = git@github.com:danielkbx/airframe.git
+	branch = master
+[submodule "blackbox-log-viewer"]
+	path = blackbox-log-viewer
+	url = git@github.com:betaflight/blackbox-log-viewer.git
+	branch = master
+[submodule "betaflight"]
+	path = betaflight
+	url = git@github.com:betaflight/betaflight.git
+	branch = master
