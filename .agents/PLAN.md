@@ -1,5 +1,13 @@
 # Airframe Investigation Plan
 
+## Indexed Table Chunk Cache (Implemented 2026-07-13)
+
+- The Table no longer uses a 2,000-frame range query around the cursor.
+- `DecodedLogScan` exposes a resumable directory whose chunks begin every fourth valid I-frame.
+- `MainFrameChunkCache` is per-document, LRU, and limited to 12,288 decoded Main frames.
+- Table projects selected raw/derived values from cached chunks; cold chunk loads run detached, and cache hits do not decode frames.
+- The same bounded Reader/Analysis interface is ready for a later Graph consumer; Graph UI is intentionally out of scope.
+
 ## Current App Store Sandbox And iCloud State Slice
 
 - macOS App Sandbox is enabled with read-only user-selected-file access. Airframe does not persist document URLs, security-scoped bookmarks, or file metadata; it remains a read-only byte-backed viewer.
@@ -42,6 +50,10 @@ Verification for the document view architecture cleanup passed: `swift test` in 
 The macOS log data-view structure slice is implemented. `DocumentHomeView` now keeps sidebar context separate from main log data views, exposes `Overview`, `Table`, `Graph`, and `Spectrum`, persists the selected view, adds `Command-1` through `Command-4` menu commands, provides macOS-only inspectors for data views that need settings, and gives `Table`/`Graph` a lower timeline split region. macOS document windows use a 1180x660 point minimum and 1280x760 point default size. Sidebar width is protected separately from the inspector, and the inspector now uses a custom detail split clamped to 300...460 points instead of SwiftUI's native `.inspector`.
 
 Verification for the log data-view structure passed: `swift test` in `Airframe/Packages/AirframeUI`, iOS simulator `xcodebuild test` on iPhone 13 mini / iOS 26.5 with DerivedData `/tmp/airframe-log-views-ios-dd`, and macOS `xcodebuild test` with DerivedData `/tmp/airframe-log-views-macos-dd`.
+
+The Table view MVP is implemented. It keeps Main + Events as the first slice, persists field selection per log segment, uses a reusable field-selection model for Table now and Graph later, builds bounded table windows around the shared current-position time, and renders a dense data-analysis SwiftUI surface with pinned headers, lazy rows, current-row highlight, viewport-center position synchronization, event separator rows, and grouped field checkboxes in the Table inspector.
+
+Verification for the Table MVP passed: `git diff --check`, macOS `xcodebuild test` with DerivedData `/tmp/airframe-table-macos-dd`, and iOS simulator `xcodebuild test` on iPhone 17 / iOS 26.5 with DerivedData `/tmp/airframe-table-ios-dd`.
 
 SwiftUI preview coverage is implemented for the current app view files. `DocumentHomeView`, `DocumentView`, and `HomeView` each have `#if DEBUG` preview blocks. `AirframeUI` currently has no SwiftUI view files, but now exposes debug-only `makeDebug...` factories for document/opening display states.
 
@@ -233,11 +245,12 @@ The CLI slice is complete: `airframe` can inspect, validate, filter, and export 
 
 Recommended order after this:
 
-1. Replace the `Table`, `Graph`, `Spectrum`, and timeline placeholders incrementally with real data surfaces backed by `BlackboxAnalysisWorkspace`.
-2. GPS optional-frame alignment and GPS distance/azimuth/local coordinate derived series.
-3. Additional CLI backlog commands such as `stats`, `summary`, `frames`, and `derived` when approved.
-4. Gyro scaling and attitude estimate derived series.
-5. Optional coverage-guided fuzzing setup for parser/reader security.
+1. Visually exercise the Table MVP with full private logs, including scroll-to-position, position-from-scroll, field toggles, and event separators.
+2. Replace the remaining `Graph` and `Spectrum` placeholders incrementally with real data surfaces backed by `BlackboxAnalysisWorkspace`.
+3. GPS optional-frame alignment and GPS distance/azimuth/local coordinate derived series.
+4. Additional CLI backlog commands such as `stats`, `summary`, `frames`, and `derived` when approved.
+5. Gyro scaling and attitude estimate derived series.
+6. Optional coverage-guided fuzzing setup for parser/reader security.
 
 ## Current Implementation State
 

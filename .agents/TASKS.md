@@ -226,7 +226,19 @@
   - `03f2c4f`: defects as timeline markers via `ReaderLogIndex.nearestMainFrameTime(atOffset:)`, `Model.Marker` with event/issue kind, orange `issueLine` style; simulator-verified with a synthetic 25 s gap log (two orange markers at the gap boundaries).
   - Verification: BlackboxReader 178 tests, all other package suites, app suites on iPhone 13 mini / iOS 26.5 and macOS, CLI checks on the real log.
 - Main-stream recovery refinement completed (2026-07-13): `FrameStream` holds a rejected absolute `I` frame and its following main frames until two consecutive plausible `P` frames confirm it. Failed candidates restore committed history; `P` frames cannot establish a baseline. An untrusted out-of-window I/P sequence may be used only as decoder context while seeking another absolute I anchor; it is withheld from all consumers. A confirmed anchor must be temporally local (six normal time-jump windows). Full Reader suite passes (180 tests). Private Maya `LOG00002 Q700.BFL` validation recovers at `23.035302 s`, stops log 1 at `60.541099 s` (matching Upstream's ~01:00 end), and rejects the former false `693.490837 s` continuation; log 2 scans independently from `104.486025` to `127.427661 s`.
-- Next concrete slice: return to the minimal native chart prototype that consumes `BlackboxAnalysisWorkspace`, unless another security hardening topic is explicitly prioritized.
+- Current Table view MVP slice is implemented (2026-07-13):
+  - Adds per-log segment field selection state persisted through `DocumentStateStore` and `DocumentStateRepository.logFieldSelections`, with defensive restore and unchanged-skip behavior.
+  - Adds reusable `DocumentHomeView.FieldSelection` and `FieldDescriptor` for catalog descriptors, validation, grouping, units, precision, and Core tuning defaults.
+  - Adds `DocumentHomeView.Table.Model`, `ModelStore`, and bounded non-View loader logic that builds about 2,000 main-frame rows around the current position, reuses the retained scan index, and merges scan overview events as separator rows.
+  - Replaces the Table placeholder with a dense SwiftUI data surface using a pinned header, horizontal column scrolling, lazy vertical rows, monospaced formatted values, current-row highlighting, viewport-center position updates, and the existing lower timeline region.
+  - Replaces the Table inspector placeholder with grouped field checkboxes and a reset action; the last selected field cannot be removed.
+  - Verification passed: `git diff --check`; `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=macOS' -derivedDataPath /tmp/airframe-table-macos-dd`; `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=iOS Simulator,OS=26.5,name=iPhone 17' -derivedDataPath /tmp/airframe-table-ios-dd`; iPhone simulator fixture screenshot `/tmp/airframe-table-native-single.png` showed real table rows, header, and current-row highlight.
+- Table cursor/rebuild correction is implemented (2026-07-13):
+  - Cursor changes inside the loaded table window now update only highlight/scroll state and do not rebuild `Table.Model`.
+  - `Table.Model.shouldReload(for:)` returns true only outside `loadedRange`; a regression test covers range-edge positions.
+  - Row-center preference handling no longer stores viewport height in SwiftUI state and defers position writes through a plain coordinator to avoid SwiftUI per-frame preference/onChange warnings.
+  - Verification passed: `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=macOS' -derivedDataPath /tmp/airframe-table-fix-macos-dd`; `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=iOS Simulator,OS=26.5,name=iPhone 17' -derivedDataPath /tmp/airframe-table-fix-ios-dd`; iPhone simulator fixture screenshot `/tmp/airframe-table-fix-native-single.png`.
+- Next concrete slice: visually exercise the Table view with full private logs and then continue with the minimal native chart prototype that consumes `BlackboxAnalysisWorkspace`, unless another security hardening topic is explicitly prioritized.
 - Next concrete app slice after the shell: choose between native Swift Charts prototype, richer document metadata/issue UI, or remaining App Store project cleanup such as final icon and launch-screen/orientation metadata.
 - Identify or collect representative Blackbox log fixtures:
   - Betaflight 4.4.3+ logs, which are the initial supported baseline.
@@ -252,6 +264,13 @@
 - Keep Swift package manifests on Swift 5.9 language mode and modern Swift Testing test targets.
 - Add a later model/API plan for multi-file imports and multi-flight logs before implementing header/log splitting.
 - Keep `Airframe/doc/blackbox-log-format.md` updated when implementing headers, predictors, encodings, frame types, and fixture findings.
+
+## Completed: Indexed Table Chunk Cache (2026-07-13)
+
+- Reader scan now exposes an I-frame-strided `ReaderMainFrameChunkDirectory`.
+- Table loads resumable bounded chunks through a per-document LRU cache instead of repeatedly decoding 2,000-frame time windows.
+- `BlackboxAnalysisWorkspace` can project selected raw and derived series directly from decoded chunks.
+- Follow-up: profile cold and warm Table seeks with large private logs before changing chunk/cache defaults.
 
 ## Questions To Resolve
 
