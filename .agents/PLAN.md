@@ -13,6 +13,12 @@
 
 The first real visualization is implemented: the shared lower timeline in Table and Graph. Six standalone commits (`548adf3`, `5bdc1fc`, `7f636a9`, `6849b8c`, `1fbbcf6`, `2f1cccf`) cover the `motorAveragePercent` derived series with `AnalysisMotorOutputRange`, the reusable Canvas `AreaGraph`/`GraphProjection` layer in `AirframeUI`, retained per-log `DecodedLogFlightInfo` exposed through `LogContext`, the per-log current position (main-frame µs) persisted through `DocumentStateStore`/`DocumentStateRepository`, the 512-point timeline model loader with capped event markers, and the interactive timeline UI with a per-window model cache. Package and app test suites passed per step on iOS and macOS; rendering was verified in the iPhone simulator with a synthetic dynamic-motor log. Remaining manual check: drag feel on macOS. Follow-ups are parked in `BACKLOG.md` (indexed event access, metric switcher, Table/Graph position consumers).
 
+## Current Timeline Range And Collapse Toolbar Slice (2026-07-13)
+
+Airframe has a compact toolbar above the shared Table/Graph timeline. It shows `Timeline`, the current cursor time, and icon-only Set In/Set Out controls using `arrow.right.to.line.compact` and `arrow.left.to.line.compact`. Active ranges are stored per document and per log segment in main-frame microseconds through `DocumentStateStore` and `DocumentStateRepository`, with missing range meaning full log and reversed bounds normalized silently. Excluded timeline regions are dimmed with thicker boundary lines; analysis calculations will consume this same effective range later.
+
+The timeline graph height is now 136 pt while the toolbar remains 34 pt. The region can collapse per log segment through a chevron next to the `Timeline` title (`chevron.down`/`chevron.up`). Collapse state is stored as true-only `collapsedTimelineSegments` in the same synced document-state repository entry. Collapsed mode hides the graph and In/Out buttons, disables matching `I`/`O` commands, and reclaims the graph height. Toolbar icon buttons use tint-only hover feedback.
+
 ## Current Phase
 
 The workspace restructuring slice is approved and being implemented on 2026-07-13. The root workspace becomes a private Git repository with `Airframe/`, `blackbox-log-viewer/`, and `betaflight/` registered as submodules. Root commits are allowed to be lightweight workspace commits; Airframe commits remain approval-gated; upstream reference repositories remain pull-only.

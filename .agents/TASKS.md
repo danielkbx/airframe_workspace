@@ -204,6 +204,15 @@
     - Beachball fix: `DocumentProgressRelay` forwarded one main-actor snapshot update per decoded frame during scanning; large logs queued hundreds of thousands of main-thread jobs and unbounded `stateHistory` growth. Relay now throttles to ~256 byte-delta-gated updates per log; regression test bounds applied updates for a 20k-frame log (`openModelThrottlesScanProgressUpdates`).
     - Timeline padding extended to all four sides (gap to the divider above).
     - User directive recorded in MEMORY: data preparation always off the main actor; throttle high-frequency progress into main-actor state.
+- Current timeline range/collapse toolbar slice is implemented (2026-07-13):
+  - Adds a compact toolbar above the shared Table/Graph timeline with icon-only In/Out buttons and current cursor time.
+  - Persists active per-log ranges in document state and syncs them through the existing document-state repository/iCloud path.
+  - Default range is full log; reversed bounds normalize silently; excluded timeline regions render dimmed.
+  - Reduces the timeline graph height from 170 pt to 136 pt while keeping the toolbar at 34 pt.
+  - Adds per-log collapse state stored as true-only `collapsedTimelineSegments` in the same synced document-state entry.
+  - Keeps the toolbar visible while collapsed, hides the graph and In/Out buttons, disables matching `I`/`O` commands, and reclaims graph height.
+  - Places the collapse chevron directly next to the `Timeline` title and uses tint-only hover feedback for toolbar icon buttons.
+  - Verification passed: `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=macOS'`; `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=iOS Simulator,OS=26.5,name=iPhone 17'`.
 - One-pass scan slice implemented (2026-07-13), five commits:
   - `3b61d63`: scan loop reads the summary time by field index instead of a per-frame name projection; release scan 0.77 s -> 0.54 s on a 5.7 MB log.
   - `046ac33`: `ReaderScanOverview` collected during `scan()` (decimated full-layout main-frame samples via adaptive stride, all event records with truncation flag, `Configuration.maxScanOverviewSampleCount` = 1024, hostile-input coverage). Scan overhead within noise (~5%).

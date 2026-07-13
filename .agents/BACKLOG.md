@@ -13,6 +13,8 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 ## Parking Lot
 
 - Consider an optimized internal or persisted log representation after profiling parsing, seeking, memory use, and app startup behavior.
+- Consider an Airframe-owned document format that stores app metadata, view settings, analysis state, and the original unmodified log bytes so the raw log can be exported again.
+- Add bookmarks for important log positions that users can jump back to quickly; this likely depends on an Airframe-owned document format for persistence.
 - Investigate whether `blackbox-tools` can provide reliable golden outputs for Swift parser tests.
 - Investigate fixture sources for representative Betaflight logs across firmware versions, GPS usage, multiple flights, and corrupted/truncated logs.
 - Evaluate whether `jcodemunch` indexing of `blackbox-log-viewer/` and `betaflight/` improves investigation speed.
