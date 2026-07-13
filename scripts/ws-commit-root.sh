@@ -24,5 +24,5 @@ if [ -n "$(git -C betaflight status --short)" ]; then
   exit 1
 fi
 
-git add .gitignore .gitmodules README.md AGENTS.md .agents scripts Assets Airframe blackbox-log-viewer betaflight
+git add .gitignore .gitmodules README.md AGENTS.md CLAUDE.md .agents scripts Assets Airframe blackbox-log-viewer betaflight
 git commit -m "$1"

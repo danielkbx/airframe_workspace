@@ -19,7 +19,7 @@ Agents must update this file proactively when they learn a better command, workf
 - The workspace root is now its own private Git repo. Check `git rev-parse --show-toplevel` before commit-sensitive work because the root repo, `Airframe/`, `blackbox-log-viewer/`, and `betaflight/` are separate Git repositories linked by submodules.
 - Use `./scripts/ws-status.sh` from the root to inspect root and submodule working trees together.
 - Use `./scripts/ws-pull.sh` from the root for routine synchronization. It fast-forwards the read-only upstream reference submodules and leaves any pointer changes visible for an explicit root commit. It intentionally does not initialize nested upstream submodules such as Betaflight's firmware dependency modules.
-- Use `./scripts/ws-commit-root.sh "message"` for normal root workspace commits when submodule worktrees are clean. It stages only root-owned paths and submodule pointers.
+- Use `./scripts/ws-commit-root.sh "message"` for normal root workspace commits when submodule worktrees are clean. It stages only root-owned paths, agent entry points (`AGENTS.md`, `CLAUDE.md`), and submodule pointers.
 
 ## Swift and Xcode
 
