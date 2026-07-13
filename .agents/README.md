@@ -7,6 +7,7 @@ The workspace root is now a private wrapper Git repository:
 - Root repo: `git@github.com:danielkbx/airframe_workspace.git`
 - Purpose: private planning, `.agents/`, workflow scripts, reference submodule pointers, and private assets.
 - Root commits may be short, frequent, and attribution-free.
+- Root branch: `master`, tracking `origin/master`.
 
 The upstream reference project is cloned at:
 

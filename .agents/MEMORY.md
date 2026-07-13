@@ -9,6 +9,7 @@ Explore whether it is possible and worthwhile to build Airframe, a native iOS ap
 - Workspace repository decision (2026-07-13): `/Users/daniel/Projekte/Airframe` is the private workspace root repository `git@github.com:danielkbx/airframe_workspace.git`. It tracks `.agents/`, root workflow docs/scripts, private workspace assets, and submodule pointers.
 - Submodule decision (2026-07-13): `Airframe/`, `blackbox-log-viewer/`, and `betaflight/` are root-level Git submodules. `Airframe/` remains the public project repo. `blackbox-log-viewer/` and `betaflight/` are upstream reference submodules.
 - Git governance decision (2026-07-13): root workspace commits may be short, frequent, and attribution-free. Commits inside `Airframe/` still require explicit user approval and must follow the stricter public-project message rules. Never commit or push inside `blackbox-log-viewer/` or `betaflight/`; only pull/fetch them and commit desired pointer updates in the root repo.
+- Workspace bootstrap status (2026-07-13): root initial commit `f381f82` (`Set up workspace repository`) was pushed to `origin/master`, and the root branch now tracks `origin/master`.
 - Project/app name: Airframe.
 - Product subtitle: A Blackbox Log Analyzer.
 - App Store Connect name: Airframe Blackbox Analyzer.
