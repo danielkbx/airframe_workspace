@@ -31,6 +31,7 @@ Agents must update this file proactively when they learn a better command, workf
 - For Swift Packages, use `swift build` and `swift test` directly where possible.
 - Use `xcodebuild` for package or app scheme builds/tests when required.
 - Use `xcodeproj` for Xcode project file inspection or edits when appropriate.
+- The `xcodeproj` gem does not know the `name` attribute of `PBXFileSystemSynchronizedRootGroup` and drops `name = Packages` on every save (it warns about it). After any scripted project edit, restore `name = Packages;` and the `/* Packages */` comments in `project.pbxproj`, or Xcode shows the group as `../Packages`.
 - Use `xcrun simctl` for simulator lifecycle, app install/launch, screenshots, and log collection.
 - For simulator-related `xcodebuild`, do not pipe output to `grep`.
 - Instead, write useful log files, wait for `xcodebuild` to finish, and inspect the logs afterwards.

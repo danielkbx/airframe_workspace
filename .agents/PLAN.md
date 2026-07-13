@@ -1,5 +1,14 @@
 # Airframe Investigation Plan
 
+## Table Perceived-Performance Slice (Implemented 2026-07-13)
+
+- `BlackboxAnalysisWorkspace` caches header info, reader catalog, display context, field names, motor range, and the Analysis catalog at `init`; the old computed catalog reparsed the header per field per access (release: catalog x3 50 ms -> 0 ms, chunk projection x3 66 ms -> 14 ms on a 6 MB log).
+- Table load task keyed by (log, selection, chunk window), not cursor time; `Table.WindowPolicy` hysteresis recenters the 2048-frame window only when the cursor leaves the inner half, never toward a touched log edge.
+- Stale-while-revalidate window swaps with cursor-row re-anchoring; highlight scroll only for external cursor changes; O(n^2) per-render highlight replaced by one binary search per body pass.
+- `MainFrameChunkCache` is per-ordinal (partial-hit decode, shared in-flight tasks, utility-priority superseding prefetch, running frame-total LRU); `Table.ModelStore` removed.
+- Graph readiness: overview projection for wide zoom, this chunk cache for detail zoom; per-chunk LOD aggregation parked in BACKLOG.
+- Open manual check: scroll feel with a large private log on macOS.
+
 ## Indexed Table Chunk Cache (Implemented 2026-07-13)
 
 - The Table no longer uses a 2,000-frame range query around the cursor.

@@ -272,6 +272,21 @@
 - `BlackboxAnalysisWorkspace` can project selected raw and derived series directly from decoded chunks.
 - Follow-up: profile cold and warm Table seeks with large private logs before changing chunk/cache defaults.
 
+## Completed: Table Perceived-Performance Slice (2026-07-13)
+
+- `BlackboxAnalysisWorkspace` resolves header info, reader catalog, display context, main-frame field names, motor fields/range, and the Analysis catalog once in `init`; `seriesCatalog` is a stored property. The former computed path reparsed the header per field per access. Release benchmark on a 6 MB Puck log: catalog access x3 `50 ms -> 0 ms`, `seriesTable(from: chunks)` x3 `66 ms -> 14 ms`, workspace init `0.9 ms`.
+- `Table.Model` stores `frameRows` and sorted frame times; `nearestFrameRow(to:)` is a binary search; `Surface` computes the highlighted row once per body pass instead of per row (former O(n^2) per render).
+- `MainFrameChunkCache` works per ordinal: partial hits decode only missing contiguous runs, identical concurrent loads share one decode task, `prefetch` warms ranges at utility priority and is superseded per log, eviction keeps a running frame total (LRU order fixed to ordinal order; `Dictionary.values` hash order previously broke it).
+- `TableSurface` no longer keys its load task on the cursor: `Table.WindowPolicy.shouldReload` recenters the 2048-frame window only when the cursor's chunk index leaves the inner half of the loaded range, with no reload toward a log edge the range already touches. Cursor moves inside the window only update highlight/scroll.
+- Stale-while-revalidate: after the first load, window swaps keep showing the current rows; a transient failed window keeps stale rows; after a swap the row nearest the cursor is re-anchored to the viewport center via stable row IDs.
+- Scroll-quantization fix: the highlight-driven `scrollTo` fires only for external cursor changes (timeline), not for cursor writes caused by the user's own table scrolling (`ScrollPositionCoordinator.isExternalChange`).
+- After each window load the surface prefetches 8 chunks per side; window (16) + prefetch (16) stay well under the 12,288-frame LRU cap.
+- `Table.ModelStore` is removed; the chunk cache is the single cache. New tests: `MainFrameChunkCacheTests` (injectable loader closure), `TableWindowPolicyTests`, nearest-row binary-search cases in `TableModelTests`.
+- Verification passed: `swift test` in `BlackboxAnalysis` (21) and `BlackboxReader` (180); `xcodebuild test` scheme `AirframeTests` on macOS and iPhone 17 / iOS 26.5.
+- Note: `ruby xcodeproj` drops `name = Packages` from the `PBXFileSystemSynchronizedRootGroup`; restore it manually after every scripted project edit.
+- Manual check still open: scroll feel with a large private log on macOS (no spinner after first load, no snap-to-row while scrolling, timeline jumps still recenter).
+- Graph readiness: wide zoom uses the scan-overview projection, detail zoom uses this chunk cache; no separate LOD layer. Optional per-chunk min/max aggregation parked in BACKLOG.
+
 ## Questions To Resolve
 
 - Should the first Swift prototype target macOS only for faster iteration, then iOS, or start as Universal immediately?

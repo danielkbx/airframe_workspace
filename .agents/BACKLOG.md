@@ -24,6 +24,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Build a native chart prototype that consumes `ReaderViewportResult` directly.
 - Done 2026-07-13: one-pass timeline data via `ReaderScanOverview` (see TASKS). Remaining overview follow-ups: optional min/max envelope per retained sample (stride sampling drops sub-stride spikes), display-scaled overview projections when a consumer needs units, dropping the overview from retention if per-log memory (~1 MB) ever bites on 128-log documents.
 - Timeline metric switcher (max RC deflection / motor differential styles) as alternative Y signals.
+- Optional per-chunk min/max pre-aggregation per series for Graph intermediate zoom levels, only if profiling shows on-the-fly decimation of cached chunks is too slow (2026-07-13: deliberately deferred; overview covers wide zoom, chunk cache covers detail zoom).
 - Table view consumer: select the row nearest to the shared current-position time; Graph view consumer: center the traces on it.
 - Timeline hover/drag readout showing the position time and a scrub preview.
 - Add native chart interaction: pan, zoom, scrub cursor, legends, value inspection, and series visibility.
