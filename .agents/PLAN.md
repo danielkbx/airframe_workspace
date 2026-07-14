@@ -1,5 +1,30 @@
 # Airframe Investigation Plan
 
+## Graph, Timeline, and macOS Interaction Polish Plan (Implemented 2026-07-15)
+
+Implemented next UI slice:
+
+- Timeline-toolbar current-position label is positioned by cursor fraction across the full timeline width, so its center tracks the graph cursor.
+- Graph renders out-of-log-range regions with the same dark treatment used for excluded timeline regions.
+- Graph zoom window duration is persisted per document/log segment through `DocumentStateRepository` and `DocumentStateStore`.
+- Graph legend labels now drive the same transient series highlight state as inspector/sidebar rows; non-highlighted lines fade more strongly.
+- macOS File > Save is replaced with File > Reset File Settings. The reset command requires confirmation and removes the document entry from local and iCloud document-state buffers, then resets the current window to first-open defaults.
+- In Graph mode, the timeline highlights the graph's current visible viewport as transient per-window state.
+- Graph and timeline hover tooltips were removed; button/tool control help remains.
+- Main log content is focusable, suppresses the macOS focus effect, and gets focus on appear/tap.
+- Focused content commands now support Left/Right cursor movement, Command-Left/Right range jumps, Option-Left/Right jumps across range/event/issue times, and Command-Plus/Minus/0 graph zoom.
+- `Airframe.xcscheme` LaunchAction is Debug; TestAction was already Debug. Profile/Archive remain Release.
+- Graph field reordering within a section is hidden; graph section reordering remains available because section order controls vertical graph band order.
+
+Verification:
+
+- `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=macOS' -only-testing:AirframeTests/DocumentStateRepositoryTests -only-testing:AirframeTests/DocumentStateStoreTests -derivedDataPath /tmp/airframe-state-polish-after-scheme-dd` passed.
+- `xcodebuild build -project Airframe/App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-polish-build-macos-dd` passed in Debug and built preview dylibs.
+- `xcodebuild build -project Airframe/App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,OS=26.5,name=iPhone 13 mini' -derivedDataPath /tmp/airframe-polish-build-ios-dd` passed in Debug.
+- `swift test` in `Airframe/Packages/AirframeUI` passed.
+- Full `AirframeTests` macOS/iOS currently compile but still fail on existing `TableModelTests.testMakeModelBuildsFrameRowsAndEventRows` because current column width is `84` while the test expects `99`; this was not part of the UI polish changes.
+- Follow-up correction (2026-07-15): Graph out-of-range dimming now uses the active Timeline range as the canvas data range, so zoomed views before/after In/Out boundaries dim correctly. The timeline-toolbar current-position text aligns to the Graph viewport coordinate in Graph mode, while Table/other modes keep timeline-wide alignment. The transient graph-visible range is no longer clamped before storage, because edge-centered Graph windows can legitimately extend outside the log/range.
+
 ## Series Captions and Physical Value Formatting (2026-07-14)
 
 - Implemented Reader-side physical display conversion for standard field families and header-context-aware App/CLI captions. Table headers use units while cells render transformed numeric values only. Unknown fields remain selectable with readable fallback captions and raw values.
