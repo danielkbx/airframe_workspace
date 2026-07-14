@@ -325,7 +325,7 @@
 - Done (2026-07-14): native Graph renderer implemented in five slices; see `PLAN.md` section "Graph Renderer Slices". Equal-height sections, per-field normalization into a shared [-1,1] section space (axis-hint ranges), cursor-centered window with scrub/tap/pinch, 12-color `SeriesPalette` with sticky per-field slots persisted in `GraphSetup`, hover/tap line highlight, and cursor value readout in the inspector rows of Table and Graph mode.
 - Known pre-existing failure independent of this work: `TableModelTests.testMakeModelBuildsFrameRowsAndEventRows` (84.0 vs 99.0) fails on clean HEAD too; cause not yet investigated.
 - Follow-ups done (2026-07-14): full-log-stable field scaling (overview-based ranges, pidSum/debug overview projections), app-global iCloud-synced "Show Graph Legend" toggle in the View menu (`AirframeGlobalSettings`), and event marker chips with inflight-adjustment captions ("Rate Profile = 1"); see PLAN.md "Graph Follow-up Slices".
-- Backlog candidate: upstream-style flight-mode flag diffs ("ANGLE ON|USER1 OFF") need firmware CLI mode names from the header config plumbed into the event captions.
+- Done (2026-07-14): flight-mode flag-diff chips implemented as segmented per-flag states (only changed flags), the graph rendering relocated into the AirframeUI package, and macOS scroll/two-finger scrub added. See PLAN.md "Graph Package Relocation, Scroll-to-Scrub, Segmented Flag Chips".
 
 ## Risks
 
