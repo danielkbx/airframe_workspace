@@ -1,7 +1,27 @@
 # Planning Tasks
 
+## Series Presentation Follow-up
+
+- Keep the Reader series presentation resolver and AirframeCaptions lookup in sync whenever a new selectable field family or debug-mode meaning is introduced. Add conversion and caption coverage in the same change.
+
 ## Near Term
 
+- Document-wide Table/Graph field picker implemented (2026-07-13): one shared persisted selection, tri-state group bulk controls, unavailable-ID retention across schemas, and legacy per-log state ignored.
+- Current Table alignment and macOS inspector layout fix is implemented: Table cell widths include padding and rows share the header's leading content width; macOS uses SwiftUI's native inspector, and Table retains local geometry when the system overlays the inspector at narrow widths.
+
+- Current AirframeCaptions localization-rule slice is implemented:
+  - `Airframe/Packages/AirframeCaptions` exists as the shared user-facing caption package.
+  - It uses SwiftPM-processed Xcode `.xcstrings` resources at `Sources/AirframeCaptions/Resources/Localizable.xcstrings`, with explicit English source entries rather than relying on runtime `defaultValue` fallbacks.
+  - It exposes typed caption APIs through `CaptionSet`, `Caption`, `AppCaptionID`, and convenience extensions for domain semantic keys.
+  - It owns centralized captions for Reader series, derived Analysis series, info section/row keys, events, issues, selected app placeholders/control labels, unit symbols, and flight-mode display names.
+  - Architecture correction: `BlackboxAnalysis` does not depend on `AirframeCaptions`; it owns derived semantics through `AnalysisDerivedSeriesKind`, and `AirframeCaptions` maps that domain key to localized captions for App/CLI.
+  - `AirframeCLI` now derives human event summaries and issue messages from `AirframeCaptions` while keeping machine-readable JSON keys local.
+  - App Table, Timeline, and debug preview marker labels now use `CaptionSet`; `AirframeUI` re-exports `AirframeCaptions` for app consumers.
+  - A focused guardrail test in `AirframeCaptionsTests` fails if migrated event/issue/series caption literals reappear in App, CLI, or Analysis source.
+  - `HANDOFF.md` was removed after the correction was implemented.
+  - Verification passed after the architecture correction and explicit catalog population: `swift test` in `AirframeCaptions`, `BlackboxAnalysis`, `AirframeCLI`, and `AirframeUI`; `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=macOS' -derivedDataPath /tmp/airframe-captions-correction-macos-dd`; `xcodebuild test -project Airframe/App/Airframe.xcodeproj -scheme AirframeTests -destination 'platform=iOS Simulator,OS=26.5,name=iPhone 13 mini' -derivedDataPath /tmp/airframe-captions-correction-ios-dd`; `xcstringstool compile --dry-run` for the AirframeCaptions catalog; `git -C Airframe diff --check`.
+  - Follow-up: migrate `ReaderInfoReportBuilder` out of Reader-owned hardcoded labels into a Caption-backed report builder without creating a Reader -> Captions dependency cycle.
+- Current center-locked Table slice is implemented: Main-frame rows snap one at a time at the fixed viewport-center cursor; endpoint overscroll is intentional; Timeline range filters all visible Table frames/events; table-local cursor clamping does not modify global Timeline position; cached Timeline scrubbing re-centers without rebuilding the Table model.
 - Current app shell slice is implemented:
   - `Airframe/App/Airframe.xcodeproj` exists.
   - App target/product/display name is `Airframe`.
@@ -299,6 +319,13 @@
 - Should video sync/export be an MVP requirement or a later milestone?
 - How important is compatibility with Cleanflight/INAV/EmuFlight compared with Betaflight-only first?
 - Which local tool/MCP setup should be used once Swift implementation starts?
+
+## Graph Setup Follow-up
+
+- Done (2026-07-14): native Graph renderer implemented in five slices; see `PLAN.md` section "Graph Renderer Slices". Equal-height sections, per-field normalization into a shared [-1,1] section space (axis-hint ranges), cursor-centered window with scrub/tap/pinch, 12-color `SeriesPalette` with sticky per-field slots persisted in `GraphSetup`, hover/tap line highlight, and cursor value readout in the inspector rows of Table and Graph mode.
+- Known pre-existing failure independent of this work: `TableModelTests.testMakeModelBuildsFrameRowsAndEventRows` (84.0 vs 99.0) fails on clean HEAD too; cause not yet investigated.
+- Follow-ups done (2026-07-14): full-log-stable field scaling (overview-based ranges, pidSum/debug overview projections), app-global iCloud-synced "Show Graph Legend" toggle in the View menu (`AirframeGlobalSettings`), and event marker chips with inflight-adjustment captions ("Rate Profile = 1"); see PLAN.md "Graph Follow-up Slices".
+- Backlog candidate: upstream-style flight-mode flag diffs ("ANGLE ON|USER1 OFF") need firmware CLI mode names from the header config plumbed into the event captions.
 
 ## Risks
 

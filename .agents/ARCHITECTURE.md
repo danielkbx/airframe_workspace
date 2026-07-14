@@ -6,6 +6,8 @@ Product subtitle: A Blackbox Log Analyzer.
 
 ## Preferred Shape
 
+Document-wide field selection is app-owned UI state: one ordered list of `AnalysisSeriesID.rawValue` values is shared by Table and Graph, while each active log resolves only IDs it supports. The reusable picker and its pure selection model live in the app target; `BlackboxAnalysis` remains responsible only for catalogs and series data.
+
 Use a package-oriented architecture:
 
 - `BlackboxCore`: pure Swift package for IO-free parser primitives: byte streams, headers, frame definitions, field encodings, predictors, and one-frame payload decoding. It intentionally has no logging dependency.
@@ -13,6 +15,7 @@ Use a package-oriented architecture:
 - `BlackboxIndex`: optional future Swift package or Reader layer for lightweight summaries, syncpoint indexes, time ranges, chunk access, and efficient seeking.
 - `BlackboxAnalysis`: Swift package for app-facing series composition, display-scaled raw values, derived signals, and later tuning-oriented analysis. Depends on `BlackboxReader` and `Logging`.
 - `AirframeCLI`: Swift package for command-line log inspection, validation, filtering, CSV export, JSON/NDJSON output, and shell completion. It contains `AirframeCLIKit` for testable CLI logic and a thin `AirframeCLI` executable target for the `airframe` command. Depends on `BlackboxReader`, `Logging`, and the approved `apple/swift-argument-parser` package first; add `BlackboxAnalysis` only when derived analysis output is in scope.
+- `AirframeCaptions`: shared presentation-string package for App and CLI. It owns every user-facing string through typed accessors backed by Xcode string catalogs (`.xcstrings`). It may depend on `BlackboxReader` and `BlackboxAnalysis` for stable semantic IDs, events, issues, and derived-series kinds. It must not depend on app targets. Domain packages must not depend on `AirframeCaptions`; App/CLI materialize captions at the output boundary.
 - `Logging`: local infrastructure Swift package copied into `Airframe/Packages/Logging`. It exposes a dependency-free `Logging` target for `os.Logger` plus an in-memory session buffer. It intentionally has no `ErrorReporting` target and no third-party dependencies.
 - `AirframeUI`: optional future SwiftUI components for reusable, data-driven graph/status widgets such as graph panels, seek bars, legends, field values, configuration, and controls. App-specific screens and navigation containers stay in the app target. Current code also uses this package for app-facing document/opening state models. Depends on `BlackboxCore`, `BlackboxReader`, and `Logging`; add `BlackboxAnalysis` only when reusable analysis-backed widgets need it.
 - `AirframeApp`: optional future iOS/macOS Universal app shell, file import, document handling, persistence, video integration, and platform-specific capabilities.
@@ -32,6 +35,17 @@ Use a package-oriented architecture:
 Keep `BlackboxCore` free of SwiftUI, UIKit, AppKit, AVFoundation, MapKit, and persistence frameworks where possible.
 
 Do not add external package dependencies without the user's explicit approval. Prefer standard library, Foundation, Apple platform frameworks, and small in-house code until an external dependency is justified and approved.
+
+## User-Facing Strings And Localization
+
+- `AirframeCaptions` is the only approved source of user-facing strings.
+- All app targets, CLI targets, Swift packages, tests, previews, and future packages must consume user-facing text through `AirframeCaptions`.
+- No package or target may define its own labels, titles, captions, event names, issue text, header labels, button text, menu labels, placeholders, empty-state text, or accessibility text.
+- Allowed exceptions are raw log data, file names, numeric values, debug-only test names, internal IDs, and machine-readable CLI JSON keys.
+- `BlackboxCore`, `BlackboxReader`, and `BlackboxAnalysis` expose stable semantic IDs, machine-readable keys, units, precision, typed values, and grouping. They do not own final human-facing text.
+- Series values flow from Reader raw fields through `ReaderSeriesPresentation.displayValue(for:context:)`; `BlackboxAnalysisWorkspace` retains one immutable `ReaderSeriesDisplayContext`, and App/CLI obtain localized labels from `AirframeCaptions` at their output boundary. The display context may use validated header calibration and firmware revision data; unavailable calibration falls back to raw values without a guessed unit.
+- `BlackboxAnalysis` does not import `AirframeCaptions`; derived series are identified by `AnalysisDerivedSeriesKind` and rendered through `AirframeCaptions` only in consumers.
+- Localization must use Xcode-native `.xcstrings` resources processed by SwiftPM or the app target. Do not implement a long-term ad-hoc localization dictionary.
 
 ## Development Sequence
 
@@ -263,6 +277,10 @@ Recommended approach:
 - Prefer internal Swift fixtures, snapshots, and local smoke logs for the next slices. External oracle validation is deferred.
 
 Avoid designing the UI before `BlackboxCore` can parse real logs reliably.
+
+## Graph Setup State
+
+`GraphSetup` is app-owned per-document state. It has one fixed Table section (`Table Columns`) and ordered editable Graph sections. Sections persist only a name and ordered `AnalysisSeriesID.rawValue` values in a compact versioned property-list payload; unknown IDs remain retained. Table and Graph assignments are independent. Future graph rendering consumes graph sections as equal-height, shared-time-domain panels with independent Y domains.
 
 ## Testing Strategy
 

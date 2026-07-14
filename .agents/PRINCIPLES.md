@@ -50,6 +50,19 @@ Every SwiftUI view file in the app target and in the `AirframeUI` package must i
 - Debug-only `makeDebug...` factory methods on real model/state types are allowed and encouraged when they make previews fast and readable.
 - Minimal preview-only injection into views is allowed when a view otherwise owns too much state to preview directly. Prefer keeping that injection debug-only.
 
+## User-Facing String Rule
+
+Every user-facing string must be defined in `AirframeCaptions` and backed by Xcode-native localization resources.
+
+- Do not define labels, titles, captions, event names, issue text, header labels, button/menu text, placeholders, empty-state text, or accessibility text in app targets, CLI targets, or domain packages.
+- Use typed `AirframeCaptions` APIs from every consumer.
+- Keep semantic IDs, raw log values, file names, numeric values, debug-only test names, internal IDs, and machine-readable CLI JSON keys outside the localization rule.
+- Use `.xcstrings` string catalogs for localization. Do not create ad-hoc localization dictionaries as the long-term source.
+
+## Series Presentation Rule
+
+Every newly selectable Reader or Analysis series must define semantic classification, localized caption, physical unit, value conversion, precision, raw fallback behavior, and focused tests before it is exposed in a picker, table, graph, or human CLI output. Units belong in column or axis headers, never repeated in individual numeric cells.
+
 ## 4. Goal-Driven Execution
 
 Define success criteria. Work in verifiable steps.

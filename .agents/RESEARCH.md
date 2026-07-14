@@ -161,3 +161,10 @@ Airframe inference:
 - Archive/distribution signing and macOS test-product signing are different paths in Xcode Cloud.
 - Enabling the App ID capability is still required for real app builds, but it does not by itself prove that macOS test products get a usable provisioning profile.
 - For Airframe's current Xcode Cloud macOS failure, the pragmatic CI fix is a test/build-for-testing-specific macOS entitlement path that omits the iCloud KVS entitlement while keeping App Sandbox and user-selected read-only file access. Product Archive/Release builds should keep iCloud KVS.
+
+## Graph Section Layout Research
+
+- The reference graph renderer takes ordered graph definitions with a label, a field list, and a height weight (default `1`). It sums the weights, allocates each graph a normalized vertical band in that order, and leaves a small inter-section gap.
+- Every section receives the same document time window and shares the global current-time bar and event overlays. Each section calculates its own Y projection/grid from its assigned fields, so only the X axis is synchronized.
+- Airframe should retain only ordered section names and ordered semantic series IDs in document state. Future native rendering uses equal-height sections, one shared time domain, and independent per-section Y domains; height weights, curves, colors, and smoothing are deliberately out of scope.
+- The reference viewer creates `Motors` and `Gyros` when no user graph configuration exists. Airframe mirrors that small default only for newly materialized Graph setups: motor channels in `Motors`, gyro channels in `Gyros`; Table keeps its separate Core Tuning defaults.

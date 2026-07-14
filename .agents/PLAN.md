@@ -1,5 +1,11 @@
 # Airframe Investigation Plan
 
+## Series Captions and Physical Value Formatting (2026-07-14)
+
+- Implemented Reader-side physical display conversion for standard field families and header-context-aware App/CLI captions. Table headers use units while cells render transformed numeric values only. Unknown fields remain selectable with readable fallback captions and raw values.
+
+- Field-selection slice (2026-07-13): Table and Graph use one document-wide ordered selection of stable analysis-series IDs; groups support off/mixed/on bulk changes and future workspace presets can reuse the same representation.
+
 ## Table Perceived-Performance Slice (Implemented 2026-07-13)
 
 - `BlackboxAnalysisWorkspace` caches header info, reader catalog, display context, field names, motor range, and the Analysis catalog at `init`; the old computed catalog reparsed the header per field per access (release: catalog x3 50 ms -> 0 ms, chunk projection x3 66 ms -> 14 ms on a 6 MB log).
@@ -8,6 +14,21 @@
 - `MainFrameChunkCache` is per-ordinal (partial-hit decode, shared in-flight tasks, utility-priority superseding prefetch, running frame-total LRU); `Table.ModelStore` removed.
 - Graph readiness: overview projection for wide zoom, this chunk cache for detail zoom; per-chunk LOD aggregation parked in BACKLOG.
 - Open manual check: scroll feel with a large private log on macOS.
+
+## Center-Locked, Range-Scoped Table Slice (Implemented 2026-07-13)
+
+- The Table uses view-aligned Main-frame scroll targets anchored at the viewport center and limits movement to one target row. Event separators are retained as non-target rows.
+- The moving selected-row fill is replaced by a fixed accent cursor band at the vertical center. Symmetric scroll-content margins allow intentional overscroll so both log endpoints can occupy that band.
+- Table visibility now follows the active Timeline range. Cached chunk decoding may include its boundary chunks, but model projection filters Main frames and events inclusively to the range.
+- The Table clamps only its displayed cursor to the active range; it never mutates the global stored Timeline position. Cursor movement inside cached data does not reload or rebuild the model.
+- The Table continuously publishes its center target while a user scrolls, so the shared Timeline follows live. Timeline-driven table positioning is suppressed from feeding back. Momentum uses unrestricted view-aligned row targets and must still settle exactly on a row.
+
+## Table Alignment And In-Layout Inspector Slice (Implemented 2026-07-13)
+
+- Table header and row cells now use model widths as total outer cell widths, with padding inside that width.
+- Frame rows are leading-aligned and stretched to the same content width as the header and event rows, so extra window width stays to the right instead of centering rows under fixed headers.
+- LogDataView uses SwiftUI's native `.inspector` on macOS and iOS. Table width remains local to its `GeometryReader`; at narrow macOS widths, system-controlled inspector overlay is accepted in favor of the native inspector appearance. iOS keeps its sheet-specific presentation behavior.
+- Verification target: macOS and iOS `AirframeTests`, plus a manual macOS visual check with a wide and narrow Table window.
 
 ## Indexed Table Chunk Cache (Implemented 2026-07-13)
 
@@ -37,6 +58,21 @@ Airframe has a compact toolbar above the shared Table/Graph timeline. It shows `
 The timeline graph height is now 136 pt while the toolbar remains 34 pt. The region can collapse per log segment through a chevron next to the `Timeline` title (`chevron.down`/`chevron.up`). Collapse state is stored as true-only `collapsedTimelineSegments` in the same synced document-state repository entry. Collapsed mode hides the graph and In/Out buttons, disables matching `I`/`O` commands, and reclaims the graph height. Toolbar icon buttons use tint-only hover feedback.
 
 ## Current Phase
+
+The `AirframeCaptions` localization-rule slice is implemented. The project-wide rule is: no user-facing string may be defined outside `AirframeCaptions`; all App, CLI, package, test, preview, and future target user-facing text must be consumed through typed caption APIs backed by Xcode `.xcstrings` localization resources. Exceptions are raw log data, file names, numeric values, debug-only test names, internal IDs, and machine-readable CLI JSON keys.
+
+Implemented shape after the architecture correction:
+
+- `Airframe/Packages/AirframeCaptions` owns `CaptionSet`, `Caption`, and `AppCaptionID`.
+- The package uses `Sources/AirframeCaptions/Resources/Localizable.xcstrings` as the Xcode-native localization resource, with explicit English source values so Xcode shows real catalog entries instead of relying on runtime fallback strings.
+- `BlackboxAnalysis` does not depend on `AirframeCaptions`; it exposes derived semantics through `AnalysisDerivedSeriesKind`.
+- `AirframeCaptions` depends on `BlackboxAnalysis` and maps `AnalysisDerivedSeriesKind` to localized derived-series captions.
+- `AirframeCLI` depends on `AirframeCaptions` for human event summaries and issue messages; machine-readable JSON keys remain local.
+- `AirframeUI` depends on and re-exports `AirframeCaptions` for app consumers.
+- App Table and Timeline event/issue/field captions use `CaptionSet`.
+- `AirframeCaptionsTests.UserFacingStringGuardrailTests` prevents migrated event/issue/series caption literals from reappearing in App, CLI, or Analysis source.
+
+Known follow-up: `ReaderInfoReportBuilder` still contains legacy hardcoded section/row labels in Reader. Do not solve this by making Reader depend on Captions, because `AirframeCaptions` already depends on Reader semantic IDs. Move the consumer-facing report assembly into `AirframeCaptions` or introduce a lower-level semantic report model first.
 
 The workspace restructuring slice is approved and being implemented on 2026-07-13. The root workspace becomes a private Git repository with `Airframe/`, `blackbox-log-viewer/`, and `betaflight/` registered as submodules. Root commits are allowed to be lightweight workspace commits; Airframe commits remain approval-gated; upstream reference repositories remain pull-only.
 
@@ -565,3 +601,31 @@ Local series smoke verification passed with `/tmp/airframe-series-smoke`:
 - File headers for this project use `SPDX-FileCopyrightText: 2026 mail@danielkbx.com`; do not add an SPDX license identifier until the license is explicitly chosen.
 - GPL-3.0 is acceptable if required by reused/ported GPL code, but an independent implementation may use a different license.
 - App Store distribution is optional.
+
+## GraphSetup Sidebar Slice
+
+- Replace the legacy document-wide flat field selection with compact per-document `GraphSetup` state: a fixed Table Columns section plus editable Graph sections.
+- Keep assignments independent by mode, retain unknown IDs, discard historic flat selections, and use the same editor in both inspectors with Table restrictions enforced.
+- Verify persistence through the existing local/iCloud document-state buffer, table-column projection, macOS/iOS tests, and Debug/Release builds before starting graph rendering.
+
+## Graph Renderer Slices (2026-07-14)
+
+The native Graph mode is implemented in five slices, replacing the placeholder in `Graph.Container` with `Graph.Surface`. User decisions: cursor-centered window (drag scrubs the shared cursor, cursor bar fixed at center), SwiftUI Canvas rendering with a renderer-agnostic model as Metal escape hatch, and sticky per-field colors persisted in GraphSetup storage.
+
+- Slice 1, static renderer: `BlackboxAnalysis.overviewDisplayPoints(for:in:)` routes overview samples through the same display scaling as `seriesTable` (parity-tested); `Graph.Model` (normalized [-1,1] points, built off-main), `Graph.FieldScale` (axis-hint ranges: angularRate symmetric with 500 deg/s floor, angle ±180, motorOutput/percent at least 0...100, otherwise observed fit with 10% headroom, zero-anchored when non-negative), `Graph.WindowPolicy` (cursor-centered visible window, 3x load window, inner-half reload hysteresis, 1.5x zoom drift, point budget clamp(2x px, 512, 4096), width quantized to 128 px, detail tier under ~64k estimated frames else scan-overview tier), `Graph.SurfaceCanvas` (sections, center/quarter lines, 1/2/5-ladder time grid with labels, orange event/issue markers, one path+stroke per series, accent cursor band).
+- Slice 2, interaction: one DragGesture covers scrubbing (traces follow the pointer, cursor writes to `DocumentStateStore`) and tap-to-jump (sub-3pt movement); MagnifyGesture zooms `windowMicros` (transient `@State`, default 10 s, clamped 50 ms...full range); accessibility adjustable actions step by 1/20 window.
+- Slice 3, colors: `SeriesPalette` in AirframeUI (12 fixed hues as light/dark pairs, resolved once, cycling indexes, no yellow-green near the accent); sticky `colorSlots: [String: Int]` on `GraphSetup.Section` (lowest-free-slot on add, freed on remove, untouched on reorder, collision/migration normalization in init, persisted as `"c"` in Storage v1); dot before the caption in `GraphSetupEditor` graph mode; renderer and legend consume the same slots. Also fixed a shadowed-parameter bug in `GraphSetup.insertSeries(_:in:at:)` that inserted at the section index instead of the requested position.
+- Slice 4, hover highlight: transient `GraphHighlightState` (@Observable, never persisted) injected via `\.graphHighlightState` from `LogDataView`; macOS `.onHover` / iOS tap-toggle on editor field rows; highlighted series draws last at 3.5 pt while section peers dim to 45%.
+- Slice 5, cursor value readout: `GraphSetupValueReadout` resolves all visible inspector series with one bounded `seriesTable` query (±50 ms around the cursor, last row at or before the cursor, forward fallback near log start), coalesced with an 80 ms task-sleep debounce and stale-while-revalidate; row captions show `"<value> <unit>"` via the shared `SeriesValueFormat` (extracted from the Table cell formatting) with unit-only fallback, in both Table and Graph inspector modes.
+
+Verification: `swift test` in BlackboxAnalysis (25) and AirframeUI (21); `xcodebuild test` scheme AirframeTests on macOS and iPhone 13 mini (all new suites pass; `TableModelTests.testMakeModelBuildsFrameRowsAndEventRows` fails pre-existing on clean HEAD, 84.0 vs 99.0, unrelated); iOS XCUITest updated from stale placeholder assertions to real content and passes with a graph screenshot attachment. Open manual checks: scrub/zoom feel on macOS, hover highlight on macOS, light/dark palette review with a real log.
+
+## Graph Follow-up Slices (2026-07-14, second round)
+
+Three refinements after the first Graph review:
+
+- Stable full-log scaling: `Graph.FieldScale` ranges now come from full-log scan-overview extremes (`overviewDisplayPoints` over all samples) instead of per-window min/max, so jumping around a log never re-fits the lines. The overview projection gained `.pidSum(axis:)` (raw component sums) and `.debug(index:)` (raw field) support matching the seriesTable derived semantics; series without an overview projection fall back to the window fit. Occasional clipping from the strided overview is accepted; normalized values clamp at section edges.
+- Legend toggle: `AirframeGlobalSettings` (@Observable, shared instance, environment key `\.airframeGlobalSettings`) is the first app-global iCloud-synced setting: key `airframe.graph.legendVisible` in `UserDefaults` plus `NSUbiquitousKeyValueStore` (cloud value wins, external-change notification applies remote toggles live, testable through the `GlobalSettingsCloudStore` seam). The macOS View menu gained a "Show Graph Legend" checkmark toggle in `LogViewCommands`; `Graph.Surface` hides the per-section legend row when off (section names stay).
+- Event marker chips: `Graph.Model.Marker` carries a label (events via `tableEventTitle`, issues via `issueTitle`); `Graph.MarkerChips` renders material capsules at the marker lines (secondary border for events, orange for issues), staggered into up to 3 rows via a pure, unit-tested placement function, flipped to the left of the line near the trailing edge, and suppressed entirely above 16 visible markers. `AirframeCaptions` gained `inflightAdjustmentCaption(function:value:)` with the firmware-ordered 34-entry adjustment function table and per-function value scaling (rates x0.01, P x0.1, I x0.001, D floats x1000), so adjustments render like "Rate Profile = 1"; `tableEventTitle` routes `.inflightAdjustment` through it, improving Table event rows too. New committed UI-test fixture `native-event-log.bbl` (synthetic, contains a sync beep) drives the chip UI test with screenshot.
+
+Verification: BlackboxAnalysis (28) and AirframeCaptions (10) package tests; macOS/iOS app suites (new: GraphModelTests scale stability + marker labels, GraphMarkerChipsTests layout, AirframeGlobalSettingsTests precedence/sync; only the known pre-existing TableModelTests width failure remains); iOS UI tests including the new chip test pass with screenshots. Open manual checks: menu toggle across two macOS windows and relaunch persistence, no line snapping on a real log, chip styling in dark mode.

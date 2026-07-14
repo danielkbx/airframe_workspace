@@ -37,6 +37,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Add units and presentation metadata for raw and derived fields, including scaling, labels, display precision, and axis hints.
 - Add field grouping and picker metadata for common tuning workflows without copying upstream graph configuration architecture.
 - Add workspace or graph preset support after the native chart model is proven.
+- Let future named workspaces/presets own reusable document field-selection ID sets.
 - Add map view support for GPS-capable logs.
 - Add spectrum analyzer / FFT analysis.
 - Add video sync and video export support.
@@ -48,3 +49,4 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Add `airframe dump-config` to print Reader and CLI budget/default configuration.
 - Add value predicates such as `--where amperageLatest>20` after the field/time filter MVP is stable.
 - Add aggregate query filters for threshold and window-based analysis.
+- Upstream-style flight-mode flag diffs in event chips ("ANGLE ON|USER1 OFF"): plumb the firmware CLI mode names from the header config into the graph marker captions (CaptionSet.cliEventSummary already accepts them).
