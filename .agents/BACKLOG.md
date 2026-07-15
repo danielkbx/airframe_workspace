@@ -39,7 +39,13 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Add workspace or graph preset support after the native chart model is proven.
 - Let future named workspaces/presets own reusable document field-selection ID sets.
 - Add map view support for GPS-capable logs.
-- Add spectrum analyzer / FFT analysis.
+- Spectrum follow-ups (base implemented 2026-07-15 with Frequency, Freq vs Throttle, Freq vs RPM; the user wants the deferred views later):
+  - Power Spectral Density curve view: Welch method, default 512-sample segments, 75% overlap, Hanning, dB scale with a -70 dB floor, plus a segment-length control in the inspector.
+  - PSD vs Throttle and PSD vs RPM heatmaps with minPSD/maxPSD/lowLevelPSD clamping (upstream defaults -40/+10 dB, low-level filter).
+  - PID Error vs Setpoint view (average absolute axisError per setpoint value, per detected axis).
+  - Spectrum filter overlays: LPF/notch cutoff lines and the dynamic-LPF expo curve from header semantic values; the `overlays:` layer slot in `SpectrumSurfaceCanvas` and the `SpectrumOverlay` cases already exist.
+  - Spectrum CSV import/export of frequency/PSD curves like upstream Exp/Imp.
+  - Exact upstream `rcCommands[3]` throttle handling is already matched (minthrottle/maxthrottle mapping); revisit only if upstream changes.
 - Add video sync and video export support.
 - Add large-log performance work if profiling shows slow startup, seeking, memory pressure, or repeated viewport queries.
 - Add `airframe frames` to dump selected decoded frames by marker, time range, and limit for low-level debugging.

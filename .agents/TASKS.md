@@ -333,6 +333,17 @@
 - Lack of strong upstream parser tests.
 - Performance for large logs on mobile devices.
 - Recreating browser Canvas graph behavior natively may take more work than parser MVP.
+## Spectrum View Slice (done 2026-07-15)
+
+- Implemented in six standalone Airframe commits (`ff9a7fe`, `d3baddb`, `084e826`, `91503ff`, `f40021e`, `e542451`):
+  - `BlackboxAnalysis/Spectrum`: namespace/constants/typed errors, sendable results, rate resolution from raw headers, `vDSP.DiscreteFourierTransform` wrapper with cached setups and the symmetric Hanning window, `AnalysisSpectrumAnalyzer` (frequency + vs-throttle/vs-RPM heatmaps), columnar `spectrumSamples` extraction.
+  - `AirframeUI/Spectrum`: render model, `SpectrumSurfaceCanvas` with reserved overlay layer, pannable/anchored `SpectrumZoomPolicy` (1-5x), `SpectrumIntensity` (upstream zoomY semantics), off-main heatmap bitmap builder, `SpectrumScrollZoomView`.
+  - App: two-section inspector (View: mode/intensity/Hanning; Field: grouped picker), per-document `spectrumSettings` persistence, surface with compute LRU, range-only debounce, display-only intensity task, pinch/pan/scroll/double-tap gestures, container above the shared timeline region.
+  - Tests: Swift Testing suites in BlackboxAnalysis (FFT scaling pinned by a bin-aligned sine, rate, analyzer, heatmap binning, sample source) and AirframeUI (zoom policy, intensity, heatmap image), XCTest app suites (settings storage/store roundtrip, model/cache), and an iOS XCUITest for the spectrum view and inspector controls.
+  - Verified against the real `Logs/btfl_007.bbl`: max-noise 307.1 Hz matches the reference analyser's 307 Hz; full-log FFT 5-8 ms, extraction ~850 ms off-main.
+- Known pre-existing failure (NOT from this slice, confirmed on baseline `8616237`): `TableModelTests.testMakeModelBuildsFrameRowsAndEventRows` expects column width 99 for "Motor Avg" but gets 84 (short-label drift). Needs a separate look.
+- Deferred spectrum views are recorded in `BACKLOG.md`.
+
 - Spectrum analysis and video export can expand scope quickly.
 - External dependencies must not be introduced without explicit user approval, so any dependency proposal needs justification and an approval step.
 - Version drift is not allowed: Swift Packages and Xcode targets must keep the same SemVer version, with Xcode targets inheriting `MARKETING_VERSION` from `Base.xcconfig`.

@@ -30,6 +30,17 @@ Approximate file sizes from the first pass:
 
 The parser and data model are mostly plain JavaScript and are conceptually portable. The UI/rendering side is strongly browser-dependent through Canvas, DOM events, `<video>`, Leaflet, Three.js, and WebM export.
 
+## Spectrum Analyser Reference (for deferred views and overlays)
+
+Captured 2026-07-15 from `blackbox-log-viewer/src/graph_spectrum_calc.js`, `graph_spectrum_plot.js`, `components/SpectrumAnalyser.vue`.
+
+- Upstream modes: Frequency, Freq vs Throttle, Freq vs RPM (implemented natively), plus Power Spectral Density, PSD vs Throttle, PSD vs RPM, PID Error vs Setpoint (backlogged).
+- PSD: Welch method, `_pointsPerSegmentPSD` default 512 (user range 2^6..next power of two of the sample count), 75% overlap for multi-segment, Hanning scale `1/(rate*sum(win^2))`, dB via `10*log10` with a 1e-7 floor (-70 dB), max-noise search above 50 Hz. PSD heatmaps clamp with minPSD (-40 dB default), maxPSD (+10 dB), lowLevelPSD (values below map to minPSD).
+- Filter overlays read sysConfig: gyro_lowpass_dyn_hz[min,max] + gyro_lowpass_dyn_expo + gyro_soft_type, gyro_lowpass_hz, gyro_lowpass2_hz + gyro_soft2_type, gyro_notch_hz/gyro_notch_cutoff (arrays or scalars), dterm equivalents (dterm_lpf_dyn_hz, dterm_lpf_dyn_expo, dterm_filter_type, dterm_lpf_hz, dterm_lpf2_hz, dterm_notch_hz/cutoff), yaw_lpf_hz, and motor_poles. Airframe already exposes these through `ReaderHeaderSemanticValue` keys (gyroLPF1*, dterm*, rpmFilter*, motorPoles).
+- Overlay drawing: static cutoffs are labeled vertical lines; the dynamic LPF in Freq-vs-Throttle draws the expo curve `f = min + (max-min) * (t*(1-t)*expo + t)` over the throttle axis; overdraw filter modes are all/gyro/dterm/yaw/hide/auto, where auto keys off the analysed field name (gyro / pid d / yaw). Native plug-in point: `SpectrumSurfaceCanvas(overlays:)` with `SpectrumOverlay.verticalLine/.curve` plus a future `makeFilterOverlays(headerInfo:mode:)` builder in the app model.
+- Frequency-view display scaling is absolute, not max-normalized: bar height = magnitude * HEIGHT/(zoomY*100); heatmap lightness = clamp(magnitude * 100/(zoomY*1.1)); zoomY = 1/(sliderPercent/100). Native `SpectrumIntensity` reproduces exactly this.
+- Upstream `rcCommands[3]` throttle percent = clamp((rcCommand[3]-minthrottle)/(maxthrottle-minthrottle)*100, 0, 100) (flightlog.js `rcCommandRawToThrottle`); the native sample source uses the same formula with defaults 1150/1850.
+
 ## Format Notes
 
 Betaflight Blackbox logs contain multiple frame types. The reference parser handles at least:
