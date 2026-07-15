@@ -1,5 +1,31 @@
 # Airframe Investigation Plan
 
+## Spectrum Crosshair (Implemented 2026-07-15)
+
+### Think Before Coding
+
+- Spectrum now exposes the visible axis coordinates rather than sampling a nearest FFT value. X is always whole Hz; Y is whole dB, throttle percent, or RPM Hz. No crosshair label contains a decimal fraction.
+
+### Simplicity First
+
+- `SpectrumSurfaceCanvas` owns the pure projection and drawing; its crosshair chips use monospaced digits, a stable 80 pt minimum width, the accent surface, and `PrimaryOnAccent` foreground content.
+- The only new state in the app surface is a transient pointer location and a two-finger pan start window.
+
+### Surgical Changes
+
+- Added `SpectrumCrosshair`, `SpectrumPointerTrackingView`, and focused Spectrum crosshair tests in `AirframeUI`.
+- macOS reports hover and supplies an invisible local cursor; iOS maps one finger to inspection and two fingers to the existing zoom-window pan policy. Existing pinch, double-tap reset, scroll zoom, and scroll pan remain intact.
+- FFT calculation, document state, Spectrum settings, and the analysis models are unchanged.
+
+### Goal-Driven Execution
+
+Verification:
+
+- `swift test` passed in `Airframe/Packages/AirframeUI` (69 tests).
+- macOS Debug build passed.
+- iOS Simulator Debug build passed on iPhone 17 / iOS 26.5.
+- `git diff --check` passed.
+
 ## Automatic Timeline Range, Native Settings, and Spectrum Range Regression (Implemented 2026-07-15)
 
 ### Think Before Coding
