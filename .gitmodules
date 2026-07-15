@@ -10,3 +10,6 @@
 	path = betaflight
 	url = git@github.com:betaflight/betaflight.git
 	branch = master
+[submodule "PIDtoolbox"]
+	path = PIDtoolbox
+	url = https://github.com/skoch1s/PIDtoolbox.git
