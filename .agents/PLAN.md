@@ -1,5 +1,30 @@
 # Airframe Investigation Plan
 
+## Spectrum Frequency Snap (Implemented 2026-07-15)
+
+### Think Before Coding
+
+- Option snapping uses the displayed Frequency line's peak-bucket geometry, not an unrendered raw FFT bin. The cursor keeps its X coordinate; its Y coordinate interpolates along the visible polyline.
+
+### Simplicity First
+
+- `SpectrumCrosshair.isSnapping` carries transient modifier state. `FrequencyLineProjection` supplies the same points to line drawing and snap lookup, and the Canvas draws one fixed red 4 pt marker only when it receives a snap point.
+
+### Surgical Changes
+
+- Updated Spectrum pointer tracking, the Canvas, the app surface, and focused `AirframeUI` tests only.
+- The AppKit tracking view refreshes the modifier state from a window-local `flagsChanged` monitor, so Option works without additional pointer movement. Its transparent cursor is now tied to active crosshair state.
+- Heatmaps, FFT data, analysis, settings, zoom, pan, and persistence remain untouched.
+
+### Goal-Driven Execution
+
+Verification:
+
+- `swift test` passed in `Airframe/Packages/AirframeUI` (72 tests).
+- macOS Debug build passed.
+- iOS Simulator Debug build passed on iPhone 17 / iOS 26.5.
+- `git diff --check` passed.
+
 ## Spectrum Crosshair (Implemented 2026-07-15)
 
 ### Think Before Coding
