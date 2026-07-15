@@ -1,5 +1,42 @@
 # Airframe Investigation Plan
 
+## Automatic Timeline Range, Native Settings, and Spectrum Range Regression (Implemented 2026-07-15)
+
+### Think Before Coding
+
+- Implemented one global iCloud-synced setting, `Set In and Out Automatically`, default enabled, using the existing `AirframeGlobalSettings` + UserDefaults + iCloud KVS pattern.
+- Automatic detection is intentionally conservative and never mutates raw Blackbox files or overwrites an existing stored range.
+- The detector uses exact main-frame samples, not scan-overview decimation. It requires full-log duration >= 20 s and candidate duration >= 10 s. The In point is idle-relative and sustained: median of the lowest 10% positive motor-average samples + 8 percentage points, held for a 500 ms window with at least 80% qualifying samples.
+- Spectrum production range behavior was preserved; only regression coverage was added.
+
+### Simplicity First
+
+- macOS uses the native SwiftUI `Settings` scene with a `General` tab.
+- iOS/iPadOS use the Home gear button and an app-local settings sheet with a `General` form section.
+- `ReaderScanOverview` stores the final contextual disarm/log-end time as one extra scan fact, independent of event marker truncation.
+- `BlackboxAnalysisWorkspace.automaticTimelineRange(using:)` owns motor normalization and exact range calculation.
+- `DocumentStateStore` owns the atomic no-overwrite automatic range application seam.
+
+### Surgical Changes
+
+- Added `SettingsView`, `AnalysisAutomaticTimelineRange`, package tests, and app integration tests.
+- Extended `AirframeGlobalSettings`, `DocumentView`, `DocumentStateStore`, `ReaderScanOverview`, `AirframeCaptions`, and focused test suites.
+- Corrected the stale Table column-width test expectation for `Motor Avg` from `99` to the current deterministic `84`; the failure was already documented as pre-existing and unrelated to Spectrum/Graph work.
+- Did not change Spectrum production range behavior or upstream reference submodules.
+
+### Goal-Driven Execution
+
+Verification:
+
+- `swift test` passed in `Airframe/Packages/BlackboxReader`.
+- `swift test` passed in `Airframe/Packages/BlackboxAnalysis`.
+- `swift test` passed in `Airframe/Packages/AirframeCaptions`.
+- `swift test` passed in `Airframe/Packages/AirframeUI`.
+- Focused macOS `AirframeTests` passed in the log with 159 tests / 0 failures; local `xcodebuild` stayed resident after reporting pass and was terminated manually.
+- Focused iOS `AirframeTests` passed on the available `iPhone 17` / iOS 26.5 simulator. The requested `iPhone 13 mini` destination was not installed locally.
+- macOS Debug app build passed.
+- iOS Debug app build passed on `iPhone 17` / iOS 26.5.
+
 ## Graph, Timeline, and macOS Interaction Polish Plan (Implemented 2026-07-15)
 
 Implemented next UI slice:

@@ -224,9 +224,18 @@ The native app is read-only and document-based.
 - `Table` and `Graph` show the shared `DocumentHomeView.LogTimeline` below a `Divider` (fixed `LogTimeline.height`); conceptually one timeline with one state across both views. The timeline is implemented: motor-average-percent `AreaGraph`, event marker lines, and a draggable current-position line backed by `DocumentStateStore.logPositions` (main-frame µs per segment index). `LogTimeline.ModelStore` (environment `\.logTimelineModelStore`, one per document window) caches computed `LogTimeline.Model`s.
 - `AirframeUI` owns reusable graph rendering: `GraphSample`, `GraphDomain`, `GraphProjection`, `AreaGraph`, and the style types `AreaGraphStyle`, `GraphLineStyle`, `GraphGridStyle`. Graph views are data-driven and theme-free; callers provide all colors and layer overlays/gestures on top using the shared public `GraphProjection` mapping.
 - `BlackboxAnalysis` owns motor normalization through `AnalysisMotorOutputRange` and the derived `motorAveragePercent` series; `AnalysisSeriesID.derived(_:)`/`.reader(_:)` are public factory helpers for consumers.
+- `BlackboxAnalysis` owns automatic timeline range detection through `BlackboxAnalysisWorkspace.automaticTimelineRange(using:)`. The app supplies the already-opened `DecodedLogFlightInfo`; Analysis performs one exact indexed full-log query for `motorAveragePercent`, derives an idle-relative sustained start threshold from exact samples, validates log identity and duration rules, and returns either `AnalysisAutomaticTimelineRange` or `nil`. Reader/query failures propagate as thrown errors for app logging.
 - `LogContext` additionally carries `flightInfo: DecodedLogFlightInfo?` retained by `AirframeDocumentOpenModel` during loading, so consumers reuse the scan-backed syncpoint index instead of rescanning.
+- `ReaderScanOverview` carries `lastTerminationEventContextMainFrameTime` as a separate unbounded-by-marker-list fact. The scan overview still keeps bounded event records for UI markers, but final disarm/log-end context must survive event floods for automatic range detection.
+- `DocumentStateStore` owns the atomic automatic-range write seam: `hasStoredTimelineRange(forSegmentIndex:)` distinguishes an actual persisted `logRanges` entry from the implicit full-log fallback, and `setAutomaticTimelineRange(_:forSegmentIndex:defaultRange:replacingExisting:)` refuses overwrites for automatic open/reset paths while allowing the user-initiated Timeline `Auto` button to replace an existing stored range.
 - macOS window toolbar: previous/next log arrows next to the file proxy (`ToolbarItemGroup(placement: .navigation)` in `DocumentHomeView`) step through the document's logs.
 - During log scanning, the selected view should show the existing centered progress view instead of placeholder content.
+
+## Native Settings
+
+- App-global settings live in `AirframeGlobalSettings`, backed by local `UserDefaults` plus `NSUbiquitousKeyValueStore` through the existing cloud-store seam. Cloud values win over local values at initialization; external KVS changes update observed properties and mirror locally through the same persistence path.
+- `SettingsView` is app-target SwiftUI. macOS uses a native `Settings` scene and a `TabView` with the visible `General` tab. iOS/iPadOS use a Home toolbar gear and a sheet containing `NavigationStack { SettingsView() }`; the iOS view is a `Form` with a `General` section rather than a one-item tab bar.
+- Settings labels, titles, and explanations are typed `AirframeCaptions` values. Do not add app-target user-facing literals for settings UI.
 
 ## SwiftUI Preview Convention
 

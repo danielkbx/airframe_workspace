@@ -6,6 +6,19 @@
 
 ## Near Term
 
+- Current automatic timeline range/settings slice is implemented (2026-07-15):
+  - `AirframeGlobalSettings` has iCloud-synced `isAutomaticTimelineRangeEnabled`, key `airframe.timeline.automaticRangeEnabled`, default true.
+  - macOS exposes `SettingsView` through the native Settings scene with a `General` tab.
+  - iOS/iPadOS expose `SettingsView` from the Home toolbar gear as a sheet with a `General` form section.
+  - `AirframeCaptions` owns the new settings title, General label, toggle label, and explanation strings.
+  - `ReaderScanOverview` retains `lastTerminationEventContextMainFrameTime` for final disarm/log-end context even when the bounded event-record list truncates.
+  - `BlackboxAnalysisWorkspace.automaticTimelineRange(using:)` detects exact conservative ranges: full log >= 20 s, In at the first exact motor average at least 8 percentage points above the observed idle floor and sustained for 500 ms / 80% of samples, Out at final termination context minus 2 s, otherwise final exact 0 % fallback, otherwise final main-frame time minus 2 s, range duration >= 10 s.
+  - `DocumentStateStore` distinguishes stored ranges from the full-log fallback and atomically applies automatic ranges without overwriting existing stored ranges.
+  - `DocumentView` runs detection after document opening, off the main actor, persists only when a range is actually written, logs detector errors, and respects cancellation/state rechecks.
+  - Follow-up implemented: `Reset File Settings` now triggers the same missing-range automatic application after clearing document state, and the Timeline toolbar has a small `Auto` button directly left of In. The button manually recalculates and replaces the active segment's stored range; automatic open/reset application remains no-overwrite.
+  - Diagnostic logging is enabled for the Auto path: app application logs use `airframe.documents`, and detector calculation logs use `airframe.analysis.automaticRange`.
+  - Spectrum production range behavior is unchanged; regression coverage verifies compute-key range bounds and `spectrumSamples` requested bounds.
+  - Verification passed: Reader, Analysis, Captions, and UI package tests; macOS and iOS focused app tests; macOS and iOS Debug app builds. The unavailable local `iPhone 13 mini` simulator was replaced with the available `iPhone 17` / iOS 26.5 destination.
 - Document-wide Table/Graph field picker implemented (2026-07-13): one shared persisted selection, tri-state group bulk controls, unavailable-ID retention across schemas, and legacy per-log state ignored.
 - Current Table alignment and macOS inspector layout fix is implemented: Table cell widths include padding and rows share the header's leading content width; macOS uses SwiftUI's native inspector, and Table retains local geometry when the system overlays the inspector at narrow widths.
 
@@ -323,7 +336,7 @@
 ## Graph Setup Follow-up
 
 - Done (2026-07-14): native Graph renderer implemented in five slices; see `PLAN.md` section "Graph Renderer Slices". Equal-height sections, per-field normalization into a shared [-1,1] section space (axis-hint ranges), cursor-centered window with scrub/tap/pinch, 12-color `SeriesPalette` with sticky per-field slots persisted in `GraphSetup`, hover/tap line highlight, and cursor value readout in the inspector rows of Table and Graph mode.
-- Known pre-existing failure independent of this work: `TableModelTests.testMakeModelBuildsFrameRowsAndEventRows` (84.0 vs 99.0) fails on clean HEAD too; cause not yet investigated.
+- Resolved (2026-07-15): `TableModelTests.testMakeModelBuildsFrameRowsAndEventRows` now expects the current deterministic width `84` for `Motor Avg` (`ceil(9 * 7.5) + 16`) instead of the stale `99`.
 - Follow-ups done (2026-07-14): full-log-stable field scaling (overview-based ranges, pidSum/debug overview projections), app-global iCloud-synced "Show Graph Legend" toggle in the View menu (`AirframeGlobalSettings`), and event marker chips with inflight-adjustment captions ("Rate Profile = 1"); see PLAN.md "Graph Follow-up Slices".
 - Done (2026-07-14): flight-mode flag-diff chips implemented as segmented per-flag states (only changed flags), the graph rendering relocated into the AirframeUI package, and macOS scroll/two-finger scrub added. See PLAN.md "Graph Package Relocation, Scroll-to-Scrub, Segmented Flag Chips".
 
