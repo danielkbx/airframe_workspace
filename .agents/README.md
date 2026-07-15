@@ -24,6 +24,14 @@ The Betaflight firmware reference is cloned at:
 - Local observed commit: `6ecfb45f938e4996fbb568b21eafa7057446a906`
 - Workspace role: read-only reference submodule. Pull only; never commit or push from this workspace.
 
+The PIDtoolbox reference (MATLAB source of the free PIDtoolbox, algorithmic ancestor of PIDtoolbox Pro) is cloned at:
+
+- `PIDtoolbox/`
+- Upstream: https://github.com/skoch1s/PIDtoolbox (mirror; original bw1129 repo is no longer public)
+- Local observed commit: `1e12abb23188183f0f21998a6a89af3719ded22a` (v0.23-3-g1e12abb)
+- Workspace role: read-only reference submodule. Pull only; never commit or push from this workspace.
+- Purpose: reference for step-response, spectrogram, throttle-spectrum, motor-noise, notch-Q, eRPM, and xcorr-lag calculations. The Pro version's `.m` files are MATLAB Compiler encrypted (V2MCC) and not readable; the free version shares the algorithms.
+
 The Airframe project repository is:
 
 - Local path: `Airframe/`

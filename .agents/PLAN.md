@@ -1,5 +1,29 @@
 # Airframe Investigation Plan
 
+## Fixed Spectrum Frequency dB Scale (Implemented 2026-07-15)
+
+### Think Before Coding
+
+- Frequency line plots now use one fixed display range for every field: -50 dB to +30 dB. The change is render-model-only; FFT values and heatmap modes are unchanged.
+
+### Simplicity First
+
+- `SpectrumModel` owns two fixed display constants and applies them unconditionally to `.frequency` render models.
+
+### Surgical Changes
+
+- Updated `SpectrumModel.swift` and focused `SpectrumModelTests` only. The old adaptive bounds/span logic was removed.
+
+### Goal-Driven Execution
+
+Verification:
+
+- Focused macOS `AirframeTests/SpectrumModelTests` passed.
+- macOS Debug app build passed.
+- iOS Simulator Debug app build passed on iPhone 17 / iOS 26.5.
+- `git diff --check` passed.
+- Manual comparison with `btfl_007.bbl` was not run because that log file is not present in the workspace.
+
 ## Spectrum Frequency Snap (Implemented 2026-07-15)
 
 ### Think Before Coding
