@@ -6,6 +6,8 @@ Explore whether it is possible and worthwhile to build Airframe, a native iOS ap
 
 ## Durable Decisions
 
+- Content series color stability rule (2026-07-16): colors used to distinguish graph lines, Spectrum traces, chart series, or similar content data marks must be stable by semantic identity or by a persisted color slot. Do not derive these colors from current selection order unless the order itself is the persisted identity. Accent color remains appropriate for cursors, selection, crosshair chips, and app chrome.
+
 - Spectrum frequency scale decision (2026-07-15): every field in the Frequency line view uses one fixed Y-axis range, -50 dB to +30 dB. This keeps filtered and unfiltered gyro spectra and all other fields directly comparable. FFT/PSD data remains unchanged; values outside the display range are clipped by the renderer.
 
 - Spectrum crosshair decision (2026-07-15): Spectrum uses a transient dashed crosshair for axis inspection. It follows macOS hover while replacing the system cursor inside the surface; it follows one finger on iOS until touch end. X always displays whole Hz; Y displays whole dB, %, or Hz according to the selected Spectrum mode. Accent chips use black `PrimaryOnAccent` text, a fixed 80 pt minimum width, and no animation. iOS one-finger drag is reserved for inspection; two fingers pan; pinch zooms. macOS scroll keeps vertical zoom and horizontal pan. Holding Option over the Frequency line plot snaps only the Y coordinate to the displayed peak-bucket line, marks the interpolated point with a red circle, and updates while Option changes under a stationary pointer; heatmaps never snap.
