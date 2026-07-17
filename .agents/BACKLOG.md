@@ -43,7 +43,8 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
   - Power Spectral Density curve view: Welch method, default 512-sample segments, 75% overlap, Hanning, dB scale with a -70 dB floor, plus a segment-length control in the inspector.
   - PSD vs Throttle and PSD vs RPM heatmaps with minPSD/maxPSD/lowLevelPSD clamping (upstream defaults -40/+10 dB, low-level filter).
   - PID Error vs Setpoint view (average absolute axisError per setpoint value, per detected axis).
-  - Spectrum filter overlays: LPF/notch cutoff lines and the dynamic-LPF expo curve from header semantic values; the `overlays:` layer slot in `SpectrumSurfaceCanvas` and the `SpectrumOverlay` cases already exist.
+  - Spectrum filter overlays: LPF/notch cutoff lines and the dynamic-LPF expo curve from header semantic values; the `overlays:` layer slot in `SpectrumSurfaceCanvas` and the `SpectrumOverlay` cases already exist. (RPM notch harmonic distribution curves implemented 2026-07-17; see MEMORY.)
+  - RPM notch curve shape validated against PTB Pro on btfl_007 (2026-07-17): near-identical. User chose the PTB-style raw distribution; the min_hz clamp was removed from `AnalysisRPMNotch.curve` the same day (loop-rate ceiling clamp retained).
   - Spectrum CSV import/export of frequency/PSD curves like upstream Exp/Imp.
   - Exact upstream `rcCommands[3]` throttle handling is already matched (minthrottle/maxthrottle mapping); revisit only if upstream changes.
 - Add video sync and video export support.
