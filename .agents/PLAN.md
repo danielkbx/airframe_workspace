@@ -1,5 +1,36 @@
 # Airframe Investigation Plan
 
+## Graph Loading Animation Toggle (Implemented 2026-07-17)
+
+### Think Before Coding
+
+- The user needs a visible hint only when currently visible coarse Graph lines are expected to change because a real detail request is in flight.
+- The effect must not imply that skipped fast-scrub regions are loading, and it must not be coupled to generic task churn.
+
+### Simplicity First
+
+- Reused `AirframeGlobalSettings` for the global toggle and `LogViewCommands` for the existing View-menu surface.
+- Added a source-compatible `GraphSurfaceCanvas.LineRefinementEffect` render hint instead of introducing a new overlay view or dependency.
+- The setting only affects the animation; Min/Max detail refinement still runs when the setting is off.
+
+### Surgical Changes
+
+- Added persisted default-on key `airframe.graph.loadingAnimationEnabled` and View-menu toggle `Show Graph Loading Animation` with `sparkles`.
+- `GraphSurface` now tracks the loaded data source and an active refinement key containing log ID, section signature, quantized width, load range, window duration, and requested data source.
+- The glow starts only for the current visible `.detail` request after no cached detail match was found and an overview/stale placeholder remains visible; matching completion, cancellation, unavailable/failure, and request changes clear it.
+- Reduce Motion renders a static low-opacity glow; otherwise the glow pulses subtly through `TimelineView(.animation)`.
+
+### Goal-Driven Execution
+
+Verification:
+
+- `git -C Airframe diff --check` passed.
+- `swift test` passed in `Airframe/Packages/AirframeUI` (85 Swift Testing tests).
+- `swift test` passed in `Airframe/Packages/BlackboxAnalysis` (94 Swift Testing tests).
+- macOS `Airframe` app build passed.
+- iOS simulator `Airframe` app build passed on `iPhone 17` / iOS 26.5.
+- Focused `AirframeTests/AirframeGlobalSettingsTests` and `GraphLineRefinementEffectPolicyTests` could not run because the `AirframeTests` target still compiles unrelated stale `DocumentStateStoreTests` first, which reference removed field-selection and graph-window APIs.
+
 ## Graph Idle Min/Max Refinement (Implemented 2026-07-17)
 
 ### Think Before Coding

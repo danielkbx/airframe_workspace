@@ -6,6 +6,8 @@ Explore whether it is possible and worthwhile to build Airframe, a native iOS ap
 
 ## Durable Decisions
 
+- Graph loading animation decision (2026-07-17): Graph detail refinement has a global View-menu setting, `Show Graph Loading Animation`, persisted as `airframe.graph.loadingAnimationEnabled` and defaulting on. The setting disables only the subtle loading animation, not detail refinement itself. The pulse is tied to an active current-window `.detail` request with no cached detail hit and an overview/stale placeholder currently displayed; fast-scrubbed windows that are skipped do not show a loading effect. Reduce Motion uses a static low-opacity glow.
+
 - Graph data-refinement decision (2026-07-17): Graph mode may use the scan-overview projection only as a fast interaction placeholder for wide windows. Once drag/pinch/scroll scrubbing settles, the same window must refine through `BlackboxAnalysisWorkspace.viewportSeries(..., samplingMode: .minMaxBuckets, using: scan.index)` when Reader/index data is available. "All data" in the visual Graph means Min/Max bucketed detail that preserves local extrema per pixel, not necessarily one raw point per main frame. Cached detail models should still be used immediately during interaction when they already cover the visible range.
 
 - Content series color stability rule (2026-07-16): colors used to distinguish graph lines, Spectrum traces, chart series, or similar content data marks must be stable by semantic identity or by a persisted color slot. Do not derive these colors from current selection order unless the order itself is the persisted identity. Accent color remains appropriate for cursors, selection, crosshair chips, and app chrome.
