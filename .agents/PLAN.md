@@ -1,5 +1,68 @@
 # Airframe Investigation Plan
 
+## Graph Idle Min/Max Refinement (Implemented 2026-07-17)
+
+### Think Before Coding
+
+- The wide Graph simplification was caused by the scan-overview tier becoming the final rendered data source. On long logs, the retained overview samples are globally strided, so a local 40 s window can look artificially smooth until zoom switches to detail data.
+- User intent is that fast scrubbing may stay coarse, but a settled Graph should show available local detail. The chosen meaning of "all data" is Min/Max bucketed detail, not one raw point per main frame.
+
+### Simplicity First
+
+- `GraphWindowPolicy.Tier` remains unchanged as the performance heuristic.
+- Graph model building now separates the requested data source from the policy tier: `.overview` uses scan-overview samples; `.detail` uses `viewportSeries(..., .minMaxBuckets)`.
+- No graph setup migration, new user setting, renderer change, or external dependency was added.
+
+### Surgical Changes
+
+- `GraphSurface` tracks active drag, pinch, and scroll scrubbing. Scroll uses a short idle debounce before refinement.
+- During interaction, wide windows can still show cached detail if available or the overview placeholder if not.
+- After interaction settles, the load key changes even when the visible/load range did not, forcing a detail Min/Max rebuild for the current window.
+- `GraphModelTests` includes a synthetic wide-window regression where overview remains strided but detail returns the requested Min/Max point budget.
+
+### Goal-Driven Execution
+
+Verification:
+
+- `swift test` passed in `Airframe/Packages/AirframeUI` (83 Swift Testing tests).
+- `swift test` passed in `Airframe/Packages/BlackboxAnalysis` (94 Swift Testing tests).
+- macOS `Airframe` app build passed.
+- iOS simulator `Airframe` app build passed on `iPhone 17` / iOS 26.5.
+- `git -C Airframe diff --check` passed.
+- Focused `AirframeTests/GraphModelTests` could not run because the `AirframeTests` target still fails to compile unrelated stale `DocumentStateStoreTests` references to removed field-selection and graph-window APIs before Xcode reaches the selected test.
+
+## Graph Shared Y-Axis and Series Metadata Fix (Implemented 2026-07-16)
+
+### Think Before Coding
+
+- The Graph bug was a real coordinate-system error: sections normalized each series independently, so the same real value could render at different heights.
+- `setpoint[0...2]` were also exposed as raw series even though Roll/Pitch/Yaw setpoints are angular-rate values in deg/s for the supported Betaflight baseline.
+- Audit found one more clear metadata issue: `motorAveragePercent` was percent-valued but carried a raw axis hint. Per user direction, all motor aggregate series now display as percent.
+
+### Simplicity First
+
+- The renderer still consumes normalized `[-1, 1]` values and remains pure drawing code.
+- The model builder now resolves one `GraphFieldScale` per section from display-scaled values and applies it to every series in that section.
+- No graph setup schema, stored series IDs, UI controls, migrations, or axis-label UI were added.
+
+### Surgical Changes
+
+- `setpoint[0...2]` now present as `Setpoint Roll/Pitch/Yaw`, unit `deg/s`, precision 1, axis hint `.angularRate`, and display as their stored deg/s values.
+- Analysis motor aggregates (`motorMinimum`, `motorMaximum`, `motorAverage`, `motorAveragePercent`) now advertise percent metadata and return percentages through `AnalysisMotorOutputRange`.
+- `GraphFieldScale.resolveSection(...)` implements shared section domains: angular-rate symmetric around zero, angle fixed +/-180, motor/percent at least 0...100, mixed/raw combined observed range.
+- Focused tests cover Setpoint metadata/display values, motor aggregate percent output, shared section scales, and an app GraphModel regression with Gyro Roll plus Setpoint Roll in one section.
+
+### Goal-Driven Execution
+
+Verification:
+
+- `swift test` passed in `Airframe/Packages/BlackboxReader`.
+- `swift test` passed in `Airframe/Packages/BlackboxAnalysis`.
+- `swift test` passed in `Airframe/Packages/AirframeUI`.
+- macOS `Airframe` app build passed.
+- iOS simulator `Airframe` app build passed on `iPhone 17` / iOS 26.5.
+- Full macOS `AirframeTests` did not run because the test target currently fails to compile in unrelated stale tests (`SpectrumSettingsTests`, `DocumentStateStoreTests`) that reference removed/changed APIs such as old `DocumentStateStore` field-selection and graph-window helpers.
+
 ## Fixed Spectrum Frequency dB Scale (Implemented 2026-07-15)
 
 ### Think Before Coding
@@ -774,3 +837,27 @@ Verification: BlackboxAnalysis (28) and AirframeCaptions (10) package tests; mac
 - Part C, segmented flag chips: `GraphRenderModel.Marker.content` is now `.text(String)` or `.states([State{name,isOn}])`. Flight-mode events render only the flags that changed (from `CaptionSet.flightModeChanges`, XOR of flags/previousFlags), each as a separate graphic segment (accent dot + name, ON accent-tinted / OFF dimmed) inside one material chip. Chips are centered on and fixed to the event line (no X search / edge flip); overlap resolves only by Y-row stacking; density guard unchanged. The firmware flight-mode-name table (version-keyed `legacy`/`modernFlightModes`, `BetaflightVersion`) was hoisted from `AirframeCLIService` into `AirframeCaptions` (`CaptionSet.flightModeNames(for:)`), so CLI, Table, and Graph share one source; Table event rows use the comma-joined `flightModeChangeSummary`. New catalog keys `flightMode.stateOn`/`stateOff`. New UI-test fixture `native-flightmode-log.bbl`.
 
 Verification: package tests AirframeCaptions (17), AirframeUI (48), AirframeCLI (26, output unchanged); app macOS/iOS builds; AirframeTests (only the known pre-existing `TableModelTests` column-width failure remains); full iOS UI suite (4 tests) passes with graph, event-chip, and segmented-flight-mode-chip screenshots. Open manual checks: two-finger/scroll scrub feel on macOS, segmented chip in dark mode, both-segment layout with a wider window.
+
+## Preset Sidebar Slice (2026-07-16)
+
+### Think Before Coding
+
+- Presets are a per-log-segment selection, not a separate workspace. The selected preset must be visible in the document sidebar and application must not trigger additional settings loads per row.
+- The built-in `Default` preset has the shared fixed ID `"default"` and name `"Default"`. It may persist a user customization, but cannot be renamed, deleted, imported, or exported. Reset removes that override and restores the app defaults.
+
+### Simplicity First
+
+- The document sidebar is the only preset surface. There is no preset manager pane or toolbar entry.
+- A full-row click applies a preset. Existing-preset actions live in its context menu; the section header contains only New, Import, and Save when the selected appearance has unsaved changes.
+- Rows use the same compact rounded selection treatment as log rows. Default uses `gearshape` or `gearshape.fill` when customized; user presets use `slider.horizontal.3`; an unsaved current change overlays `pencil.circle.fill`; selection also shows the accent background and checkmark.
+
+### Surgical Changes
+
+- Reuse a single `LogContext` for sidebar and detail during one `DocumentHomeView` body pass. Resolve the preset snapshot and modified state once for the sidebar body, rather than reading settings from individual rows.
+- Use native SwiftUI alerts, confirmation dialogs, and file import/export panels. The New flow is an alert with a text field instead of a custom sheet.
+- Header icons are borderless and acquire their visual affordance only on hover, matching the timeline controls.
+
+### Goal-Driven Execution
+
+- Automated repository coverage verifies Default customization round-trips, reset behavior, and its import/export restrictions. The macOS Release build passed on 2026-07-16.
+- Manual review remains: inspect sidebar spacing, hover, dynamic type, and the native text-field alert with a real loaded log on macOS and iOS.
