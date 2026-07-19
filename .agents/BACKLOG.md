@@ -62,6 +62,6 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
   - Bookmark-based reference-log restore across relaunch (local-only security-scoped bookmarks; must NOT go into the iCloud-mirrored document-state entry).
   - Synthesize setpoint from `rcCommand` + rates for pre-BF-4 logs that lack `setpoint[]` fields.
   - High/low-rate split traces as separate legend entries (calculator already flags high-rate windows and supports rate-class filtering).
-  - Hook the step response workspace/compute caches into the memory-pressure path (currently bounded LRUs only: 6 workspaces, 36 axis results per surface).
+  - Hook the step response workspace/compute caches into the memory-pressure path (currently bounded LRUs only: 12 workspaces, 72 axis results per surface, sized for the main log plus `ReferenceLogStore.maximumReferenceLogs` = 8 references across 3 axes).
   - Optional PTB regression harness: feed the Damping `.BFL` set through `AnalysisStepResponseCalculator` and pin peak/latency; the 2026-07-18 manual comparison matched PTB Pro curve peaks within a few percent (050/070/090 roll: ours 1.294/1.196/1.095 vs PTB curves ~1.25/~1.17/~1.08, ordering identical). Our QC accepts fewer windows than PTB (n lower); PTB's latency definition is a configurable dropdown and not directly comparable to our fixed time-to-50%-of-steady-state.
   - Hover crosshair with time/value readout in the step response panes (spectrum-style pointer tracking was deferred in v1).
