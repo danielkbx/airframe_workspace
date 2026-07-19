@@ -1,17 +1,48 @@
 # Airframe Investigation Plan
 
+## Graph Prepared-Series Prewarm Cache (Implemented 2026-07-17)
+
+### Think Before Coding
+
+- The cache must improve settled Graph detail latency without adopting upstream's much higher memory footprint.
+- Cached visible detail has priority over speculative work. Memory pressure must trim by priority and stop once the target is reached.
+- The cache stores compact detail-ready samples, not raw decoded frame graphs.
+
+### Simplicity First
+
+- Kept the existing `GraphModelCache` as the first render-model lookup layer.
+- Added a prepared-series cache underneath it, keyed by log ID and ordered selected selector IDs.
+- Did not add UI, persistence, schema migration, new dependencies, or cross-shape partial reuse.
+
+### Surgical Changes
+
+- `GraphModel` now has `makePreparedSeries(...)` plus a prepared-series render overload while preserving the existing `makeModel(...)` signature.
+- `GraphSurface` checks render detail first, then prepared detail, then overview/stale placeholder, then delayed cancellable detail extraction.
+- Successful useful detail extraction stores both the render model and compact prepared series.
+- Idle prewarm schedules utility-priority previous/next range preparation only when the Graph is not interacting; request changes and interaction cancel the prewarm token.
+- `DocumentView` injects the document-scoped prepared cache and trims it on iOS memory warnings and macOS resign-active lifecycle events.
+
+### Goal-Driven Execution
+
+Verification:
+
+- macOS `Airframe` app compile-check build passed with the new prepared cache wired into the app target.
+- Focused `AirframeTests` compile still stops on unrelated stale `DocumentStateStoreTests` references to removed field-selection and graph-window APIs; the new cache test's XCTest async-autoclosure issue was corrected.
+
 ## Graph Loading Animation Toggle (Implemented 2026-07-17)
 
 ### Think Before Coding
 
 - The user needs a visible hint only when currently visible coarse Graph lines are expected to change because a real detail request is in flight.
 - The effect must not imply that skipped fast-scrub regions are loading, and it must not be coupled to generic task churn.
+- Follow-up user feedback clarified that detail loading itself must not start during fast scrubbing: cached detail should still display immediately, but uncached detail work should wait for a stable final range and old in-flight work should be cancelled when the visible range moves away.
 
 ### Simplicity First
 
 - Reused `AirframeGlobalSettings` for the global toggle and `LogViewCommands` for the existing View-menu surface.
 - Added a source-compatible `GraphSurfaceCanvas.LineRefinementEffect` render hint instead of introducing a new overlay view or dependency.
 - The setting only affects the animation; Min/Max detail refinement still runs when the setting is off.
+- Added a 400 ms stabilization delay only for uncached `.detail` builds; cached detail and overview/stale placeholders remain immediate.
 
 ### Surgical Changes
 
@@ -19,6 +50,9 @@
 - `GraphSurface` now tracks the loaded data source and an active refinement key containing log ID, section signature, quantized width, load range, window duration, and requested data source.
 - The glow starts only for the current visible `.detail` request after no cached detail match was found and an overview/stale placeholder remains visible; matching completion, cancellation, unavailable/failure, and request changes clear it.
 - Reduce Motion renders a static low-opacity glow; otherwise the glow pulses subtly through `TimelineView(.animation)`.
+- The glow was strengthened after user feedback: 10 pt glow width, pulse opacity `0.18...0.38`, Reduce Motion opacity `0.24`, clamp `0...0.45`.
+- `GraphSurface` tracks active detail work through a cancellation token. It cancels when the visible range leaves the active load range or log/sections/data source change, but keeps work during zoom-in when the active range still covers the new visible range.
+- `BlackboxAnalysisWorkspace.viewportSeries` gained an optional `AnalysisCancellationToken` and throws `.cancelled` at cooperative cancellation checks before/after Reader extraction, during row projection, per selector, and during bucket sampling.
 
 ### Goal-Driven Execution
 
@@ -26,10 +60,10 @@ Verification:
 
 - `git -C Airframe diff --check` passed.
 - `swift test` passed in `Airframe/Packages/AirframeUI` (85 Swift Testing tests).
-- `swift test` passed in `Airframe/Packages/BlackboxAnalysis` (94 Swift Testing tests).
+- `swift test` passed in `Airframe/Packages/BlackboxAnalysis` (98 Swift Testing tests).
 - macOS `Airframe` app build passed.
 - iOS simulator `Airframe` app build passed on `iPhone 17` / iOS 26.5.
-- Focused `AirframeTests/AirframeGlobalSettingsTests` and `GraphLineRefinementEffectPolicyTests` could not run because the `AirframeTests` target still compiles unrelated stale `DocumentStateStoreTests` first, which reference removed field-selection and graph-window APIs.
+- Focused `AirframeTests/GraphLineRefinementEffectPolicyTests` could not run because the `AirframeTests` target still compiles unrelated stale `DocumentStateStoreTests` first, which reference removed field-selection and graph-window APIs.
 
 ## Graph Idle Min/Max Refinement (Implemented 2026-07-17)
 
@@ -892,3 +926,81 @@ Verification: package tests AirframeCaptions (17), AirframeUI (48), AirframeCLI 
 
 - Automated repository coverage verifies Default customization round-trips, reset behavior, and its import/export restrictions. The macOS Release build passed on 2026-07-16.
 - Manual review remains: inspect sidebar spacing, hover, dynamic type, and the native text-field alert with a real loaded log on macOS and iOS.
+
+## Graph Loading Fixes and Cache Hardening (2026-07-18)
+
+### Think Before Coding
+
+- Root cause of "stuck on simplified data at range edges": `GraphWindowPolicy.visibleRange` intentionally extends past the bounds near the edges, but all coverage checks (model cache, prepared cache, stale check, active-load usefulness) compared that unclamped window against bounds-clamped load ranges and could never succeed there. Completed detail builds were discarded, in-flight loads cancelled, cache hits missed. The cursor defaults to the range lower bound, so even the first load after opening hit this path.
+- Secondary causes for reload churn and detail/overview flicker: completed-but-"no longer useful" builds thrown away instead of cached, adjacent (non-overlapping) prewarm ranges that miss when the visible window straddles a boundary, a 400 ms stabilization delay before every detail decode even when idle, and render-model construction from prepared-cache hits running on the MainActor.
+
+### Simplicity First
+
+- `GraphWindowPolicy.coverageRange(visible:bounds:)` clamps at the call sites; rendering keeps the unclamped window.
+- Prewarm ranges shifted by half the load span (1.5 visible windows of overlap) instead of cache-entry stitching: any visible window inside the union is covered by a single entry, no merge logic.
+- `GraphActiveDetailLoadPolicy` keeps in-flight loads at >= 50% overlap of the clamped visible window; completed builds are cached regardless (protection `.warmRecent` when scrubbed away).
+
+### Surgical Changes
+
+- Canvas: out-of-range dim overlay now draws above the traces. Cache concept: macOS gets a real `DispatchSource` memory-pressure observer (resign-active only trimmed to the normal budget, a no-op), `GraphModelCache` gains `removeAllDetailEntries()` for pressure paths and drops stale per-width shapes on store, `canStoreEstimatedByteCount` now checks remaining plus evictable capacity, `updateProtection` writes only changed entries and is skipped during interaction, stores subsume fully contained same-zoom entries.
+- Ported `DocumentStateStoreTests` off APIs removed by the preset slice (`setFieldSelectionIDs`, `setGraphWindowMicros` -> `graphZoomFactor`); the test target had not compiled since cbe5431.
+
+### Goal-Driven Execution
+
+- AirframeUI (89), BlackboxAnalysis (98), and the full `AirframeTests` target pass on macOS; app builds and launched with the reference log `btfl_007.bbl`.
+- Open manual checks: dimmed traces outside the range, detail data sticking at the range edges, no re-glow when scrubbing back into known regions, stable detail after idle, pressure trim via `memory_pressure -S -l warn`.
+
+Follow-up (same day): graph load windows now clamp to the full log range instead of the timeline range. The timeline range confines only the cursor and defines the dim-overlay boundary; data outside the range is loaded, rendered, and dimmed. Before this, detail loads never contained out-of-range samples, so traces vanished left/right of the range once real detail replaced the full-log overview placeholder. Coverage clamping, prewarm bounds, protection updates, and the overview `loadedDataRange` all use `fullLogRange` now.
+
+Follow-up 2 (same day): near the log edges the visible window keeps moving after the last load request (the loaded range already touches the bounds, so reload hysteresis stays quiet), leaving a displayed detail model that ends mid-plot with an empty region beside it until the final build lands. Fix: `GraphSurface` keeps the last coarse overview in view state (`coarsePlaceholderModel`) and swaps to it synchronously from the cursor/zoom/width `onChange` handlers whenever the displayed detail model no longer covers the clamped visible window (`swapToCoarsePlaceholderIfDisplayedDetailNoLongerCovers`). The in-flight detail load then replaces the placeholder.
+
+Follow-up 3 (same day): the "fixed positions always re-glow" report traced via temporary [Claude-DEBUG] file logging and synthetic scroll events to a starved prewarm: beginGraphInteraction and every load-request change cancelled the running prewarm, the neighbor list always built the left range first, and an aborted or empty build returned out of the whole loop, so the direction-of-travel neighbor was never cached and the edge of the built union re-missed on every crossing. Fixes: prewarm survives interactions and request changes (cancelled only when superseded by a newer prewarm, on log switch, or onDisappear), the neighbor in the last cursor-movement direction builds first (lastCursorMovementDirection in GraphSurface), and a failed/empty neighbor build continues with the next range instead of returning. Also recorded: the Airframe scheme's default xcodebuild build configuration is Release; Debug products require -configuration Debug (the Debug product dir may otherwise hold stale binaries from test runs).
+
+Follow-up 4 (same day): reproducible simple->glow->details at fixed positions (e.g. 29s->30s in btfl_007.bbl) had two cooperating causes. First, both cache lookups preferred the tightest covering entry (GraphPreparedSeriesCache.covering sorted by smallest span, GraphModelCache.detailCovering took the first match), so the displayed detail model often ended just past the visible window and its edge sat at a stable position across passes. Second, swapToCoarsePlaceholderIfDisplayedDetailNoLongerCovers downgraded to the overview on crossing that edge without triggering any re-evaluation, so detail only returned at the next hysteresis recenter or interaction end. Fixes: both lookups now pick the covering entry with the largest headroom around the visible window (GraphPreparedSeriesCache.coverageHeadroom, shared by GraphModelCache), and the swap bumps refinementGeneration so loadModel re-evaluates immediately - a covering cache entry restores detail right away, otherwise the rebuild starts without waiting for the recenter.
+
+## Processing Activity Spinner (2026-07-18)
+
+### Think Before Coding
+
+- All off-main data work in the app target already funneled through `await Task.detached(...).value`, so a single balanced counter at that boundary observes reading, decoding, transforming, and computing without touching the domain packages.
+- The initial document decode runs before `LogDataView` (and its toolbar) is mounted, so the spinner covers post-open work, not the first-open LoadingState. That is acceptable: the LoadingState screen already communicates the first decode.
+
+### Simplicity First
+
+- One type: `ProcessingActivityCounter` (`@MainActor @Observable`, per document, injected via `\.processingActivityCounter`). Self-balancing funnels only, no manual begin/end at call sites: `compute` (awaited, throwing + non-throwing overloads because `Task.value` cannot ride `rethrows`), `track` (awaited, no extra detach), `instrument` (Sendable, for actor-internal tasks like the chunk prefetch), `backgroundTask` (fire-and-forget). Optional-typed mirrors keep previews/tests without a counter working.
+- `ProcessingSpinnerPolicy` is a pure, unit-tested visibility policy: 150 ms appear delay, 400 ms minimum visible, so brief blips do not flash and short finishes do not strobe.
+
+### Surgical Changes
+
+- Swapped every `Task.detached` data site in the app target to a funnel call: DocumentView (decode load via `track`, auto-range via `compute`), LogTimeline, GraphSurface (detail build, prepared-match build, overview warmers via `backgroundTask`, prewarm build), TableSurface (chunk load via `track`, model build via `compute`, prefetch via new `activity:` parameter threaded into `MainFrameChunkCache.prefetch` -> `instrument`), SpectrumSurface (5 sites), GraphSetupEditor. PresetRepository cloud sync stays bare (non-log-data, rule-exempt).
+- Spinner placement (user-revised): the sidebar File section item, right-aligned via an `HStack { VStack{name,size}; Spacer; ProcessingActivitySpinner }`. The toolbar placement was tried first (trailing `.primaryAction`) but the user found it visually poor. The spinner collapses to zero width when idle (a zero-width clear anchor keeps the driving `.task` alive so it can reappear); the sidebar row is always mounted, so it also covers the initial decode.
+
+### Goal-Driven Execution
+
+- `ProcessingActivityCounterTests` (balance on success/throw/nesting, active-while-running, track, backgroundTask) and `ProcessingSpinnerPolicyTests` (appear delay, minimum-visible hold, idle) pass; full `AirframeTests` and AirframeUI (89) green.
+- Verified on macOS with btfl_007.bbl via titlebar screenshots: spinner rotates left of Edit during decode/prewarm/graph builds, collapses cleanly when all work (including idle prewarm) finishes.
+- The Processing Activity Rule in PRINCIPLES.md governs all future compute paths: use the funnel, never bare `Task.detached` for data work in the app target.
+
+## Step Response Analysis with Multi-Log Comparison (2026-07-18)
+
+### Think Before Coding
+
+- The document architecture stays document-based (`DocumentGroup`); no shoebox. A `.bbl` already carries multiple segments, so same-document overlay covers the flash-download tuning workflow; cross-file comparison attaches reference files to the window instead of restructuring scenes.
+- Reference algorithm is PIDtoolbox `PTstepcalc.m` (local clone under `PIDtoolbox/`); numerics were matched deliberately (window length, normalization, regularization scale, smoothing span, QC bands, subsample default 9).
+
+### Simplicity First
+
+- A reference file is just another `AirframeDocumentOpenModel` in a per-window `ReferenceLogStore`; the load pipeline, progress, and snapshot rendering are reused unchanged.
+- Reference in/out ranges reuse the existing `DocumentStateRepository` entry keyed by the file's content identity, so trimming a file as its own document applies to its reference traces and vice versa; no new sync machinery, no trimming UI.
+- Step Response state is one document-wide `ViewState` (settings + hidden-trace set); hidden-set semantics make "all logs on by default" enumeration-free.
+
+### Surgical Changes
+
+- `LogContext`, sidebar selection semantics, presets, and all existing views stay single-log; multi-log access is the additive `airframeDocumentLogAccess` environment value.
+- The spectrum FFT is untouched; step response has its own complex FFT helper. The canvas is a dedicated sibling of the stacked spectrum canvas reusing only `SeriesPalette`/`ColorRole`.
+- New persisted fields are additive and versioned (`stepResponse` entry field, `AirframeLogSummary.tune`).
+
+### Goal-Driven Execution
+
+- Milestones M1 (computation + tests, PTB cross-check on the Damping set), M2 (view mode), M3 (sidebar trace list + tune), M4 (reference logs) are implemented and verified; follow-ups (bookmark restore, rcCommand-derived setpoint, rate-split traces, crosshair) are in BACKLOG.md.
+- Verification: 113 package + 223 app tests green; manual macOS run against `.../Maya/Tuning/Flights/2 Damping` shows PTB-consistent curves (ordering and peaks within a few percent).

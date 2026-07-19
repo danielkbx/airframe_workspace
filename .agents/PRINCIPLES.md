@@ -2,6 +2,14 @@
 
 These principles apply to all work in this repository and must shape every plan, implementation, review, and status update.
 
+## Subagent-First Rule
+
+For substantial implementation tasks in this Airframe workspace, use a fresh subagent by default because context windows often become full.
+
+- The main agent remains responsible for reading project instructions, defining scope, reviewing subagent changes, running verification, and committing only when explicitly requested.
+- Do not use subagents for tiny one-line fixes, simple command answers, or tasks where delegation would add coordination overhead.
+- Subagents must be given bounded ownership and must not revert user or other-agent changes.
+
 ## Non-Negotiable Engineering Goals
 
 Stability, security, and performance are always active goals.
@@ -62,6 +70,18 @@ Every user-facing string must be defined in `AirframeCaptions` and backed by Xco
 ## Series Presentation Rule
 
 Every newly selectable Reader or Analysis series must define semantic classification, localized caption, physical unit, value conversion, precision, raw fallback behavior, and focused tests before it is exposed in a picker, table, graph, or human CLI output. Units belong in column or axis headers, never repeated in individual numeric cells.
+
+## Processing Activity Rule
+
+Every data-processing operation in the app target — reading, decoding, transforming, or computing log data — must be observable through the per-document `ProcessingActivityCounter` so the title-bar activity spinner reflects all work. This rule is strict and applies to every future change.
+
+- All off-main-actor data work must run through the counter's self-balancing funnel APIs: `compute(priority:_:)` for awaited work, `backgroundTask(priority:_:)` for fire-and-forget work (prewarm, prefetch, cache warmers).
+- Bare `Task.detached` for data work is forbidden in the app target. The funnel is the only sanctioned way to detach data work. Detached work that provably touches no log data (pure UI bookkeeping) is the only exemption and must be justified in the PR/commit text.
+- Never mutate the counter manually with begin/end pairs at call sites. Balance must come from the funnel APIs alone, so a forgotten decrement can never leave the spinner stuck.
+- A change that introduces a new compute path (view, cache, pipeline, exporter) must adopt the funnel in the same change. Adding unreported data processing makes the change incomplete; reviews must reject it.
+- The counter is per document window, created in `DocumentView` next to the caches and injected via the `\.processingActivityCounter` environment key. Do not create ad-hoc counters or a global singleton.
+- The spinner is the only consumer of the counter's `isActive`. Do not branch app or domain logic on activity state.
+- Domain packages (`BlackboxReader`, `BlackboxAnalysis`, …) stay unaware of the counter; tracking happens at the app-side boundary where their synchronous APIs are detached.
 
 ## 4. Goal-Driven Execution
 

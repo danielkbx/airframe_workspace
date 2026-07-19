@@ -45,6 +45,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
   - PID Error vs Setpoint view (average absolute axisError per setpoint value, per detected axis).
   - Spectrum filter overlays: LPF/notch cutoff lines and the dynamic-LPF expo curve from header semantic values; the `overlays:` layer slot in `SpectrumSurfaceCanvas` and the `SpectrumOverlay` cases already exist. (RPM notch harmonic distribution curves implemented 2026-07-17; see MEMORY.)
   - RPM notch curve shape validated against PTB Pro on btfl_007 (2026-07-17): near-identical. User chose the PTB-style raw distribution; the min_hz clamp was removed from `AnalysisRPMNotch.curve` the same day (loop-rate ceiling clamp retained).
+  - RPM notch overlays extended to both heatmap modes (2026-07-17): locus lines/curves; validate the throttle-locus mean-per-bin shape against PTB Pro on the Q700 log; consider median if outliers skew, and per-bin sample-count minimum if sparse bins look noisy.
   - Spectrum CSV import/export of frequency/PSD curves like upstream Exp/Imp.
   - Exact upstream `rcCommands[3]` throttle handling is already matched (minthrottle/maxthrottle mapping); revisit only if upstream changes.
 - Add video sync and video export support.
@@ -57,3 +58,10 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Add value predicates such as `--where amperageLatest>20` after the field/time filter MVP is stable.
 - Add aggregate query filters for threshold and window-based analysis.
 - Upstream-style flight-mode flag diffs in event chips ("ANGLE ON|USER1 OFF"): plumb the firmware CLI mode names from the header config into the graph marker captions (CaptionSet.cliEventSummary already accepts them).
+- Step Response follow-ups (base implemented 2026-07-18: PTB-style Wiener deconvolution in `BlackboxAnalysis/StepResponse`, stacked Roll/Pitch/Yaw view mode with cmd-5, sidebar trace list with stable colors/toggles/hover/PID tune, session-only reference logs):
+  - Bookmark-based reference-log restore across relaunch (local-only security-scoped bookmarks; must NOT go into the iCloud-mirrored document-state entry).
+  - Synthesize setpoint from `rcCommand` + rates for pre-BF-4 logs that lack `setpoint[]` fields.
+  - High/low-rate split traces as separate legend entries (calculator already flags high-rate windows and supports rate-class filtering).
+  - Hook the step response workspace/compute caches into the memory-pressure path (currently bounded LRUs only: 6 workspaces, 36 axis results per surface).
+  - Optional PTB regression harness: feed the Damping `.BFL` set through `AnalysisStepResponseCalculator` and pin peak/latency; the 2026-07-18 manual comparison matched PTB Pro curve peaks within a few percent (050/070/090 roll: ours 1.294/1.196/1.095 vs PTB curves ~1.25/~1.17/~1.08, ordering identical). Our QC accepts fewer windows than PTB (n lower); PTB's latency definition is a configurable dropdown and not directly comparable to our fixed time-to-50%-of-steady-state.
+  - Hover crosshair with time/value readout in the step response panes (spectrum-style pointer tracking was deferred in v1).
