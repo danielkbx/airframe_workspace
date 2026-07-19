@@ -40,6 +40,7 @@ Agents must update this file proactively when they learn a better command, workf
 - For simulator-related `xcodebuild`, do not pipe output to `grep`.
 - Instead, write useful log files, wait for `xcodebuild` to finish, and inspect the logs afterwards.
 - Prefer modern Swift Testing for package tests.
+- Folder/file open panels (`NSOpenPanel`, SwiftUI `.fileImporter`) cannot be driven by synthetic key events via AppleScript/`System Events`; Cmd+Shift+O and Cmd+Shift+G + path + Return did not reliably open/select a folder in the running app. To prove a load/decode parallelization without the UI, measure at the package level instead: a throwaway Swift Testing case that reads the real logs and times a serial `for` loop of scans vs a `withThrowingTaskGroup` fan-out (`reader.open` -> `decodedLog` -> `flightInfo()` per file) gives a concrete serial-vs-parallel ratio. Debug-build absolute times are inflated; use the ratio. Delete the temp test after capturing numbers.
 
 ## MCP and Optional Tools
 
