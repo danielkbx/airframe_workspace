@@ -199,6 +199,9 @@ The native app is read-only and document-based.
 - Preserve source file, log segment, and session identity; do not collapse them into one flat log.
 - Original log files must not be modified by the app.
 - Later optional import of `.txt` or `.log` files must be explicit and content-sniffed, not system-wide file association.
+- The macOS File menu keeps every native item; read-only enforcement is `ReadOnlyFileMenuPolicy` (App target), which clears the action of write-family items (`saveDocument:`, `saveDocumentAs:`, `duplicateDocument:`, `renameDocument:`, `moveDocument:`; plus the revert selectors inside submenus only) on `NSMenu.didAddItemNotification`/`didChangeItemNotification`. Action-less items fail auto-validation, so they render disabled and their key equivalents are inert. No timers, no title matching, no `CommandGroup(replacing:)` for `.newItem`/`.saveItem` (replacing `.saveItem` corrupts Open Recent into a dead "NSMenuItem" placeholder — known macOS bug, still on 26.5 — and drops Close/Close All/Share/Revert To). `NSPrincipalClass` does not work under the SwiftUI lifecycle; do not reintroduce an `NSApplication` subclass for menu behavior.
+- The Navigation menu uses SwiftUI's default `CommandMenu` position (between View and Window).
+- `DocumentHomeView.LogViewCommandState` is Equatable over a `Capabilities` value only (closures live in a non-compared `Actions` payload); the no-context detail branch publishes `LogViewCommandState.unavailable` so command menus keep a stable structure during document loading and only flip enablement once at load completion. Keep new command state additions inside `Capabilities` (semantic, Equatable) or `Actions` (closures) accordingly.
 
 ## Native Log Data Views
 
