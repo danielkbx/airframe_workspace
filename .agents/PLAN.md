@@ -606,6 +606,7 @@ Recommended order after this:
 #### Surgical Changes
 
 - Added Graph-only SF Symbol toolbar controls without moving the principal ViewMode picker. The controller pauses when Graph is left, the selected log changes, the document view disappears, or file settings reset; Reset File Settings deliberately leaves the global speed untouched.
+- macOS follow-up: moved Playback out of `.primaryAction` into a balanced principal layout. The ViewMode picker remains at the exact principal center, Playback sits immediately to its right, and matching empty leading width prevents the new controls from shifting the picker or entering the inspector's toolbar region. iOS keeps its native primary-action layout.
 
 #### Goal-Driven Execution
 
