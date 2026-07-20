@@ -606,7 +606,8 @@ Recommended order after this:
 #### Surgical Changes
 
 - Added Graph-only SF Symbol toolbar controls without moving the principal ViewMode picker. The controller pauses when Graph is left, the selected log changes, the document view disappears, or file settings reset; Reset File Settings deliberately leaves the global speed untouched.
-- macOS follow-up: moved Playback out of `.primaryAction` into a balanced principal layout. The ViewMode picker remains at the exact principal center, Playback sits immediately to its right, and matching empty leading width prevents the new controls from shifting the picker or entering the inspector's toolbar region. iOS keeps its native primary-action layout.
+- Placement follow-up: moved Playback out of the system titlebar entirely and into the custom Timeline toolbar on both platforms. It is independently positioned at 75% width, while the timestamp continues to track the exact cursor fraction. A capsule outline and full-height vertical separators make Play/Pause, speed, and rate read as one segmented transport without depending on changing system-toolbar visuals.
+- Control follow-up: reduced the transport to 20 pt with a mini Slider; the multiplier now belongs inside the speed segment, leaving one divider only. The playing accent fills the entire Play/Pause segment. A focused-state Playback command menu uses the same capability/action publication as Navigation and View commands; Space toggles playback only in Graph mode, and menu commands adjust or reset the globally persisted speed.
 
 #### Goal-Driven Execution
 
