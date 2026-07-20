@@ -6,7 +6,7 @@
 
 ## Near Term
 
-- Graph playback is implemented (2026-07-20): Graph-only Play/Pause toolbar controls drive the shared current position to the active Out point, restart from In when already at Out, pause on view/log changes, and use a monotonic anchor. Playback speed is globally persisted from 0.3x through 3.0x in 0.1x steps, default 1.0x. Future video synchronization should use this same master position/rate rather than adding an independent timer.
+- Graph and Table playback are implemented (2026-07-20): both modes use one reusable surface-plus-Timeline container and the exact same Timeline toolbar transport. Play/Pause drives the shared current position to active Out, restarts from In when already at Out, pauses when leaving both playback modes or changing logs, and uses a monotonic anchor. Table follows through its existing center-locked scroll behavior. Playback speed is globally persisted from 0.3x through 3.0x in 0.1x steps, default 1.0x. Future video synchronization should use this same master position/rate rather than adding an independent timer.
 
 - Current automatic timeline range/settings slice is implemented (2026-07-15):
   - `AirframeGlobalSettings` has iCloud-synced `isAutomaticTimelineRangeEnabled`, key `airframe.timeline.automaticRangeEnabled`, default true.
