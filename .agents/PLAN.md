@@ -1,5 +1,34 @@
 # Airframe Investigation Plan
 
+## Craft Section in Graph Inspector (Implemented 2026-07-20)
+
+### Think Before Coding
+
+- Attitude needs sequential integration from log start; a bounded cursor-window query cannot produce it. One full-rate pass per log, decimated ~100 Hz timeline, binary-search sampling at the cursor.
+- Betaflight-to-screen sign conventions are the main risk; a visual side-by-side against the reference viewer on a real log is the required confirmation and is still pending.
+- Motor display scaling (fixed 0.1 factor) is not true percent for digital output ranges, so gauges convert raw values through the resolved motor output range.
+
+### Simplicity First
+
+- Quad-only v1 with a caption row for other motor counts; no playback engine, no 2D/3D toggle, no graphable attitude series.
+- Canvas pseudo-3D projection instead of SceneKit; ring gauges instead of pie wedges; yaw computed but not rendered (user decisions).
+- Collapse state is one app-global `@AppStorage` flag, not document-state schema.
+
+### Surgical Changes
+
+- New `BlackboxAnalysis/Attitude/`: `AnalysisAttitudeEstimator`, `AnalysisAttitudeTimeline`, `AnalysisAttitudeSampleSource` (windowed 25 s decode, cancellation, typed `AnalysisAttitudeError`); `motorPercent(forRawValue:)`/`motorSeriesFieldNames` exposed on the workspace.
+- New `AirframeUI/Craft/`: `CraftRenderModel` (+projection with viewer-tilt coefficient), `CraftSilhouetteShape`, `CraftSurfaceCanvas` with injectable `Style` and previews.
+- App: new `Graph/GraphCraftSection.swift` (collapsible section, zero work while collapsed, per-log attitude cache excluding `.cancelled`, deterministic gauge colors); `GraphInspector.swift` hosts it first; four `app.graph.craft.*` captions; explicit pbxproj file reference (Graph group is not file-system-synchronized).
+
+### Goal-Driven Execution
+
+Verification:
+
+- `swift test`: BlackboxAnalysis 130 tests, AirframeUI 97 tests, AirframeCaptions 17 tests, all green.
+- macOS and iOS simulator app builds passed via `xcodebuild` with log files.
+- Temporary real-log smoke test (private 80 s flight): ~100 Hz timeline, accelerometer correction active, monotonic times, bounded angles; deleted after capture.
+- Pending user check: roll/pitch sign side-by-side against the reference viewer, and gauge/graph color match while scrubbing.
+
 ## Graph Prepared-Series Prewarm Cache (Implemented 2026-07-17)
 
 ### Think Before Coding

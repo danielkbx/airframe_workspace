@@ -58,6 +58,12 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Add value predicates such as `--where amperageLatest>20` after the field/time filter MVP is stable.
 - Add aggregate query filters for threshold and window-based analysis.
 - Upstream-style flight-mode flag diffs in event chips ("ANGLE ON|USER1 OFF"): plumb the firmware CLI mode names from the header config into the graph marker captions (CaptionSet.cliEventSummary already accepts them).
+- Craft section follow-ups (base implemented 2026-07-20: collapsible Graph inspector section, pseudo-3D Canvas craft, rotor ring gauges, complementary-filter attitude in `BlackboxAnalysis/Attitude/`):
+  - Yaw readout as a number or compass rose next to the craft (yaw is already computed, deliberately not rotating the model).
+  - Non-quad layouts (hex/octo/bi) once a generic motor placement model is worth it; v1 gates on exactly 4 motor fields.
+  - Attitude as graphable derived series (`AnalysisDerivedSeriesKind.attitude*` are still catalog-gated stubs); would need the timeline exposed through the series catalog with proper presentation metadata.
+  - Persist the attitude timeline across window/document reopen if the one-time pass on very long logs annoys (currently per-view-state cache, recomputed per window).
+  - Logged IMU quaternion input path if Betaflight ever logs one commonly; the estimator is currently the single source.
 - Step Response follow-ups (base implemented 2026-07-18: PTB-style Wiener deconvolution in `BlackboxAnalysis/StepResponse`, stacked Roll/Pitch/Yaw view mode with cmd-5, sidebar trace list with stable colors/toggles/hover/PID tune, session-only reference logs):
   - Bookmark-based reference-log restore across relaunch (local-only security-scoped bookmarks; must NOT go into the iCloud-mirrored document-state entry).
   - Synthesize setpoint from `rcCommand` + rates for pre-BF-4 logs that lack `setpoint[]` fields.
