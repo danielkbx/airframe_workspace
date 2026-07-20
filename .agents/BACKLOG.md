@@ -48,7 +48,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
   - RPM notch overlays extended to both heatmap modes (2026-07-17): locus lines/curves; validate the throttle-locus mean-per-bin shape against PTB Pro on the Q700 log; consider median if outliers skew, and per-bin sample-count minimum if sparse bins look noisy.
   - Spectrum CSV import/export of frequency/PSD curves like upstream Exp/Imp.
   - Exact upstream `rcCommands[3]` throttle handling is already matched (minthrottle/maxthrottle mapping); revisit only if upstream changes.
-- Add video sync and video export support.
+- Add video sync and video export support. Reuse Graph playback's shared current-position master timeline, monotonic anchor semantics, and global rate; the video player should synchronize to that transport rather than own an independent UI timer.
 - Add large-log performance work if profiling shows slow startup, seeking, memory pressure, or repeated viewport queries.
 - Add `airframe frames` to dump selected decoded frames by marker, time range, and limit for low-level debugging.
 - Add `airframe summary` as a compact one-line-per-log command for shell pipelines.

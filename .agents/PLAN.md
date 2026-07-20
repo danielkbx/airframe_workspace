@@ -593,6 +593,24 @@ Recommended order after this:
 
 ## Current Implementation State
 
+### Graph Playback (2026-07-20)
+
+#### Think Before Coding
+
+- Playback owns no separate cursor: it advances the existing per-log current-position time. A monotonic clock anchor derives position from total elapsed time and playback rate, avoiding accumulated timer drift and leaving one master timeline for later video synchronization.
+
+#### Simplicity First
+
+- One window-scoped `LogPlaybackController` owns transient Play/Pause and task state. The existing global settings store owns the only persisted value, `airframe.playback.speedStep` (3...30, default 10). The active timeline In/Out range is the playable range.
+
+#### Surgical Changes
+
+- Added Graph-only SF Symbol toolbar controls without moving the principal ViewMode picker. The controller pauses when Graph is left, the selected log changes, the document view disappears, or file settings reset; Reset File Settings deliberately leaves the global speed untouched.
+
+#### Goal-Driven Execution
+
+- Controller/settings regression coverage and macOS/iOS build verification cover rate projection, restart-at-In, persistence, validation, target wiring, and platform compilation. Later video work should synchronize against the same current-position/rate contract rather than introduce another playback clock.
+
 Done:
 
 - Created project directory: `Airframe/`.
