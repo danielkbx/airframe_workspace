@@ -1,5 +1,45 @@
 # Airframe Investigation Plan
 
+## USB CDC-ACM Betaflight CLI on iPadOS (Planned 2026-07-20)
+
+### Think Before Coding
+
+- Core question: can a normal native iPadOS app talk to a Betaflight/INAV USB CDC-ACM interface over USB-C without extra hardware, DriverKit, private APIs, jailbreak, or MFi.
+- Do not assume CDC needs an OS serial device. Investigate both paths: serial abstraction availability and raw interface/endpoint access.
+- Evidence standard: every conclusion needs a primary source, code sample, open-source precedent, firmware behavior, descriptor, or device experiment. Forum claims alone are leads, not conclusions.
+- Main unknowns: public iPadOS USB host APIs, entitlements, whether CDC interfaces are blocked/reserved, DriverKit availability on iPadOS for this device class, App Store viability, and whether Betaflight CLI needs CDC class control requests.
+
+### Simplicity First
+
+- Research first. Build nothing until the API/entitlement story is clear enough to avoid a dead POC.
+- POC scope is one primary user action: `Start Mass Storage Access`, which connects to the flight controller and sends the CLI mass-storage command sequence.
+- Include a compact read-only log/debug pane showing what the POC sends, what it receives, and useful USB discovery/open/transfer details.
+- Avoid a terminal-style interface, arbitrary ASCII sender, or full descriptor browser unless needed as temporary diagnostic scaffolding during bring-up.
+- No configurator features, MSP protocol, Blackbox parsing, cloud sync, shared Airframe package integration, third-party dependencies, or hardware bridges.
+- If the official answer is "not possible for App Store iPadOS apps", stop at the report and document fallback options separately.
+
+### Surgical Changes
+
+- If feasible, create one new root-level folder for the POC, separate from `Airframe/` and the public app submodule.
+- Keep the POC iPadOS-only, Swift-native, and dependency-free unless the user explicitly approves otherwise.
+- Keep root workspace changes limited to the POC folder plus `.agents/` context updates.
+- Do not commit inside `Airframe/`, `blackbox-log-viewer/`, or `betaflight/` for this work.
+
+### Goal-Driven Execution
+
+1. Research Apple API surface and entitlements: IOUSBHost, USB Host APIs on iPadOS, USBAccessory, ExternalAccessory, DriverKit, MFi, App Store distribution.
+2. Research raw endpoint access: device/interface enumeration, endpoint inspection, opening Bulk IN/OUT, and whether CDC ACM can be treated as generic USB.
+3. Research Betaflight/INAV CDC implementation: descriptors, CLI transport path, CDC class requests (`SET_LINE_CODING`, `SET_CONTROL_LINE_STATE`, `GET_LINE_CODING`), and whether simple bulk byte exchange is enough.
+4. Search existing code and apps: Swift USB serial, iPad USB terminal, Arduino/ESP32/RP2040 USB serial on iPad, IOUSBHost examples, and any App Store entitlement notes.
+5. Produce the technical report with citations and a feasibility decision.
+6. Only if feasible, create the iPadOS SwiftUI POC in a new root folder. The user-facing flow has one primary button that opens the FC connection and sends the current Betaflight/INAV mass-storage command:
+   ```
+   #
+   msc
+   ```
+   The same screen includes a read-only activity/debug log with sent bytes, received bytes, detected USB device/interface/endpoint facts, open/transfer results, and disconnect/reconnect observations.
+7. Verify at least compile-time API availability; real success requires device testing with an iPad, USB-C cable, and Betaflight/INAV flight controller.
+
 ## Craft Section in Graph Inspector (Implemented 2026-07-20)
 
 ### Think Before Coding
@@ -609,7 +649,7 @@ Recommended order after this:
 - Placement follow-up: moved Playback out of the system titlebar entirely and into the custom Timeline toolbar on both platforms. It is independently positioned at 75% width, while the timestamp continues to track the exact cursor fraction. A capsule outline and full-height vertical separators make Play/Pause, speed, and rate read as one segmented transport without depending on changing system-toolbar visuals.
 - Control follow-up: reduced the transport to 20 pt with a mini Slider; the multiplier now belongs inside the speed segment, leaving one divider only. The playing accent fills the entire Play/Pause segment. A focused-state Playback command menu uses the same capability/action publication as Navigation and View commands; Space toggles playback in Graph and Table, and menu commands adjust or reset the globally persisted speed.
 - Table follow-up: extracted Graph/Table's duplicated surface-plus-Timeline stack into `LogTimelineContainer`, making both modes use the identical Timeline region and toolbar. Playback capability now covers both modes, and Table's existing shared-position scroll coordination follows playback. The Table toolbar timestamp remains fixed at 50% under its center cursor while transport remains independently placed at 75%.
-- Timestamp follow-up: integrated the current-time label as the middle Playback capsule segment. The capsule is positioned by an explicit alignment guide at the timestamp segment's center, not by the capsule's asymmetric outer bounds, so Graph and Table preserve exact cursor-line alignment while Play/Pause and speed controls flank the timestamp.
+- Timestamp follow-up: integrated the current-time label as the middle Playback capsule segment. The capsule is positioned by an explicit alignment guide at the timestamp segment's center, not by the capsule's asymmetric outer bounds, so Graph and Table preserve exact cursor-line alignment while Play/Pause and speed controls flank the timestamp. Graph omits the complete transport until it has published a valid visible range, avoiding a provisional position while its layout/data is unavailable. The custom layout receives the fraction rather than an absolute X and resolves it against its current bounds, preventing a zero-width initial `GeometryReader` pass from pinning Playback left until the next cursor update. Table remains available at its fixed center as soon as the normal log time range exists.
 - Timestamp sizing follow-up: the segment uses a hidden locale-formatted `1000.000 s` reference to reserve minimum width and formats the live value with exactly three fraction digits. `DurationFormatter.minimumFractionDigits` is additive and defaults to zero, so other duration presentation remains unchanged.
 
 #### Goal-Driven Execution
@@ -966,7 +1006,9 @@ Verification: package tests AirframeCaptions (17), AirframeUI (48), AirframeCLI 
 
 - The document sidebar is the only preset surface. There is no preset manager pane or toolbar entry.
 - A full-row click applies a preset. Existing-preset actions live in its context menu; the section header contains only New, Import, and Save when the selected appearance has unsaved changes.
-- Rows use the same compact rounded selection treatment as log rows. Default uses `gearshape` or `gearshape.fill` when customized; user presets use `slider.horizontal.3`; an unsaved current change overlays `pencil.circle.fill`; selection also shows the accent background and checkmark.
+- File/Logs/References and Presets use separate native sidebar `List`s with independent single-selection bindings, a fixed 70/30 height split, a `Divider`, and independent scrolling. Fixed 8-point layout padding sits between the divider and preset list, outside its scroll content, so selecting or scrolling cannot move the gap. This keeps the active log and applied preset selected simultaneously without a multi-selection `Set` or manually mirrored log-selection state.
+- Every selectable log, reference-log, and preset entry is the same raw tagged `SidebarItemRow`; log rows no longer wrap it in `NavigationLink` because the selection binding already drives detail presentation. The shared row combines its selected value with `EnvironmentValues.isFocused`: focused selections use semantic `PrimaryOnAccent`/`SecondaryOnAccent`, while selected rows in the unfocused list use normal foregrounds against the native gray background. Presets retain no checkbox or custom selection background. Default uses `gearshape` or `gearshape.fill` when customized; user presets use `slider.horizontal.3`; an unsaved current change overlays `pencil.circle.fill`.
+- Each document/reference file row shows its craft name once. Child log rows contain only log identity and duration, and the main document file row no longer exposes its raw byte count.
 
 ### Surgical Changes
 
@@ -978,6 +1020,7 @@ Verification: package tests AirframeCaptions (17), AirframeUI (48), AirframeCLI 
 
 - Automated repository coverage verifies Default customization round-trips, reset behavior, and its import/export restrictions. The macOS Release build passed on 2026-07-16.
 - Manual review remains: inspect sidebar spacing, hover, dynamic type, and the native text-field alert with a real loaded log on macOS and iOS.
+- Dual-list refactor verification (2026-07-21): Debug app builds pass for macOS and the iOS 26.5 simulator; the bundled single-log fixture launches successfully on iPhone and iPad. Interactive dual-selection, independent-scroll, focus, and VoiceOver checks remain manual.
 
 ## Graph Loading Fixes and Cache Hardening (2026-07-18)
 

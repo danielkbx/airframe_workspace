@@ -13,6 +13,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 ## Parking Lot
 
 - Consider an optimized internal or persisted log representation after profiling parsing, seeking, memory use, and app startup behavior.
+- Investigate an upstream Betaflight firmware patch that enters USB MSC from a local button gesture, e.g. triple-press on a configured button while disarmed and storage-ready, reusing `systemResetToMsc(...)`; scope depends on target button availability and upstream UX/safety acceptance.
 - Consider an Airframe-owned document format that stores app metadata, view settings, analysis state, and the original unmodified log bytes so the raw log can be exported again.
 - Add bookmarks for important log positions that users can jump back to quickly; this likely depends on an Airframe-owned document format for persistence.
 - Investigate whether `blackbox-tools` can provide reliable golden outputs for Swift parser tests.

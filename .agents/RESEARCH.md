@@ -1,5 +1,27 @@
 # Research Notes
 
+## USB CDC-ACM Betaflight CLI on iPadOS
+
+Investigation on 2026-07-20 concluded that the requested no-DriverKit/no-MFi/no-private-API iPadOS POC is not feasible.
+
+- Technical report: `USB-CDC-ACM-iPadOS-Report.md`.
+- Local SDK baseline: Xcode 26.5 / iPhoneOS 26.5.
+- iPhoneOS app-target compile probes:
+  - `import IOUSBHost` fails: no such module.
+  - `import USBDriverKit` fails: no such module.
+  - `import AccessoryAccess` fails: no such module.
+  - `import ExternalAccessory` succeeds, but Apple's documentation positions it for MFi accessories and declared accessory protocols, not arbitrary USB CDC-ACM.
+- Local SDK file search found `ExternalAccessory.framework` in the iPhoneOS SDK, but no `IOUSBHost.framework` or `AccessoryAccess.framework`. USBDriverKit lives in the DriverKit SDK, not the iPhoneOS app SDK.
+- Apple's documented iPadOS route for external USB drivers is DriverKit on M-series iPads. That requires a driver extension, USB transport entitlement, iPadOS app-to-driver communication entitlement, user driver approval in Settings, and Apple entitlement approval for distribution.
+- Apple DTS forum guidance for an iPadOS RP2040 CDC-ACM case says user-space serial APIs are unavailable; the proposed route is a DEXT implementing serial communication via raw USB commands plus a user client for the app.
+- Current Betaflight and INAV mass-storage CLI command is `msc`, not `storage`. Betaflight docs and source agree: `CLI_COMMAND_DEF("msc", "switch into msc mode", ..., cliMsc)`.
+- Betaflight VCP receives CLI payload bytes through USB OUT endpoint data (`VCP_DataRx` into the RX ring). It also handles CDC `SET_LINE_CODING`, `GET_LINE_CODING`, and `SET_CONTROL_LINE_STATE`; a future DriverKit implementation should send the standard control requests for robustness even if the CLI payload itself is bulk data.
+- Betaflight also exposes MSC entry through MSP, not only CLI. `MSP_REBOOT` command 68 accepts one-byte reboot modes where `MSP_REBOOT_MSC` is value 2 and `MSP_REBOOT_MSC_UTC` is value 3. The MSP handler checks `mscCheckFilesystemReady()` for MSC mode and then schedules `systemResetToMsc(...)`. This still requires a working MSP transport, usually the same USB CDC/VCP path, but it avoids CLI prompt-state parsing.
+- Firmware-side MSC entry is implemented as a reboot flag, not a live USB mode switch. `systemResetToMsc(...)` writes `RESET_MSC_REQUEST` to persistent storage and resets. Early boot checks `mscCheckBootAndReset() || mscCheckButton()` before initializing VCP; if true it starts MSC and does not return to the normal scheduler. A physical/configured `USB_MSC_BUTTON_PIN` can also enter MSC at boot, but the default is `NONE` and many boards will not expose a usable button path.
+- Betaflight's legacy Blackbox download path uses MSP over the normal serial/VCP connection, not MSC. `MSP_DATAFLASH_SUMMARY` reports FlashFS support/readiness, sector count, size, and current offset. `MSP_DATAFLASH_READ` reads onboard flash by absolute address in chunks; payload is address plus optional read length and compression flag, with a 128-byte legacy fallback when only the address is sent. `MSP_DATAFLASH_ERASE` erases via `blackboxEraseAll()`. `MSP_SDCARD_SUMMARY` exposes SD-card state/free/total space, but current firmware source does not show an equivalent MSP file-read command for SD-card Blackbox logs; SD-card/on-filesystem access is the MSC/FAT path.
+- External helper-device architecture: if a helper talks to Betaflight over a hardware UART with the MSP function enabled, it does not need USB host support to download onboard FlashFS Blackbox logs. A small MCU such as an ESP32 can use 3.3 V TTL UART, request `MSP_DATAFLASH_SUMMARY`, then chunk through `MSP_DATAFLASH_READ` and expose the result onward over Wi-Fi/BLE or, on USB-capable ESP32 variants, as a USB device. USB host support is only required when the helper itself needs to operate the FC's USB CDC/MSC interface.
+- If a helper connects to the FC's USB port and speaks MSP over Betaflight VCP/CDC, the helper still needs USB host support, but only CDC-ACM host support rather than MSC/FAT. ESP32-S3 is the practical ESP32 family choice. Espressif's ESP-IDF USB Host docs include CDC-ACM host and MSC host class-driver examples. Board shortlist from 2026-07-21 research: Espressif ESP32-S3-USB-OTG is the safest USB-host validation board because it has a Type-A host port, Li battery charging, battery-boosted 5 V host power, and 500 mA host current limiting, but it does not meet a USB-C-port preference. Olimex ESP32-S3-DevKit-Lipo best matches USB-C plus LiPo charger and native USB OTG in a compact board, but its USB-C host-role/VBUS behavior should be verified against the schematic or with a prototype before treating it as a plug-and-play FC host. LilyGO T-Display-S3 and SparkFun Thing Plus ESP32-S3 are attractive USB-C/LiPo ESP32-S3 boards, but available docs emphasize device/power use more than a ready USB-host power path, so they are higher-risk first choices for FC USB hosting.
+
 ## Upstream Blackbox Explorer
 
 The official viewer is currently a Vite/Vue PWA, not an Electron app.
