@@ -6,6 +6,8 @@ Product subtitle: A Blackbox Log Analyzer.
 
 ## Preferred Shape
 
+- `BlackboxAnalysisWorkspace.motorAnomalies(using:)` is the exact indexed full-log seam for observed per-motor RPM-loss intervals. `AnalysisMotorAnomaly` carries zero-based motor index plus main-frame start/end times. The app caches it in `LogTimeline.Model`; Timeline merges ranges only for red background bands and Graph projects original intervals to start/end generic `.anomaly` markers. `GraphSurfaceCanvas` and `GraphMarkerChips` stay dependency-free.
+
 Document-wide field selection is app-owned UI state: one ordered list of `AnalysisSeriesID.rawValue` values is shared by Table and Graph, while each active log resolves only IDs it supports. The reusable picker and its pure selection model live in the app target; `BlackboxAnalysis` remains responsible only for catalogs and series data.
 
 Use a package-oriented architecture:

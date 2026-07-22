@@ -1,5 +1,26 @@
 # Airframe Investigation Plan
 
+## Motor Anomaly Detection (Implemented 2026-07-22)
+
+### Think Before Coding
+
+- eRPM absence alone is not a diagnosis. The detector reports an observed Motor Anomaly only after previously valid telemetry falls to near zero during active output; a desync remains one possible cause.
+
+### Simplicity First
+
+- One exact `BlackboxAnalysisWorkspace.motorAnomalies(using:)` query produces `AnalysisMotorAnomaly` values. The existing Timeline model cache is the single full-log cache shared with Graph.
+
+### Surgical Changes
+
+- Added exact indexed detector, synthetic boundary tests, Timeline red bands, Graph start/end markers, captions, and generic red marker rendering. No settings, persistence, Table/Spectrum UI, or causal classification.
+
+### Goal-Driven Execution
+
+- `swift test --package-path Packages/BlackboxAnalysis` passed (141 tests).
+- `swift test --package-path Packages/AirframeUI` passed (100 tests).
+- Focused macOS `AirframeTests/LogTimelineModelTests` and `GraphModelTests` passed (15 tests).
+- macOS and iOS Simulator Debug app builds passed. `git diff --check` passed.
+
 ## USB CDC-ACM Betaflight CLI on iPadOS (Planned 2026-07-20)
 
 ### Think Before Coding
