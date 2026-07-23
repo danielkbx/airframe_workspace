@@ -17,7 +17,7 @@ Only approved near-term work and unresolved items belong here. Completed work be
 ## Flight Controller Import Assistant
 
 - Execute the approved commit sequence on `feature/flight-controller-import`, stopping after every commit for review.
-- Current review gate: commit 6 (file-backed FlashFS download) is implementation- and hardware-validated; commit 7 must not start before explicit approval and the commit-6 review.
+- Current review gate: commit 7 (CLI dump and Blackbox settings) is implementation-, test-, review-, and hardware-validated; commit 8 must not start before explicit approval and the commit-7 review.
 - Commit 1: feature branches, pinned Configurator reference, and durable project context.
 - Commit 2: generic `MSP` package.
 - Commit 3: `FlightController` domain and discovery.

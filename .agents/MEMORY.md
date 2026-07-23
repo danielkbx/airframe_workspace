@@ -131,6 +131,8 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - macOS USB discovery uses IOKit USB serial callout devices and opaque stable IDs. Serial I/O uses `/dev/cu.*` at 115200 8N1 raw mode on a dedicated queue.
 - The USB path is hardware-validated with a sandboxed SpeedyBee F405 V5 running Betaflight 4.5.2. Build revision fields are printable seven-byte ASCII and may contain `norevis`, not only Git hex.
 - FlashFS download uses uncompressed 4,096-byte MSP v1 jumbo reads, writes validated bytes directly to a temporary file, reports byte-derived progress, and retries a timed-out chunk once. Normal downloads remove partial files on final failure or cancellation; explicit resume mode preserves confirmed partial bytes.
+- Configuration download uses framed STX/ETX CLI on Betaflight 4.5.4 and newer. Older firmware uses interactive CLI, recognizes either the batch-end marker or a settled terminal prompt after a verified dump header, then exits and treats the rebooting serial connection as disconnected.
+- MSP and CLI logs contain only lifecycle, command/frame metadata, byte counts, retries, and failures. Configuration contents, payload bytes, destination paths, and device identifiers are never logged.
 - Production discovery must never inject mock devices. Preview mocks are compiled only in Debug; macOS currently shows real USB devices only and iOS/iPadOS remains empty until CoreBluetooth is implemented.
 - Serial transports can only be created from a currently discovered provider-owned device mapping; the app does not accept user-provided device paths.
 - `Delete Logs After Import` remains visible but disabled in the current scope.

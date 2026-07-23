@@ -11,6 +11,11 @@
 - FlashFS uses `MSP_DATAFLASH_SUMMARY` (70), `MSP_DATAFLASH_READ` (71), and `MSP_DATAFLASH_ERASE` (72). Current Airframe scope leaves erase disabled.
 - CLI framing and Blackbox settings operate above the same transport. Airframe must remain an independent Swift-native implementation.
 - Sandboxed macOS apps require the Boolean `com.apple.security.device.serial` entitlement to interact with serial devices. Apple lists it as the hardware entitlement for serial-device interaction.
+- Hardware validation on 2026-07-23 completed the same full FlashFS download on an additional flight controller whose Betaflight Configurator download consistently stalls.
+- Betaflight 4.5.4 backported STX/ETX-framed CLI commands. Airframe uses framed `dump all` for 4.5.4 and newer and interactive CLI for 4.5.3 and older.
+- Betaflight 4.5.1 has no `exit noreboot`; plain `exit` reboots the controller. Its build may omit CLI batch support, so a dump can end at the terminal prompt without emitting `batch end`.
+- Hardware validation on 2026-07-24 downloaded a Betaflight 4.5.1 configuration through the interactive fallback: 39,370 bytes and 1,542 lines were received in under one second, followed by the expected reboot/disconnect.
+- A newer framed-CLI controller produced a 39,084-byte, 1,514-line configuration dump and restored MSP communication after ETX.
 
 ## USB CDC-ACM Betaflight CLI on iPadOS
 
