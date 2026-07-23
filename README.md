@@ -9,6 +9,7 @@ It contains private planning, coordination, reference checkouts, and local workf
 - `Airframe/`: public Airframe app and Swift packages. This is its own repository: `git@github.com:danielkbx/airframe.git`.
 - `blackbox-log-viewer/`: upstream reference checkout. Pull only; do not commit or push from this workspace.
 - `betaflight/`: upstream firmware reference checkout. Pull only; do not commit or push from this workspace.
+- `betaflight-configurator/`: pinned upstream Configurator reference checkout. Do not commit or push from this workspace.
 - `.agents/`: durable private project context for local automation and handoff.
 - `Assets/`: private workspace assets and source design files.
 - `scripts/`: workspace maintenance helpers.
@@ -25,7 +26,7 @@ The `Airframe/` submodule has stricter rules:
 
 The upstream reference submodules have read-only rules:
 
-- `blackbox-log-viewer/` and `betaflight/` may be fetched or pulled.
+- `blackbox-log-viewer/` and `betaflight/` may be fetched or pulled. Keep `betaflight-configurator/` at its pinned workspace commit.
 - Do not commit in them.
 - Do not push them.
 - If their submodule pointers change, commit that pointer change only in the root workspace repo.

@@ -36,6 +36,7 @@ Agents must update this file proactively when they learn a better command, workf
 - Before writing or reviewing any file under `Airframe/`, official docs, commit messages, PR titles, or PR descriptions, make sure there is no AI/agent/Codex/ChatGPT attribution. Keep that context only in `.agents/`.
 - Human-visible text should be clear developer prose, slightly casual when appropriate, and never stiff generated boilerplate.
 - The workspace root is now its own private Git repo. Check `git rev-parse --show-toplevel` before commit-sensitive work because the root repo, `Airframe/`, `blackbox-log-viewer/`, and `betaflight/` are separate Git repositories linked by submodules.
+- `betaflight-configurator/` is also a read-only reference submodule. Keep it detached at the pinned workspace commit and never commit or push inside it.
 - Use `./scripts/ws-status.sh` from the root to inspect root and submodule working trees together.
 - Use `./scripts/ws-pull.sh` from the root for routine synchronization. It fast-forwards the read-only upstream reference submodules and leaves any pointer changes visible for an explicit root commit. It intentionally does not initialize nested upstream submodules such as Betaflight's firmware dependency modules.
 - Use `./scripts/ws-commit-root.sh "message"` for normal root workspace commits when submodule worktrees are clean. It stages only root-owned paths, agent entry points (`AGENTS.md`, `CLAUDE.md`), and submodule pointers.

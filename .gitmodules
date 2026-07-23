@@ -13,3 +13,7 @@
 [submodule "PIDtoolbox"]
 	path = PIDtoolbox
 	url = https://github.com/skoch1s/PIDtoolbox.git
+[submodule "betaflight-configurator"]
+	path = betaflight-configurator
+	url = git@github.com:betaflight/betaflight-configurator.git
+	branch = master

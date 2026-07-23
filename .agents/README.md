@@ -24,6 +24,14 @@ The Betaflight firmware reference is cloned at:
 - Local observed commit: `6ecfb45f938e4996fbb568b21eafa7057446a906`
 - Workspace role: read-only reference submodule. Pull only; never commit or push from this workspace.
 
+The Betaflight Configurator reference is cloned at:
+
+- `betaflight-configurator/`
+- Upstream: https://github.com/betaflight/betaflight-configurator
+- Pinned commit: `14a050b7b57b4addadc209e5b67b3cfd9fdef943`
+- Workspace role: read-only reference submodule. Never commit or push from this workspace.
+- Purpose: reference for MSP framing, serial/BLE transport behavior, Betaflight handshake, dataflash access, CLI, and connection lifecycle.
+
 The PIDtoolbox reference (MATLAB source of the free PIDtoolbox, algorithmic ancestor of PIDtoolbox Pro) is cloned at:
 
 - `PIDtoolbox/`

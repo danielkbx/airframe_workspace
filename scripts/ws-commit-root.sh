@@ -24,5 +24,10 @@ if [ -n "$(git -C betaflight status --short)" ]; then
   exit 1
 fi
 
-git add .gitignore .gitmodules README.md AGENTS.md CLAUDE.md .agents scripts Assets Airframe blackbox-log-viewer betaflight
+if [ -n "$(git -C betaflight-configurator status --short)" ]; then
+  echo "betaflight-configurator has local changes. It is read-only in this workspace." >&2
+  exit 1
+fi
+
+git add .gitignore .gitmodules README.md AGENTS.md CLAUDE.md .agents scripts Assets Airframe blackbox-log-viewer betaflight betaflight-configurator
 git commit -m "$1"

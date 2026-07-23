@@ -16,6 +16,20 @@ AirframeCaptions / AirframeUnits / AirframeUI
 Airframe app and AirframeCLI
 ```
 
+Flight-controller import is an independent side path:
+
+```text
+Serial / CoreBluetooth transport
+    ↓
+MSP
+    ↓
+FlightController
+    ↓
+FlightControllerImportPayload
+    ↓
+AirframeImportMaterializer
+```
+
 - `BlackboxCore`: byte streams, encodings, predictors, frame primitives, and typed parser failures.
 - `BlackboxReader`: imports, source/log/session identity, schemas, frame streams, recovery, scan overview, syncpoint index, range queries, raw series, events, and retained issues.
 - `BlackboxAnalysis`: derived series and dedicated calculations such as Spectrum, Step Response, attitude, motor normalization, and automatic timeline range.
@@ -24,6 +38,8 @@ Airframe app and AirframeCLI
 - `AirframeUI`: reusable data-driven rendering and display models without app navigation ownership.
 - App target: document lifecycle, state routing, windows, menus, navigation, settings, and composed views.
 - `AirframeCLI`: human and machine-readable inspection/export over Reader and Analysis APIs.
+- `MSP`: transport-independent MSP v1/v2 encode/decode, request coordination, and CLI framing.
+- `FlightController`: Betaflight-specific device discovery, byte transports, handshake, FlashFS/CLI operations, and file-backed import results.
 
 Dependencies point downward. Domain packages never depend on captions, SwiftUI, app state, or the processing activity counter.
 
@@ -35,6 +51,8 @@ Dependencies point downward. Domain packages never depend on captions, SwiftUI, 
 4. Indexed queries decode full-resolution data for requested time ranges.
 5. Analysis maps Reader series to display-scaled or derived series.
 6. App/UI consumers build bounded render models and cache them per document.
+
+FC acquisition writes byte-identical logs and optional CLI configuration to a managed temporary directory. The assistant returns `FlightControllerImportPayload`; `AirframeImportMaterializer` either creates a package or atomically appends the payload without coupling acquisition to document lifecycle.
 
 Main-frame time is the primary query axis. Valid auxiliary frames are associated with the active main-frame interval.
 
@@ -60,6 +78,7 @@ Do not collapse source, segment, session, and runtime-window identity.
 
 - `UTType.package` directory with `metadata.json`.
 - Ordered equal `logs` descriptors and SHA-256-keyed byte-identical payloads.
+- Format version 2 adds ordered flight-controller import snapshots and content-addressed configuration payloads; version 1 remains readable.
 - Metadata owns selection, per-source state, names, and other package UI state.
 - Mutations create coalesced snapshots and explicit silent saves.
 - Physical duplicate coordinates, copies, validates, then opens the package.

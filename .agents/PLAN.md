@@ -1,43 +1,50 @@
 # Current Plan
 
-This file contains only the current approved work plan. Completed implementation histories belong in Git, not here.
+Implement the Flight Controller Import Assistant on `feature/flight-controller-import`. Every numbered milestone ends in verification and one commit, followed by a mandatory review stop.
 
 ## Think Before Coding
 
-- Current product work is in planning mode unless the user explicitly requests implementation.
-- Treat `Airframe/` as the public project repository and the workspace root as private project context.
-- Treat all Blackbox input as untrusted.
-- Check current code and tests before relying on an older design note.
-- Surface unresolved product or architecture choices instead of silently expanding scope.
+- Keep `MSP` generic and independent of Betaflight, Blackbox, transports, documents, and UI.
+- Keep Betaflight behavior and serial/BLE transports in `FlightController`.
+- The assistant returns a file-backed `FlightControllerImportPayload`; it never decides whether to create or extend a document.
+- The app-side materializer creates a new package now and exposes the same atomic append path for future imports into open documents.
+- Preserve downloaded Blackbox bytes exactly. Support onboard FlashFS only; do not imply MSP SD-card file access.
+- Show `Delete Logs After Import` disabled and send no erase command in this scope.
+- Use no new external dependency without explicit approval.
 
 ## Simplicity First
 
-- Keep one canonical home for each kind of durable context:
-  - `MEMORY.md`: stable decisions and constraints.
-  - `ARCHITECTURE.md`: current technical shape and boundaries.
-  - `RESEARCH.md`: external facts and source findings.
-  - `TASKS.md`: approved or genuinely unresolved near-term work.
-  - `BACKLOG.md`: unapproved future ideas.
-  - `TOOLING.md`: repeatable commands and learned workflow corrections.
-- Use Git history for completed plans, diffs, commits, and verification transcripts.
-- Do not preserve implementation diaries in `.agents/`.
+- Assistant flow: Prepare → Device → Connect → Content → Import.
+- macOS discovery combines USB serial and BLE devices; iOS/iPadOS shows BLE only.
+- Connection validates MSP API version, `BTFL` variant, firmware, board, build, and FlashFS summary.
+- Selected operations are log download and/or CLI configuration snapshot.
+- Report real byte progress for FlashFS and indeterminate progress for CLI dump.
+- Store temporary outputs under one managed import directory until successful materialization or final cancellation.
+- Airframe format version 2 stores ordered FC import snapshots and content-addressed config files while reading version 1 unchanged.
 
 ## Surgical Changes
 
-- Update only the document that owns the changed information.
-- Replace superseded statements instead of appending another dated correction.
-- Keep short cross-references when a fact is owned elsewhere; do not copy the fact.
-- Do not modify reference submodules.
-- Commit inside `Airframe/` only with explicit user approval.
+1. Add matching feature branches, pin `betaflight-configurator/` as a read-only reference, and update durable context.
+2. Add the generic `MSP` package with v1/v2 frames, streaming decode, checksums, request coordination, timeout, cancellation, and CLI framing.
+3. Add `FlightController` domain types, transport protocol, Betaflight client, and discovery abstractions.
+4. Add the native SwiftUI assistant shell, captions, previews, step state, and mock discovery.
+5. Add macOS IOKit/POSIX USB serial transport and real handshake/content discovery.
+6. Add bounded, resumable file-backed FlashFS download with progress and cleanup.
+7. Add CLI dump and validated `blackbox_*` settings reads/writes.
+8. Add reusable payload types and explicit temporary-directory ownership.
+9. Add append-capable package format version 2 and one atomic `AirframeImportMaterializer` mutation used by create and append.
+10. Connect `StartView` to native destination selection, package creation, opening, and cleanup.
+11. Add CoreBluetooth transport and known SpeedyBee/Nordic UART profiles.
+12. Complete the shared BLE flow on macOS and real iOS/iPadOS devices.
+
+Do not start a later item before the user approves the preceding commit. Do not add the open-document import UI yet.
 
 ## Goal-Driven Execution
 
-Current documentation-maintenance success criteria:
-
-1. Each `.agents` file has one clear purpose.
-2. Active decisions remain available after context loss.
-3. Completed implementation logs and obsolete handoffs are removed.
-4. Contradictory current/superseded statements are eliminated.
-5. Future updates can replace concise facts without growing another timeline.
-
-For future implementation work, replace this section with the current approved objective, scoped files, ordered execution steps, and verification commands. Keep all four named sections.
+- Each package milestone runs focused Swift Testing suites.
+- App milestones build for macOS and iOS and add focused app/UI tests where platform behavior requires XCTest.
+- Protocol tests cover fragmented/coalesced frames, checksums, malformed input, timeout, retry, and cancellation.
+- Transport tests cover partial I/O, disconnect, reconnect, and BLE write chunking.
+- Import tests cover logs-only, config-only, combined payloads, duplicate hashes, atomic append, version-1 compatibility, and temp cleanup.
+- Hardware acceptance proves cable import on macOS and SpeedyBee Adapter 3 import on macOS and real iOS/iPadOS.
+- A milestone is complete only when its behavior is verified, its diff is reviewed for scope, and its commit exists in the correct repository.

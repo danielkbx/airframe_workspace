@@ -1,5 +1,16 @@
 # Research Notes
 
+## Betaflight Configurator Flight Controller Transport
+
+- Repository: https://github.com/betaflight/betaflight-configurator
+- Workspace path: `betaflight-configurator/`
+- Pinned reference commit: `14a050b7b57b4addadc209e5b67b3cfd9fdef943`
+- The Configurator treats serial, Web Bluetooth, and native BLE as raw byte transports beneath the same MSP/CLI layer.
+- Known SpeedyBee BLE UART profiles include FF00/FF01/FF02, V1 `1000/1001/1002`, and V2 `ABF0/ABF1/ABF2`; the native Android implementation includes the FF00 profile relevant to current SpeedyBee hardware.
+- MSP handshake starts with API version, FC variant (`BTFL`), FC version, board info, and build info.
+- FlashFS uses `MSP_DATAFLASH_SUMMARY` (70), `MSP_DATAFLASH_READ` (71), and `MSP_DATAFLASH_ERASE` (72). Current Airframe scope leaves erase disabled.
+- CLI framing and Blackbox settings operate above the same transport. Airframe must remain an independent Swift-native implementation.
+
 ## USB CDC-ACM Betaflight CLI on iPadOS
 
 Investigation on 2026-07-20 concluded that the requested no-DriverKit/no-MFi/no-private-API iPadOS POC is not feasible.

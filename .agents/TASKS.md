@@ -14,16 +14,31 @@ Only approved near-term work and unresolved items belong here. Completed work be
 - Expand automatic mixer-template checks beyond quad-X using representative bicopter, tricopter, Y4, V-tail, A-tail, Hex, Y6, X8, and octocopter logs.
 - Continue compatibility coverage across representative Betaflight versions, multi-log files, GPS logs, and damaged/truncated logs.
 
+## Flight Controller Import Assistant
+
+- Execute the approved commit sequence on `feature/flight-controller-import`, stopping after every commit for review.
+- Commit 1: feature branches, pinned Configurator reference, and durable project context.
+- Commit 2: generic `MSP` package.
+- Commit 3: `FlightController` domain and discovery.
+- Commit 4: native assistant shell with mock discovery.
+- Commit 5: macOS USB serial connection and Betaflight handshake.
+- Commit 6: file-backed FlashFS download with progress, cancellation, retry, and cleanup.
+- Commit 7: CLI dump and safe `blackbox_*` settings workflow.
+- Commit 8: reusable `FlightControllerImportPayload` and temporary-directory ownership.
+- Commit 9: append-capable Airframe format version 2 and materializer.
+- Commit 10: new-document consumer from `StartView`.
+- Commit 11: CoreBluetooth transport.
+- Commit 12: BLE end-to-end integration on macOS and real iOS/iPadOS devices.
+
 ## Product Decisions Needed
 
-- Decide when direct flight-controller import becomes approved scope. Current research for USB CDC-ACM on iPadOS is in `RESEARCH.md`; the start view intentionally shows the action as unavailable.
 - Decide whether a future transformed/persisted index is justified only after profiling package open, seek, memory, and autosave costs.
 - Decide the final project license before adding SPDX license identifiers.
 - Identify the Apple Developer Team ID before final signing setup.
 
 ## Current Constraints
 
-- Planning only unless implementation is explicitly requested.
+- Implementation is approved only for the reviewed Flight Controller Import Assistant milestone; other product work remains planning-only.
 - No new external dependency without explicit approval.
 - Raw Betaflight logs remain byte-identical and read-only.
 - Airframe document state belongs in package metadata; raw-log UI state remains external.

@@ -22,3 +22,7 @@ git -C blackbox-log-viewer status --short
 echo
 echo "betaflight"
 git -C betaflight status --short
+
+echo
+echo "betaflight-configurator"
+git -C betaflight-configurator status --short

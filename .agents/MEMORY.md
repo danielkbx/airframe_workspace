@@ -17,7 +17,8 @@ This file stores durable decisions and constraints. It intentionally omits imple
 
 - Workspace root: private wrapper repository `danielkbx/airframe_workspace`, branch `master`.
 - `Airframe/`: public project submodule `danielkbx/airframe`; commit only with explicit user approval.
-- `blackbox-log-viewer/`, `betaflight/`, and `PIDtoolbox/`: read-only reference submodules; never commit or push from this workspace.
+- `blackbox-log-viewer/`, `betaflight/`, `betaflight-configurator/`, and `PIDtoolbox/`: read-only reference submodules; never commit or push from this workspace.
+- `betaflight-configurator/` is intentionally pinned at `14a050b7b57b4addadc209e5b67b3cfd9fdef943` for flight-controller import reference work.
 - Durable private context lives in `.agents/`.
 - Never put AI or automation attribution in `Airframe/`, public documentation, commits, PR titles, or PR descriptions.
 
@@ -55,6 +56,8 @@ This file stores durable decisions and constraints. It intentionally omits imple
   - `AirframeUI`: reusable data-driven UI, charts, and display models.
   - `AirframeCLI`: CLI kit plus thin `airframe` executable.
   - `Logging`: local dependency-free logging infrastructure.
+  - `MSP`: transport-independent MSP v1/v2 framing, streaming decode, request coordination, and CLI framing.
+  - `FlightController`: Betaflight-specific discovery, transports, handshake, dataflash, CLI, settings, and file-backed import payloads.
 - App-specific navigation, documents, window lifecycle, menus, and composed screens remain in the app target.
 - Domain packages must not depend on `AirframeCaptions`; consumers combine semantic IDs with captions.
 
@@ -71,6 +74,8 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Raw logs are read-only and never modified.
 - `AirframeWorkspaceDocument` is the shared model for raw logs and `.airframe` packages.
 - Package format version 1 contains `metadata.json` and byte-identical source payloads stored under SHA-256-derived paths.
+- Flight-controller import will introduce package format version 2 with ordered FC import snapshots and content-addressed CLI configuration payloads while retaining version-1 read compatibility.
+- `FlightControllerImportPayload` is independent of document creation. One app-side materializer creates a new package today and can append the same payload to an existing package later.
 - Package metadata uses one ordered `logs` array. All embedded sources are equal; there is no persistent main/reference distinction.
 - Package validation requires at least one source, unique full hashes and paths, safe relative paths, and matching byte counts and SHA-256 hashes.
 - Package source order is insertion order and drives global `Log N` numbering. Sources append; reorder UI does not exist.
@@ -84,7 +89,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 ## Document Entry And Presentation
 
 - iOS uses one `HomeView` workspace and `AirframeUIDocument`; macOS uses `AirframeNSDocument` windows plus one non-document start window.
-- The shared start view offers Open Log, open a folder of up to eight raw logs, and a visible unavailable flight-controller import action.
+- The shared start view offers Open Log, folder import, and the staged Flight Controller Import Assistant.
 - Raw-log opening policy is iCloud-synced and offers `Ask` or `Always Open Read-Only`.
 - Conversion language says `Airframe document`, not `editable document`.
 - Package sidebars flatten all source segments into one `Logs` section. Raw sidebars preserve file/log/reference hierarchy.
@@ -110,3 +115,14 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Never commit or push reference submodules.
 - Use `gh` with account `danielkbx`; verify the active account before every push or PR action.
 - Do not use Conventional Commit prefixes.
+- Current feature work uses `feature/flight-controller-import` in both the private workspace and public Airframe repository.
+- Flight-controller import advances one reviewed commit at a time; do not begin the next milestone before explicit user approval.
+
+## Flight Controller Import
+
+- Direct FC import is approved as a staged feature.
+- macOS supports direct USB serial and BLE; iOS/iPadOS support BLE only.
+- The assistant flow is Prepare, Device, Connect, Content, and Import. It returns a reusable file-backed payload rather than creating a document itself.
+- The first release reads onboard FlashFS through MSP and can save a CLI `dump`. MSP SD-card file download is unavailable.
+- `Delete Logs After Import` remains visible but disabled in the current scope.
+- Imported Blackbox bytes remain byte-identical. Temporary files are retained until successful materialization or definitive cancellation.
