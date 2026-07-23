@@ -61,6 +61,8 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - App-specific navigation, documents, window lifecycle, menus, and composed screens remain in the app target.
 - Domain packages must not depend on `AirframeCaptions`; consumers combine semantic IDs with captions.
 - `MSP` uses the local `Logging` package category `msp.protocol` for direction, version, code, byte counts, retries, failures, and connection lifecycle. It never logs MSP payload bytes or CLI command/response text.
+- `FlightController` owns transport-neutral discovery and byte-transport protocols plus the Betaflight handshake. It accepts MSP API 1.44 through 1.48, marks newer API 1.x versions as untested, and rejects non-`BTFL` variants.
+- `FlightController` logs handshake stages, lifecycle, and dataflash metadata through `flight-controller.protocol`; it never logs payload bytes or device identifiers.
 
 ## User-Facing Text
 
