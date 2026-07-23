@@ -1,5 +1,31 @@
 # Airframe Investigation Plan
 
+## Raw Logs, Airframe Documents, and Effective Names (2026-07-23)
+
+### Think Before Coding
+
+- Preserve immutable Betaflight bytes and parser titles; store user names only in package metadata.
+- Treat a source file as the removal/export boundary even when it contains several flight segments.
+
+### Simplicity First
+
+- Reuse the global settings mirror, package silent-save controller, reference store, native exporter, and one shared conversion sheet.
+- Resolve one effective name instead of teaching each consumer custom-name fallback rules.
+
+### Surgical Changes
+
+- Add one backward-compatible `segmentNames` field without changing format version 1.
+- Keep raw sidebar hierarchy; switch only package presentation to a flat log list.
+- Remove inline removal controls and expose only the agreed context-menu actions.
+
+### Goal-Driven Execution
+
+- macOS and generic iOS Simulator Debug app builds pass.
+- Focused macOS settings, benefits, effective-name, metadata round-trip, reference preservation, and rename-controller tests pass.
+- `AirframeCaptions` package tests and localization-catalog JSON validation pass.
+- Full macOS test run reaches two existing unrelated `BlackboxAnalysis` failures; focused Airframe app suites pass.
+- `git diff --check` passes.
+
 ## Physical Airframe Package Duplicate (Implemented 2026-07-23)
 
 ### Think Before Coding

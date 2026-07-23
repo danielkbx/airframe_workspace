@@ -1,5 +1,7 @@
 # Tooling Knowledge Base
 
+- Do not run macOS and iOS `xcodebuild` commands concurrently against the same default DerivedData path: both contend for `XCBuildData/build.db` and one fails with “database is locked.” Run them sequentially or provide distinct `-derivedDataPath` values.
+
 This file captures practical lessons for using local tools efficiently and correctly in this workspace.
 
 Agents must update this file proactively when they learn a better command, workflow, log strategy, simulator flow, parser oracle, test approach, or when they had to correct a tool usage mistake.

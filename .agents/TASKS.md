@@ -1,5 +1,13 @@
 # Planning Tasks
 
+## Implemented 2026-07-23: Raw logs and effective names
+
+- Added the Ask / Always Open Read-Only global policy and conversion-benefits sheet.
+- Removed the conversion toolbar action while retaining manual File-menu conversion.
+- Added flat package log presentation, persisted custom names, original-byte export, and context-menu-only source removal.
+- Routed effective names through selected and multi-log presentation consumers.
+- Added focused settings, metadata, controller, and benefits regression coverage.
+
 ## Series Presentation Follow-up
 
 - Keep the Reader series presentation resolver and AirframeCaptions lookup in sync whenever a new selectable field family or debug-mode meaning is introduced. Add conversion and caption coverage in the same change.

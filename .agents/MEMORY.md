@@ -1,5 +1,15 @@
 # Project Memory
 
+## Raw-log opening and effective names (implemented 2026-07-23)
+
+- Global, iCloud-synced `RawLogOpeningPolicy` defaults to `ask` and offers only `Ask` or `Always Open Read-Only`. Ask presents one friendly benefits sheet per raw document lifetime; the File-menu conversion command presents the same sheet manually. The conversion toolbar button is removed.
+- Airframe package sidebars flatten main and attached source segments into one `Logs` section, globally numbered `Log N`, with the original filename as subtitle. Raw sidebars retain their file/log hierarchy. Neither mode has inline remove controls.
+- Package log context menus offer Rename and Export; attached package logs also offer Remove. Raw attached-log rows offer only Remove. Removing any segment row removes its complete attached source.
+- Raw-log removal confirmations explicitly state that the source log file is not deleted; removal only detaches it from the current window.
+- Document removal uses the user-facing label `Delete from Document` and states that the embedded log source and all contained logs are permanently deleted from the document; it makes no claim about files outside the document. Reserve `Airframe Document` for technical format/conversion contexts.
+- The log rename confirmation action is `Save Log Name`; it must never reuse preset-specific captions.
+- Custom names persist in `Metadata.Log.segmentNames`, keyed by segment index within the descriptor identified by full SHA-256. Raw bytes, parser titles, original filenames, hashes, and format version 1 stay unchanged. The app resolves one effective name (`custom ?? Log N` for packages, parser title for raw logs) and uses it in the sidebar, navigation/window subtitle, Spectrum host title, and Step Response labels.
+
 ## Goal
 
 Explore whether it is possible and worthwhile to build Airframe, a native iOS app, potentially a Universal iOS/macOS app, that provides Betaflight Blackbox log viewing similar to the official Blackbox Explorer.

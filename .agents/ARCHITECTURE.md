@@ -1,5 +1,12 @@
 # Native Swift Architecture Notes
 
+## Effective log-name presentation
+
+- Parser-owned `AirframeLogSummary.title` is immutable input, not user state.
+- `DocumentHomeView.PresentedLog` flattens the main snapshot plus reference snapshots and is the single presentation resolver for source identity, ordinal, original filename, export bytes, removal role, and effective name.
+- Package overrides live beside each physical source descriptor in `Metadata.Log.segmentNames[String(segmentIndex)]`; source SHA-256 plus segment index prevents collisions between equal segment indexes in different files.
+- Selected `LogContext` carries `effectiveName`; multi-log consumers resolve names through `DocumentLogAccess.effectiveName`. Package mutations route through `AirframeWorkspaceController.renameLog` and its existing silent-save revision funnel.
+
 Project/app name: Airframe.
 
 Product subtitle: A Blackbox Log Analyzer.
