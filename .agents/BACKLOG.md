@@ -41,6 +41,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Add units and presentation metadata for raw and derived fields, including scaling, labels, display precision, and axis hints.
 - Add field grouping and picker metadata for common tuning workflows without copying upstream graph configuration architecture.
 - Add workspace or graph preset support after the native chart model is proven.
+- Presets: the current preset UI (sidebar `PresetList`, `PresetControls`, `PresetManager` sheet) is hidden as of 2026-07-23. The user was not happy with the overall UX. Redesign later. Code remains in place under `DocumentHome/Sidebar.swift` (`PresetList` struct) and `DocumentHome/Content/Presets/` so it can be re-enabled after the redesign.
 - Let future named workspaces/presets own reusable document field-selection ID sets.
 - Add map view support for GPS-capable logs.
 - Spectrum follow-ups (base implemented 2026-07-15 with Frequency, Freq vs Throttle, Freq vs RPM; the user wants the deferred views later):
