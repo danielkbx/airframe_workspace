@@ -18,7 +18,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Improve Airframe package autosave after profiling FileWrapper replacement costs for large main and reference logs; consider coordinated incremental package writes or native document subclasses if unchanged log payloads are repeatedly copied or uploaded.
 - Investigate an upstream Betaflight firmware patch that enters USB MSC from a local button gesture, e.g. triple-press on a configured button while disarmed and storage-ready, reusing `systemResetToMsc(...)`; scope depends on target button availability and upstream UX/safety acceptance.
 - Consider an Airframe-owned document format that stores app metadata, view settings, analysis state, and the original unmodified log bytes so the raw log can be exported again.
-- Add bookmarks for important log positions that users can jump back to quickly; this likely depends on an Airframe-owned document format for persistence.
+- Design bookmarks for important log positions before adding persistence. Define behavior, typed data, source/segment identity, editing, and navigation first; do not reserve speculative fields in the Airframe document format.
 - Investigate whether `blackbox-tools` can provide reliable golden outputs for Swift parser tests.
 - Investigate fixture sources for representative Betaflight logs across firmware versions, GPS usage, multiple flights, and corrupted/truncated logs.
 - Evaluate whether `jcodemunch` indexing of `blackbox-log-viewer/` and `betaflight/` improves investigation speed.

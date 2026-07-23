@@ -1,5 +1,29 @@
 # Airframe Investigation Plan
 
+## Equal Airframe document log sources — implemented 2026-07-23
+
+### Think Before Coding
+
+- Package sources have no main/reference role. Stable insertion order drives numbering and default selection.
+- Window state stays document-wide; every source, including the first, uses SHA-256-keyed source state.
+- Raw-log windows retain their intentional main/reference behavior.
+
+### Simplicity First
+
+- Format version 1 now uses only `Metadata.logs` and SHA-256-keyed `logData`.
+- Removed speculative bookmarks instead of defining an unowned placeholder schema.
+- No migration or compatibility decoder exists for the unused earlier package shape.
+
+### Surgical Changes
+
+- Changed package format/storage/controller seams, package runtime routing, sidebar source actions, Step Response identity, captions, and focused tests.
+- Kept parser, analysis algorithms, raw-log attachment semantics, dependencies, and shared version unchanged.
+
+### Goal-Driven Execution
+
+- Format and controller tests cover ordering, round trips, validation, legacy rejection, more than nine sources, last-source protection, state pruning, and neutral trace identity.
+- Verification passed: all 331 macOS `AirframeTests`, all 18 `AirframeCaptions` package tests, macOS app build, and iPhone 17 / iOS 26.5 simulator app build.
+
 ## Raw Logs, Airframe Documents, and Effective Names (2026-07-23)
 
 ### Think Before Coding

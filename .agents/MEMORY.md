@@ -1,5 +1,13 @@
 # Project Memory
 
+## Equal Airframe document log sources (implemented 2026-07-23)
+
+- Airframe package format version 1 now stores one stable ordered `Metadata.logs` array. It no longer stores `mainLog`, `referenceLogs`, or a speculative `bookmarks` field. Existing pre-change packages are deliberately unsupported and no migration or format-version bump was added because there are no real users.
+- `AirframePackage.logData` maps each source's full SHA-256 to its byte-identical original data. Package validation requires at least one source, unique hashes and paths, safe relative paths, matching byte counts, and matching hashes. New payload paths are `logs/<sha256>.<extension>`.
+- Every package source uses the same package-backed runtime store, selection form (`source:<sha256>:<segment>`), per-source state entry, loading pipeline, navigation, rename/export/delete actions, and Step Response source identity. Source order is insertion order and drives global `Log N` numbering. New sources append; no reorder UI exists.
+- Package documents have no fixed source limit. Any source can be deleted while at least one remains; deleting a source removes its bytes and source state. Raw-log windows retain one main log plus up to eight temporary references, and conversion turns them into equal package sources in visible order.
+- Bookmarks remain only a future product idea. No bookmark persistence field should be added before bookmark behavior and types are designed.
+
 ## Raw-log opening and effective names (implemented 2026-07-23)
 
 - Global, iCloud-synced `RawLogOpeningPolicy` defaults to `ask` and offers only `Ask` or `Always Open Read-Only`. Ask presents one friendly benefits sheet per raw document lifetime; the File-menu conversion command presents the same sheet manually. The conversion toolbar button is removed.

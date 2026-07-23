@@ -1,5 +1,7 @@
 # Tooling Knowledge Base
 
+- In zsh, `status` is a read-only special parameter. When capturing an `xcodebuild` exit code before printing a log tail, use a task-specific name such as `build_result=$?` or `test_result=$?`.
+
 - Do not run macOS and iOS `xcodebuild` commands concurrently against the same default DerivedData path: both contend for `XCBuildData/build.db` and one fails with “database is locked.” Run them sequentially or provide distinct `-derivedDataPath` values.
 
 This file captures practical lessons for using local tools efficiently and correctly in this workspace.

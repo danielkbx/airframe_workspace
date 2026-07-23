@@ -1,5 +1,13 @@
 # Native Swift Architecture Notes
 
+## Equal package source model
+
+- An Airframe package owns an ordered, non-empty `Metadata.logs: [Metadata.Log]` and `AirframePackage.logData: [SHA256: Data]`.
+- SHA-256 is the package source identity for descriptors, bytes, per-source state, selection, caches, and cross-view trace identity. Array order is presentation/insertion order, not a primary-source ranking.
+- `metadata.state` is window/document state; `metadata.state.logs[sha256]` is source state. The first source has no special persistence route.
+- Raw Betaflight documents remain intentionally asymmetric at runtime: the opened file is main and up to eight files are temporary references. Airframe packages feed every source through the package-backed source store.
+- Package invariants are enforced on read and write: at least one source, unique hashes, unique safe relative paths, byte-count match, and full-hash match.
+
 ## Effective log-name presentation
 
 - Parser-owned `AirframeLogSummary.title` is immutable input, not user state.

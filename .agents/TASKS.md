@@ -1,5 +1,14 @@
 # Planning Tasks
 
+## Implemented 2026-07-23: Equal Airframe document log sources
+
+- Replaced package `mainLog`/`referenceLogs` metadata with ordered `logs`.
+- Replaced split payload storage with SHA-256-keyed `logData`.
+- Removed the unused speculative `bookmarks` metadata field.
+- Unified package loading, selection, state routing, sidebar actions, and Step Response identities across all embedded sources.
+- Kept raw-log main/reference behavior and its eight-reference limit.
+- Added package invariant, unlimited-source, removal, legacy-format rejection, and source-identity tests.
+
 ## Implemented 2026-07-23: Raw logs and effective names
 
 - Added the Ask / Always Open Read-Only global policy and conversion-benefits sheet.
