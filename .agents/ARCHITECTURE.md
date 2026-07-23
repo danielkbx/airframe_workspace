@@ -30,6 +30,8 @@ Use a package-oriented architecture:
   - Existing packages are not duplicated as hand-made Xcode library targets.
   - `AirframeCLI` remains SwiftPM-only for product purposes and is not linked into the app.
   - App accent color is `#d3fc03`.
+  - Document ownership is native at the platform boundary: `AirframeNSDocument` creates macOS document windows, while `AirframeUIDocument` retains iOS security-scoped URLs inside the existing single-window `HomeView`.
+  - `AirframeWorkspaceController` is the shared `@MainActor` observable owner. Package-internal mutations advance a revision and use one debounced, serialized silent-save handler; they never drive the native edited/change-count state. Raw Betaflight workspaces do not install package persistence.
 - `AirframeUI`: Swift package for reusable, data-driven SwiftUI widgets and app-facing document metadata/opening models. App target files own scenes, document registration, document navigation, and platform-specific composition.
 - Logging category ownership: each package that logs defines a package-local `PackageLog` namespace using `Log.shared.makeCategory(...)`. Current category names are `blackbox.reader`, `blackbox.stream`, `blackbox.analysis`, `airframe.documents`, and `airframe.cli`.
 - Xcode project hygiene: the visible package source folder must be named `Packages`, point to `../Packages`, and must not be copied under `Airframe/App/`. Remove stale duplicate synchronized folder references such as `Packages 2`.
@@ -195,13 +197,14 @@ The native app is read-only and document-based.
 
 - Register `.bbl` and `.bfl` only.
 - Do not register `.txt` or `.log`.
-- Use SwiftUI `DocumentGroup` for app document opening.
+- Use `NSDocumentController` plus registered `AirframeNSDocument` on macOS and `AirframeUIDocument` inside the iOS `HomeView`.
 - Use `LogDocument` in the app target for file type handling and read-only document behavior.
 - Use `AirframeDocumentModel` in `AirframeUI` for source name, byte count, log summaries, and Reader issues.
 - Preserve source file, log segment, and session identity; do not collapse them into one flat log.
 - Original log files must not be modified by the app.
 - Later optional import of `.txt` or `.log` files must be explicit and content-sniffed, not system-wide file association.
-- The macOS File menu keeps every native item; read-only enforcement is `ReadOnlyFileMenuPolicy` (App target), which clears the action of write-family items (`saveDocument:`, `saveDocumentAs:`, `duplicateDocument:`, `renameDocument:`, `moveDocument:`; plus the revert selectors inside submenus only) on `NSMenu.didAddItemNotification`/`didChangeItemNotification`. Action-less items fail auto-validation, so they render disabled and their key equivalents are inert. No timers, no title matching, no `CommandGroup(replacing:)` for `.newItem`/`.saveItem` (replacing `.saveItem` corrupts Open Recent into a dead "NSMenuItem" placeholder — known macOS bug, still on 26.5 — and drops Close/Close All/Share/Revert To). `NSPrincipalClass` does not work under the SwiftUI lifecycle; do not reintroduce an `NSApplication` subclass for menu behavior.
+- The Settings-only SwiftUI scene does not synthesize document File commands. `DocumentFileMenuPolicy` installs Open/Open Recent/Open Folder/Close/Save/Duplicate/Rename/Move/Revert as native AppKit menu items, with `Open Folder…` directly below `Open Recent` and above the first divider. The responder chain selects the active document and performs normal validation for document commands. Native Save As is intentionally absent; physical `Duplicate…` and `Move To…` cover copy and relocation without rebuilding packages. Raw-log write-family validation lives in `AirframeNSDocument.validateUserInterfaceItem`; menu actions are never cleared permanently. Do not replace SwiftUI `.newItem`/`.saveItem` command groups.
+- Airframe package duplication is a coordinated filesystem operation, not an `NSDocument` in-memory duplicate: flush, user-selected destination, byte-preserving package-directory copy, format validation, then native open. This preserves unknown future entries and avoids an untitled duplicate whose silent persistence has no URL.
 - The Navigation menu uses SwiftUI's default `CommandMenu` position (between View and Window).
 - `DocumentHomeView.LogViewCommandState` is Equatable over a `Capabilities` value only (closures live in a non-compared `Actions` payload); the no-context detail branch publishes `LogViewCommandState.unavailable` so command menus keep a stable structure during document loading and only flip enablement once at load completion. Keep new command state additions inside `Capabilities` (semantic, Equatable) or `Actions` (closures) accordingly.
 

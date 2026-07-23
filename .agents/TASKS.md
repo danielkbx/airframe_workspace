@@ -142,11 +142,11 @@
   - Empty/non-Blackbox documents still surface import issues in the document window.
   - Verification passed: `swift test` in `Airframe/Packages/BlackboxReader`; `swift test` in `Airframe/Packages/AirframeUI`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-frame-progress-test-dd`.
 - Current state-restoration slice is implemented:
-  - `DocumentGroup` has macOS minimum/default document sizing. System state restoration should restore the most recent window size after that initial default.
-  - `DocumentHomeView` persists `NavigationSplitView` column visibility with `@SceneStorage`.
-  - The selected log row is restored per scene with `@SceneStorage`.
+  - Native macOS document windows have explicit minimum/default sizing.
+  - `DocumentStateStore` owns `NavigationSplitView` column visibility.
+  - The selected log is window-local for raw logs and package-persisted through `metadata.json`.
   - The sidebar has stable `navigationSplitViewColumnWidth(min:ideal:max:)` values.
-  - Exact persistence of manually dragged sidebar widths is not custom-implemented; keep using SwiftUI restoration unless real macOS testing shows it is insufficient.
+  - Exact persistence of manually dragged sidebar widths is not custom-implemented.
   - Verification passed: `swift test` in `Airframe/Packages/AirframeUI`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' -derivedDataPath /tmp/airframe-state-restoration-test-dd`; `xcodebuild test -project App/Airframe.xcodeproj -scheme Airframe -destination 'platform=macOS' -derivedDataPath /tmp/airframe-state-restoration-macos-test-dd`.
 - Current iPhone full-screen fix is implemented:
   - Added the minimal `UILaunchScreen` dictionary to the manual app `Info.plist`.

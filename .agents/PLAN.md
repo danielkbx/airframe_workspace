@@ -1,5 +1,94 @@
 # Airframe Investigation Plan
 
+## Physical Airframe Package Duplicate (Implemented 2026-07-23)
+
+### Think Before Coding
+
+- Inherited `NSDocument.duplicate` writes a full temporary snapshot and opens an untitled document with `fileURL == nil`; Airframe silent persistence then cannot save it.
+
+### Simplicity First
+
+- Copy the existing package directory. Do not rebuild it through `FileWrapper` or duplicate the in-memory model.
+
+### Surgical Changes
+
+- `Duplicate…` flushes package state, presents a destination, performs a coordinated byte-preserving copy through `ProcessingActivityCounter`, validates it, and opens it.
+- Both File-menu and titlebar-proxy Duplicate route through the override. Raw logs remain disabled and existing destinations are never overwritten.
+
+### Goal-Driven Execution
+
+- macOS Debug build passed.
+- Ten focused document/controller/duplicate tests passed, including unknown-file byte preservation and existing-destination protection.
+- `git diff --check` passed.
+
+## Native macOS Document File Menu (Implemented 2026-07-23)
+
+### Think Before Coding
+
+- Replacing `DocumentGroup` removed its synthesized File commands. SwiftUI command-group replacement is unsuitable because it has previously corrupted Open Recent and removes unrelated system items.
+
+### Simplicity First
+
+- Install one native AppKit document group with public selectors. Let the responder chain route to the active `NSDocument`.
+
+### Surgical Changes
+
+- Added Open, Open Recent, Close, Save, Duplicate, Rename, Move To, and Revert to Saved. Native Save As is deliberately absent.
+- `Open Folder…` lives in the same native top File-menu block directly below `Open Recent`, above the first divider, and uses the folder-plus system symbol.
+- Raw-log write actions are disabled by `AirframeNSDocument.validateUserInterfaceItem`; package windows retain normal document behavior.
+- Save and Revert/version browsing are explicitly disabled for every workspace because silent continuous persistence has no unsaved state or prior save boundary.
+- The obsolete action-clearing observers were removed.
+
+### Goal-Driven Execution
+
+- macOS Debug build passed without new source warnings.
+- Eight focused workspace/document-menu tests passed.
+- The opt-in macOS UI test now asserts the menu entries and raw-log disabled states; this runner still skips it because the test app launches in background.
+
+## Native Document Scene-Storage Warning (Fixed 2026-07-23)
+
+### Think Before Coding
+
+- `@SceneStorage` requires SwiftUI App scene ownership. macOS document content now lives under `NSDocument` and `NSHostingController`, so the sole remaining wrapper emitted repeated warnings and would become a future runtime failure.
+
+### Simplicity First
+
+- Reuse the existing per-window `DocumentStateStore`; do not introduce global `@AppStorage` or another persistence layer.
+
+### Surgical Changes
+
+- Removed the selected-log `@SceneStorage` wrapper from `DocumentHomeView`.
+- Raw-log selection is transient per window. Package selection continues to publish through the same store into `metadata.json`.
+
+### Goal-Driven Execution
+
+- Repository search contains no executable `SceneStorage` use.
+- Focused macOS state-store suites passed: 44 tests.
+- iOS Simulator Debug build passed.
+
+## Silent Airframe Package Persistence (Implemented 2026-07-23)
+
+### Think Before Coding
+
+- SwiftUI `FileDocument` binding mutations inherently participate in the native document change count. Package-owned UI state must use a separate persistence channel so background/internal state does not show an Edited indicator or require a manual Save.
+
+### Simplicity First
+
+- One shared `AirframeWorkspaceController` owns the current value document and one revisioned, debounced, serialized save callback. Raw logs remain read-only and do not enter this path.
+
+### Surgical Changes
+
+- `DocumentStateStore` and `ReferenceLogStore` callbacks now mutate the controller instead of a `FileDocument` binding.
+- macOS routes registered log/package types through `AirframeNSDocument`; iOS keeps `HomeView` and retains an `AirframeUIDocument` for the opened URL and security scope.
+- Close/workspace replacement flushes pending internal state. Failed writes remain pending and observable for retry.
+
+### Goal-Driven Execution
+
+- macOS and iOS Simulator Debug builds passed.
+- Focused controller coverage passed on both platforms.
+- A macOS native-document integration test verifies the package roundtrip and `isDocumentEdited == false`.
+- Full macOS suite passed: 310 unit tests, plus 5 UI tests with 1 skipped and no failures.
+
 ## macOS Keyboard Shortcut Single Dispatch Path (Revised 2026-07-22)
 
 ### Think Before Coding
@@ -458,9 +547,9 @@ The workspace restructuring slice is approved and being implemented on 2026-07-1
 
 Parser/reader security gate completed. The `AirframeCLI` MVP slice, modern semantic `info` report, CLI diagnostics slice, event export slice, first native SwiftUI app shell slice, progressive document-opening slice, and frame-level opening progress are implemented.
 
-The first SwiftUI state-restoration slice is implemented for the app shell: macOS document windows get explicit minimum/default sizing, `NavigationSplitView` column visibility and selected log are stored with `@SceneStorage`, and the sidebar has stable min/ideal/max widths. Exact custom persistence of manually dragged sidebar pixel widths remains deferred unless SwiftUI's built-in restoration proves insufficient.
+The first state-restoration slice is implemented for the app shell: macOS document windows get explicit minimum/default sizing, `DocumentStateStore` owns `NavigationSplitView` column visibility and selected-log state, and the sidebar has stable min/ideal/max widths. Raw-log selection is window-local; package selection persists in `metadata.json`. `@SceneStorage` is intentionally not used below native `NSDocument`/`NSHostingController` windows.
 
-The iOS root scene no longer uses `DocumentGroup`. iOS now starts in a custom `WindowGroup`/`HomeView` with direct `fileImporter` and `onOpenURL` file opening; macOS keeps `DocumentGroup`.
+Neither platform uses SwiftUI `DocumentGroup`: iOS uses `WindowGroup`/`HomeView`; macOS uses registered `AirframeNSDocument` windows through `NSDocumentController`.
 
 The iPhone document navigation fix is implemented. Opening a file from the iOS home view now replaces the home content with `DocumentView` directly instead of nesting the document `NavigationSplitView` inside the home `NavigationStack`. The document sidebar no longer repeats `Airframe` as a title, and selected log rows use explicit Accent Color background with primary text.
 
@@ -482,7 +571,7 @@ Verification for the Table MVP passed: `git diff --check`, macOS `xcodebuild tes
 
 SwiftUI preview coverage is implemented for the current app view files. `DocumentHomeView`, `DocumentView`, and `HomeView` each have `#if DEBUG` preview blocks. `AirframeUI` currently has no SwiftUI view files, but now exposes debug-only `makeDebug...` factories for document/opening display states.
 
-UI-test infrastructure is implemented. `AirframeLaunchContext` detects explicit UI-test launches and supports fixture injection with `--airframe-ui-test-fixture-name` / `--airframe-ui-test-fixture-base64`. Normal macOS Debug and Release launches use `DocumentGroup`; Debug macOS UI-test fixture bytes are staged inside the app sandbox and opened through native document infrastructure. `AirframeUITests` verifies bundled fixture opening on iOS/iPadOS. The macOS bundled-fixture UI test remains opt-in through `AIRFRAME_ENABLE_MACOS_UI_TESTS=1`; on this local host, XCUITest currently launches Airframe as `Running Background` and cannot reach the document UI, so the default macOS scheme skips that UI test while app unit tests cover the launch context.
+UI-test infrastructure is implemented. `AirframeLaunchContext` detects explicit UI-test launches and supports fixture injection with `--airframe-ui-test-fixture-name` / `--airframe-ui-test-fixture-base64`. Normal macOS Debug and Release launches use `AirframeNSDocument`; Debug fixture bytes are staged inside the app sandbox and opened through `NSDocumentController`. `AirframeUITests` verifies bundled fixture opening on iOS/iPadOS. The macOS bundled-fixture UI test remains opt-in through `AIRFRAME_ENABLE_MACOS_UI_TESTS=1`; on this local host, XCUITest currently launches Airframe as `Running Background` and cannot reach the document UI, so the default macOS scheme skips that UI test while app unit tests cover the launch context.
 
 The local `Logging` infrastructure package has been copied into `Airframe/Packages/Logging` and reduced to the dependency-free `Logging` target. Investigation and fixes for this package must happen in the Airframe copy, not the source goStation package.
 
@@ -583,9 +672,9 @@ Completed CLI product work includes:
   - one progress update emitted after each decoded frame
   - byte-range-based determinate percent plus decoded frame count for UI text
 - SwiftUI state restoration includes:
-  - macOS document default size through the `DocumentGroup` scene
-  - per-scene split-column visibility with `@SceneStorage`
-  - per-scene selected-log restoration with `@SceneStorage`
+  - macOS native-document default/minimum size
+  - per-window split-column visibility through `DocumentStateStore`
+  - per-window raw selected-log state and package selected-log restoration through `metadata.json`
   - stable sidebar column width constraints
 - SwiftUI preview coverage includes:
   - debug-only `makeDebug...` factories in `AirframeUI`
