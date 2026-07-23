@@ -126,6 +126,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Direct FC import is approved as a staged feature.
 - macOS supports direct USB serial and BLE; iOS/iPadOS support BLE only.
 - The assistant flow is Prepare, Device, Connect, Content, and Import. It returns a reusable file-backed payload rather than creating a document itself.
+- The assistant shell is driven by a testable app-side state machine. macOS device selection prefers USB and otherwise selects the strongest BLE device; iOS selects the strongest BLE device.
 - The first release reads onboard FlashFS through MSP and can save a CLI `dump`. MSP SD-card file download is unavailable.
 - `Delete Logs After Import` remains visible but disabled in the current scope.
 - Imported Blackbox bytes remain byte-identical. Temporary files are retained until successful materialization or definitive cancellation.
