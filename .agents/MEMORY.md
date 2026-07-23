@@ -137,3 +137,4 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Serial transports can only be created from a currently discovered provider-owned device mapping; the app does not accept user-provided device paths.
 - `Delete Logs After Import` remains visible but disabled in the current scope.
 - Imported Blackbox bytes remain byte-identical. Temporary files are retained until successful materialization or definitive cancellation.
+- `FlightControllerImportPayload` carries the FC identity, capture time, ordered downloaded logs, optional configuration snapshot, file sizes, and SHA-256 hashes. Its actor-owned temporary directory is created by the package, can be transferred exactly once by the assistant, and is discarded explicitly and idempotently.
