@@ -1,5 +1,30 @@
 # Airframe Investigation Plan
 
+## macOS Keyboard Shortcut Single Dispatch Path (Revised 2026-07-22)
+
+### Think Before Coding
+
+- The root issue was that SwiftUI menu `.keyboardShortcut`s (routed via `@FocusedValue`/`.focusedSceneValue`) were unreliable across multiple document windows: they fired in the wrong window or not at all. The earlier attempt added a window-scoped `NSEvent` monitor but left the menu shortcuts in place, so the fragile unmodified keys were registered on two paths and executed twice; a `CommandDeduplicator` time-window guard then tried to mask that. The durable rule: exactly one delivery path per key, bound to the correct (key) window.
+
+### Simplicity First
+
+- Kept the existing `LogViewCommands` menu structure, the `LogViewShortcut` dispatcher, and the command-specific enablement. Removed the workaround scaffolding (command scope UUID, target ID, `CommandDeduplicator`) and made the monitor the single dispatcher for all shortcuts. Net deletion of code.
+
+### Surgical Changes
+
+- `LogViewCommands` menu buttons carry no `.keyboardShortcut` anymore (click-only); `LogViewCommandState.Capabilities` equality reverts to keying on `logID`.
+- `LogDataView` keeps command-specific availability: frame stepping requires decoded log + flight info, interesting-time jumps require a target in the requested direction, zoom requires the active graph/spectrum surface to be ready, timeline range commands respect collapsed/unavailable state.
+- macOS `LogViewKeyCommandHost.KeyCommandView` overrides `NSView.performKeyEquivalent(with:)` as the sole dispatcher for every mapped shortcut (modified and unmodified), gated on `isKeyWindow` and skipping text-editing responders. Returning `true` for recognized keys suppresses the macOS system beep that a raw `NSEvent` monitor left in place; unrecognized keys return `false` for normal handling.
+- `LogViewShortcut.command(for:)` strips `.shift` for character keys, since shift is already encoded in the character (for example `⌘+` is physically `⌘⇧=`).
+- `DocumentView` no longer injects `airframeLogViewCommandScopeID` (removed).
+- UI test expectation for the Spectrum inspector uses the current `airframe.log.inspector.spectrum.frequencyGroups` identifier.
+
+### Goal-Driven Execution
+
+- Focused macOS `AirframeTests/LogViewSelectionTests` passing (mapping, enablement, logID equality, shift-stripping; dedup test removed).
+- Tradeoff accepted: menu items lose native key-equivalent glyphs. Hybrid fallback (native menu shortcuts for `⌘`/`⌥`, monitor only for unmodified keys) documented if discoverability is prioritized.
+- Remaining verification before commit: full macOS + iOS app test, manual two-window shortcut check, `git -C Airframe diff --check`.
+
 ## Motor Anomaly Detection (Implemented 2026-07-22)
 
 ### Think Before Coding
