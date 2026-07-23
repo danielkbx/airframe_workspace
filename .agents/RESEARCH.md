@@ -10,6 +10,7 @@
 - MSP handshake starts with API version, FC variant (`BTFL`), FC version, board info, and build info.
 - FlashFS uses `MSP_DATAFLASH_SUMMARY` (70), `MSP_DATAFLASH_READ` (71), and `MSP_DATAFLASH_ERASE` (72). Current Airframe scope leaves erase disabled.
 - CLI framing and Blackbox settings operate above the same transport. Airframe must remain an independent Swift-native implementation.
+- Sandboxed macOS apps require the Boolean `com.apple.security.device.serial` entitlement to interact with serial devices. Apple lists it as the hardware entitlement for serial-device interaction.
 
 ## USB CDC-ACM Betaflight CLI on iPadOS
 
