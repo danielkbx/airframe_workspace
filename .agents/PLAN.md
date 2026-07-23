@@ -1145,3 +1145,28 @@ Follow-up 4 (same day): reproducible simple->glow->details at fixed positions (e
 
 - Milestones M1 (computation + tests, PTB cross-check on the Damping set), M2 (view mode), M3 (sidebar trace list + tune), M4 (reference logs) are implemented and verified; follow-ups (bookmark restore, rcCommand-derived setpoint, rate-split traces, crosshair) are in BACKLOG.md.
 - Verification: 113 package + 223 app tests green; manual macOS run against `.../Maya/Tuning/Flights/2 Damping` shows PTB-consistent curves (ordering and peaks within a few percent).
+
+## Portable Graph Defaults and Immediate File Reset (2026-07-23)
+
+### Think Before Coding
+
+- Persisted Reader series IDs include schema-local field indexes, so portable presets must resolve identity by exact ID first and then by unique marker plus field name.
+- File reset must clear both current appearance state and the legacy values captured when the window opened; deleting only the repository entry cannot update that open store.
+
+### Simplicity First
+
+- Keep storage format `v1`, stored preset data, parser, analysis packages, renderer, and global Default semantics unchanged.
+- Resolve stored Graph/Table IDs only when `DocumentStateStore` materializes a setup for a concrete catalog.
+
+### Surgical Changes
+
+- `GraphSetup.Storage.resolved(for:)` remaps unique Reader identities and their Graph color slots, preserves derived/unavailable/ambiguous IDs, and uses existing section normalization for deterministic duplicate/slot handling.
+- `DocumentStateStore.resetDocumentSettings()` clears the mutable one-time legacy Graph/Spectrum values and invalidates default, resolved-appearance, and setup caches.
+- Focused coverage verifies index remapping, exact/ambiguous behavior, derived/unavailable preservation, color-slot transfer, duplicate collapse, and immediate factory Gyro/Motor restoration in the same open store.
+
+### Goal-Driven Execution
+
+- Focused macOS regression: 77 tests passed.
+- Full macOS `AirframeTests`: 283 tests passed.
+- Full iOS 26.4 simulator `AirframeTests`: 282 tests passed.
+- `git diff --check` passed. No persistence migration, public package API, dependency, or view-layer change was introduced.
