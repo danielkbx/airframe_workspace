@@ -214,3 +214,11 @@ Airframe inference:
 - Every section receives the same document time window and shares the global current-time bar and event overlays. Each section calculates its own Y projection/grid from its assigned fields, so only the X axis is synchronized.
 - Airframe should retain only ordered section names and ordered semantic series IDs in document state. Future native rendering uses equal-height sections, one shared time domain, and independent per-section Y domains; height weights, curves, colors, and smoothing are deliberately out of scope.
 - The reference viewer creates `Motors` and `Gyros` when no user graph configuration exists. Airframe mirrors that small default only for newly materialized Graph setups: motor channels in `Motors`, gyro channels in `Gyros`; Table keeps its separate Core Tuning defaults.
+
+## macOS USB Flight Controller Validation
+
+- Real-hardware validation on 2026-07-23 used a SpeedyBee F405 V5 exposed as `Betaflight STM32F405` at `/dev/cu.usbmodem0x80000001`.
+- The signed sandboxed app works with `com.apple.security.device.serial`; `com.apple.security.device.usb` is not required for the current IOKit metadata scan plus serial callout transport.
+- Mutating the mutable dictionary returned by `IOServiceMatching(kIOSerialBSDServiceValue)` through bridged Core Foundation pointers caused an optimized ARM64 `EXC_BAD_ACCESS`. Matching the `IOSerialBSDClient` provider directly and filtering discovered services afterward avoids the unsafe mutation.
+- A real Betaflight 4.5.2 build returned `norevis` in the fixed seven-byte `MSP_BUILD_INFO` revision field. The Configurator treats this field as ASCII, not as a mandatory lowercase Git hash; Airframe must do the same.
+- The validated handshake completed MSP codes 1, 2, 3, 4, and 5, then code 70 reported a ready 16 MiB FlashFS with zero bytes used.
