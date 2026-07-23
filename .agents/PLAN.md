@@ -1,5 +1,28 @@
 # Airframe Investigation Plan
 
+## Settings UI Refresh — implemented 2026-07-23
+
+### Think Before Coding
+
+- The settings surface contains only two choices, so a tab hierarchy adds navigation without improving organization.
+- Preserve the global settings model, persistence keys, iCloud mirroring, defaults, and forced Dark Mode.
+
+### Simplicity First
+
+- Use one native grouped SwiftUI form on both platforms.
+- Present Raw Logs before Timeline and keep each explanation next to its standard control.
+
+### Surgical Changes
+
+- Remove only the one-tab macOS wrapper, widen the natural-height settings content to 560 points, and use scene padding.
+- Rename the General caption to Timeline without changing settings behavior or adding dependencies.
+
+### Goal-Driven Execution
+
+- Verification passed: 18 `AirframeCaptions` package tests, 28 macOS `AirframeGlobalSettingsTests`, macOS Debug build, iPhone 17 Pro / iOS 26.4 build, and iPad (A16) / iOS 26.5 build.
+- The localization catalog passes `jq empty`; stale General identifiers are absent; `git diff --check` passes.
+- Manual visual, keyboard-navigation, Dynamic Type, and VoiceOver checks remain open.
+
 ## Equal Airframe document log sources — implemented 2026-07-23
 
 ### Think Before Coding

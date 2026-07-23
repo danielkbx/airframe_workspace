@@ -11,6 +11,7 @@
 ## Raw-log opening and effective names (implemented 2026-07-23)
 
 - Global, iCloud-synced `RawLogOpeningPolicy` defaults to `ask` and offers only `Ask` or `Always Open Read-Only`. Ask presents one friendly benefits sheet per raw document lifetime; the File-menu conversion command presents the same sheet manually. The conversion toolbar button is removed.
+- User-facing copy calls the result an `Airframe document`; it must not call it an `editable document`, because users cannot edit the embedded log data.
 - Airframe package sidebars flatten main and attached source segments into one `Logs` section, globally numbered `Log N`, with the original filename as subtitle. Raw sidebars retain their file/log hierarchy. Neither mode has inline remove controls.
 - Package log context menus offer Rename and Export; attached package logs also offer Remove. Raw attached-log rows offer only Remove. Removing any segment row removes its complete attached source.
 - Raw-log removal confirmations explicitly state that the source log file is not deleted; removal only detaches it from the current window.
