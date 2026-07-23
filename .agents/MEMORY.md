@@ -130,6 +130,8 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - The first release reads onboard FlashFS through MSP and can save a CLI `dump`. MSP SD-card file download is unavailable.
 - macOS USB discovery uses IOKit USB serial callout devices and opaque stable IDs. Serial I/O uses `/dev/cu.*` at 115200 8N1 raw mode on a dedicated queue.
 - The USB path is hardware-validated with a sandboxed SpeedyBee F405 V5 running Betaflight 4.5.2. Build revision fields are printable seven-byte ASCII and may contain `norevis`, not only Git hex.
+- FlashFS download uses uncompressed 4,096-byte MSP v1 jumbo reads, writes validated bytes directly to a temporary file, reports byte-derived progress, and retries a timed-out chunk once. Normal downloads remove partial files on final failure or cancellation; explicit resume mode preserves confirmed partial bytes.
+- Production discovery must never inject mock devices. Preview mocks are compiled only in Debug; macOS currently shows real USB devices only and iOS/iPadOS remains empty until CoreBluetooth is implemented.
 - Serial transports can only be created from a currently discovered provider-owned device mapping; the app does not accept user-provided device paths.
 - `Delete Logs After Import` remains visible but disabled in the current scope.
 - Imported Blackbox bytes remain byte-identical. Temporary files are retained until successful materialization or definitive cancellation.
