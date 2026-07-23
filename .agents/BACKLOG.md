@@ -17,6 +17,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Consider an optimized internal or persisted log representation after profiling parsing, seeking, memory use, and app startup behavior.
 - Improve Airframe package autosave after profiling FileWrapper replacement costs for large main and reference logs; consider coordinated incremental package writes or native document subclasses if unchanged log payloads are repeatedly copied or uploaded.
 - Investigate an upstream Betaflight firmware patch that enters USB MSC from a local button gesture, e.g. triple-press on a configured button while disarmed and storage-ready, reusing `systemResetToMsc(...)`; scope depends on target button availability and upstream UX/safety acceptance.
+- Make the Flight Controller Import Assistant device list continuously live while visible: reflect USB attach/detach and BLE discovery/loss immediately, preserve an explicit valid selection, and recompute the preferred automatic selection when availability changes.
 - Design bookmarks for important log positions before adding persistence. Define behavior, typed data, source/segment identity, editing, and navigation first; do not reserve speculative fields in the Airframe document format.
 - Investigate whether `blackbox-tools` can provide reliable golden outputs for Swift parser tests.
 - Investigate fixture sources for representative Betaflight logs across firmware versions, GPS usage, multiple flights, and corrupted/truncated logs.
