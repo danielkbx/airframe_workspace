@@ -6,6 +6,9 @@ Agents must update this file proactively when they learn a better command, workf
 
 ## General Rules
 
+- In zsh, `status` is a read-only special parameter. When preserving a command exit code around log inspection, use a task-specific name such as `test_exit_code=$?`.
+- For macOS beachball diagnosis, build into an isolated DerivedData path, launch only that exact app binary, resolve its PID from the binary path, and capture `sample <pid> 5 -file <path>`. Two-document sampling can distinguish global-executor decode load from synchronous MainActor body churn without modifying the app; terminate only the isolated test PID afterward.
+- SwiftUI `.disabled` and `.allowsHitTesting(false)` do not automatically suppress AppKit local `NSEvent` monitors or always-active tracking areas inside representables. Native scroll/pointer helpers must propagate `EnvironmentValues.isEnabled`, guard monitor callbacks, restore cursor/crosshair state when disabled, and return unhandled events unchanged.
 - SwiftUI `.inspector` content is hosted separately from the modified content view and does not inherit an environment value applied only to that content. Pass document-scoped environment values explicitly inside the inspector closure.
 - SwiftUI `.inspector` can adapt to overlay presentation on macOS at narrow widths. It has no public API for forcing a permanent side-by-side layout; keep the content's geometry self-contained when native inspector appearance takes priority.
 

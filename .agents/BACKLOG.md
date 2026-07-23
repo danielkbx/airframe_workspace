@@ -53,6 +53,7 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
   - Exact upstream `rcCommands[3]` throttle handling is already matched (minthrottle/maxthrottle mapping); revisit only if upstream changes.
 - Add video sync and video export support. Reuse Graph playback's shared current-position master timeline, monotonic anchor semantics, and global rate; the video player should synchronize to that transport rather than own an independent UI timer.
 - Add large-log performance work if profiling shows slow startup, seeking, memory pressure, or repeated viewport queries.
+- Harden Graph/Timeline gap rendering against genuinely pathological damaged logs: coalesce visual gap spans, replace per-point `gaps.contains` segmentation with a sorted two-pointer pass, and apply the Graph gap-chip cap before building all visible chip models. The 2026-07-23 false-gap cadence fix removes the current real-log trigger; this remains defense in depth.
 - Add `airframe frames` to dump selected decoded frames by marker, time range, and limit for low-level debugging.
 - Add `airframe summary` as a compact one-line-per-log command for shell pipelines.
 - Add `airframe stats` for simple min/max/average/count over selected fields and time windows.
