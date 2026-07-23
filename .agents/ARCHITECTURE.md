@@ -87,6 +87,7 @@ Do not collapse source, segment, session, and runtime-window identity.
 
 - iOS: `WindowGroup` → `HomeView` → one `AirframeUIDocument` workspace.
 - macOS: `NSDocumentController`/`AirframeNSDocument` plus one start window when no document is visible.
+- `FlightControllerImportCompletionCoordinator` keeps assistant acquisition independent from new-document destination, persistence, opening, and post-success temporary cleanup. iOS transfers the payload out of the assistant before presenting `fileExporter`; cancellation restores the same completed assistant state.
 - `DocumentHomeView` owns the document `NavigationSplitView`.
 - Sidebar chooses a log; detail chooses Overview, Table, Graph, Spectrum, or Step Response.
 - `EnvironmentValues.airframeLogContext` passes the selected summary, decoded log, analysis workspace, issues, progress, and flight info.

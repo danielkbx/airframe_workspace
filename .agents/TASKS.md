@@ -17,7 +17,7 @@ Only approved near-term work and unresolved items belong here. Completed work be
 ## Flight Controller Import Assistant
 
 - Execute the approved commit sequence on `feature/flight-controller-import`, stopping after every commit for review.
-- Current review gate: commit 9 (append-capable Airframe format version 2 and materializer) is implementation- and test-validated; commit 10 must not start before explicit approval and the commit-9 review.
+- Current review gate: commit 10 (new-document flight-controller payload consumer) is implementation- and test-validated; commit 11 must not start before explicit approval and the commit-10 review.
 - Commit 1: feature branches, pinned Configurator reference, and durable project context.
 - Commit 2: generic `MSP` package.
 - Commit 3: `FlightController` domain and discovery.
