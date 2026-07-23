@@ -5,6 +5,7 @@ Implement the Flight Controller Import Assistant on `feature/flight-controller-i
 ## Think Before Coding
 
 - Keep `MSP` generic and independent of Betaflight, Blackbox, transports, documents, and UI.
+- Log MSP/CLI communication metadata through `Logging` without recording payload or CLI contents.
 - Keep Betaflight behavior and serial/BLE transports in `FlightController`.
 - The assistant returns a file-backed `FlightControllerImportPayload`; it never decides whether to create or extend a document.
 - The app-side materializer creates a new package now and exposes the same atomic append path for future imports into open documents.
