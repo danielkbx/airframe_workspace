@@ -1,5 +1,7 @@
 # Tooling Knowledge Base
 
+- A pure `.borderless` AppKit `NSWindow` hosting SwiftUI through `NSHostingController` collapsed to an AX-reported `900 × 0`/invisible window in Airframe. For a visually borderless fixed SwiftUI window, use a technically `.titled` + `.fullSizeContentView` window, hide title/traffic-light controls, make the title bar transparent, then call `setContentSize` after assigning the hosting controller. Verify runtime window geometry through System Events, not only by compiling.
+- Resolve validation paths relative to the command's explicit `workdir` exactly once. With `workdir` set to the public `Airframe/` submodule, package paths begin with `Packages/`, not `Airframe/Packages/`.
 - Validate `.xcstrings` catalogs as JSON with `jq empty`, not with `plutil -lint`; `plutil` reports valid String Catalog JSON as an unexpected leading `{`.
 - When several simulator runtimes contain identically named devices, take destination IDs from the scheme's `xcodebuild` available-destinations error/listing. `xcrun simctl list devices available` can include devices from runtimes that the active Xcode project cannot target.
 

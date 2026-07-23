@@ -1,5 +1,32 @@
 # Airframe Investigation Plan
 
+## Shared start view and entry lifecycle — implemented 2026-07-23
+
+### Think Before Coding
+
+- Kept the view shared while leaving file access and document ownership in the existing platform shells.
+- Used AppKit's genuine recent-document URLs on macOS only; did not invent an iOS recent-history store.
+
+### Simplicity First
+
+- Reused the existing iOS importers, macOS `NSDocumentController`, folder importer, app icon, and document error paths.
+- Added no dependency, document-browser migration, bookmark database, or flight-controller protocol.
+
+### Surgical Changes
+
+- Added the shared `StartView`, one macOS `StartWindowController`, File > New…, iOS Close Document, localized captions, previews, and focused lifecycle/recent tests.
+- Refined the action cards to a compact icon-beside-copy layout; macOS keeps the three actions side by side and iOS remains width-adaptive.
+- Made the macOS start window visually borderless and fixed at 900 × 700 pt, using full-size content behind a transparent hidden AppKit title bar because a pure `.borderless` SwiftUI-hosted window collapsed to zero height. Native traffic-light controls stay hidden and a localized accent-colored Close button supports Command-W.
+- Matched the three-card action row to the 720 pt recent-list width, added enabled-card hover feedback, reduced the Close control to a corner-aligned background-free accent `xmark`, and renamed `Open Raw Log` to `Open Log`.
+- Removed the hidden AppKit title bar's residual top safe-area inset from the hosted macOS start view, making the declared top/right padding match the visible window edges.
+- Preserved parser, analysis, package schema, and the eight-log folder limit.
+
+### Goal-Driven Execution
+
+- macOS and generic iOS Simulator builds pass.
+- Focused start-view/menu/lifecycle tests and all `AirframeCaptions` package tests pass.
+- A full macOS `AirframeTests` run still reports two unrelated pre-existing `BlackboxAnalysis` projection/passthrough failures; the start-view test failure found in that run was fixed and passes in the focused rerun.
+
 ## Settings UI Refresh — implemented 2026-07-23
 
 ### Think Before Coding

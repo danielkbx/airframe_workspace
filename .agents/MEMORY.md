@@ -1,5 +1,13 @@
 # Project Memory
 
+## Shared start view and document entry points (implemented 2026-07-23)
+
+- Airframe now uses one shared SwiftUI `StartView` on iOS and macOS. It presents compact horizontal-content action cards for `Open Log` (raw or Airframe document), opening up to eight raw logs from a folder, and a visible disabled `Import from Flight Controller` action marked `Coming Soon`. Card symbols are vertically centered beside their copy; macOS always keeps all three cards in one row, while iOS stacks them only when width requires it. The action row and recent-document section share the same 720 pt maximum width, and enabled cards use a short accent-border/light/scale hover treatment.
+- iOS replaces its former `ContentUnavailableView` with the shared start view and adds a toolbar `Close Document` action. Closing first flushes pending workspace changes and closes any `AirframeUIDocument`; failure keeps the document visible, while success clears the single workspace and returns home.
+- macOS owns one non-document `StartWindowController` window. It is fixed at 900 × 700 pt and uses a full-size content view with a transparent hidden title bar and hidden native traffic-light controls; using a technically titled window avoids AppKit collapsing a pure borderless SwiftUI-hosted window to zero height. The hosted start view ignores only the hidden title bar's top safe-area inset, so its own 42 pt content padding and the background-free accent `xmark`'s equal 12 pt top/right padding are measured from the visible window edges. It remains movable by its background and supports Command-W. Empty launch, Dock reopen without visible windows, closing the final `NSDocument`, and File > New… (Command-N) show or focus it. Successful opens close it; cancellations and failures leave it visible. It is suppressed during app termination.
+- macOS start-view recents come only from `NSDocumentController.recentDocumentURLs`, preserve system order, deduplicate standardized URLs, and show at most eight filename/path rows. iOS deliberately has no custom recent-history or security-scoped bookmark store.
+- The existing folder-import semantics remain unchanged: Finder-style name order and at most eight total raw logs. Flight-controller transport remains future scope.
+
 ## Equal Airframe document log sources (implemented 2026-07-23)
 
 - Airframe package format version 1 now stores one stable ordered `Metadata.logs` array. It no longer stores `mainLog`, `referenceLogs`, or a speculative `bookmarks` field. Existing pre-change packages are deliberately unsupported and no migration or format-version bump was added because there are no real users.
