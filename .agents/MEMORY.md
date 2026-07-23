@@ -76,9 +76,9 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - The app registers raw `.bbl` and `.bfl` files plus Airframe package documents. `.txt` and `.log` are not system-wide document types.
 - Raw logs are read-only and never modified.
 - `AirframeWorkspaceDocument` is the shared model for raw logs and `.airframe` packages.
-- Package format version 1 contains `metadata.json` and byte-identical source payloads stored under SHA-256-derived paths.
-- Flight-controller import will introduce package format version 2 with ordered FC import snapshots and content-addressed CLI configuration payloads while retaining version-1 read compatibility.
-- `FlightControllerImportPayload` is independent of document creation. One app-side materializer creates a new package today and can append the same payload to an existing package later.
+- Package format version 2 contains `metadata.json`, byte-identical source payloads stored under SHA-256-derived paths, ordered flight-controller import snapshots, and content-addressed CLI configurations under `flight-controller/config/<sha256>.txt`.
+- Version-1 packages remain readable and keep their original format version until a real mutation occurs.
+- `FlightControllerImportPayload` is independent of document creation. `AirframeImportMaterializer` uses one atomic mutation for both new-package creation and append; duplicate-only imports are complete no-ops, while configuration-only payloads can extend existing packages.
 - Package metadata uses one ordered `logs` array. All embedded sources are equal; there is no persistent main/reference distinction.
 - Package validation requires at least one source, unique full hashes and paths, safe relative paths, and matching byte counts and SHA-256 hashes.
 - Package source order is insertion order and drives global `Log N` numbering. Sources append; reorder UI does not exist.
