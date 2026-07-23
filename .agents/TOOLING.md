@@ -15,6 +15,8 @@ Agents must update this file proactively when they learn a better command, workf
 
 ## General Rules
 
+- When auditing several large context files, inspect line counts and headings first, then read files in bounded per-file chunks. One combined `sed` dump can be truncated and hide the exact duplication or contradiction being reviewed.
+
 - The app source/test groups in `App/Airframe.xcodeproj` use explicit file references. Add new Swift files to both their group and target source build phase. The installed `xcodeproj` Ruby gem (`1.28.1` observed 2026-07-23) is safer than hand-authoring PBX object IDs.
 - `FileDocumentWriteConfiguration` has no accessible public initializer. Focused document-format tests should call a small explicit serialization seam such as `packageFileWrapper()` rather than constructing `WriteConfiguration`.
 - In zsh, `status` is a read-only special parameter. When preserving a command exit code around log inspection, use a task-specific name such as `test_exit_code=$?`.
