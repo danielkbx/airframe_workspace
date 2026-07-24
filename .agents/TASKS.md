@@ -17,7 +17,7 @@ Only approved near-term work and unresolved items belong here. Completed work be
 ## Flight Controller Import Assistant
 
 - Execute the approved commit sequence on `feature/flight-controller-import`, stopping after every commit for review.
-- Current review gate: BLE Huffman compression and the hardware-validated 400-byte stable baseline are committed as Airframe `3677111`. Real end-to-end validation with a small-log FC on macOS, followed by real iOS/iPadOS validation, remains before the feature can be considered complete. Further BLE throughput optimization is deferred in `BACKLOG.md` until after this vertical slice.
+- Current review gate: the approved 12-commit implementation sequence is complete. Airframe `b3c8be7` is hardware-validated end to end on macOS and real iPadOS through SpeedyBee V2, including the Legacy-BLE log-only policy. Further BLE throughput optimization and continuous live discovery remain deferred in `BACKLOG.md`.
 - Commit 1: feature branches, pinned Configurator reference, and durable project context.
 - Commit 2: generic `MSP` package.
 - Commit 3: `FlightController` domain and discovery.
@@ -35,7 +35,6 @@ Only approved near-term work and unresolved items belong here. Completed work be
 
 - Decide whether a future transformed/persisted index is justified only after profiling package open, seek, memory, and autosave costs.
 - Decide the final project license before adding SPDX license identifiers.
-- Identify the Apple Developer Team ID before final signing setup.
 
 ## Current Constraints
 
