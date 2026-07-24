@@ -7,6 +7,8 @@
 - Pinned reference commit: `14a050b7b57b4addadc209e5b67b3cfd9fdef943`
 - The Configurator treats serial, Web Bluetooth, and native BLE as raw byte transports beneath the same MSP/CLI layer.
 - Known SpeedyBee BLE UART profiles include FF00/FF01/FF02, V1 `1000/1001/1002`, and V2 `ABF0/ABF1/ABF2`; the native Android implementation includes the FF00 profile relevant to current SpeedyBee hardware.
+- SpeedyBee Adapter 3 hardware evidence on macOS showed correct entitlements/TCC and an active `bluetoothd` scan while the adapter remained absent from Airframe's service-filtered results. The pinned Configurator Web Bluetooth path uses `acceptAllDevices: true` and discovers primary services only after connection, so advertisements cannot be assumed to contain the bridge service UUID.
+- A follow-up hardware retest confirmed CoreBluetooth discovery callbacks for Adapter 3 while neither a recognized service UUID nor a usable SpeedyBee name was present. Airframe therefore must publish all BLE callbacks and defer supported-profile validation entirely to post-connect primary-service discovery.
 - MSP handshake starts with API version, FC variant (`BTFL`), FC version, board info, and build info.
 - FlashFS uses `MSP_DATAFLASH_SUMMARY` (70), `MSP_DATAFLASH_READ` (71), and `MSP_DATAFLASH_ERASE` (72). Current Airframe scope leaves erase disabled.
 - CLI framing and Blackbox settings operate above the same transport. Airframe must remain an independent Swift-native implementation.
@@ -230,3 +232,5 @@ Airframe inference:
 - A second real controller exposed a full 8 MiB FlashFS. Airframe downloaded it through 2,048 sequential `MSP_DATAFLASH_READ` requests with 4,096 uncompressed bytes each, no retry, and clean disconnect/temporary-directory cleanup. The transfer took about 132 seconds, approximately 62 KiB/s.
 - Modern `MSP_DATAFLASH_READ` uses a seven-byte request (`UInt32 address`, `UInt16 length`, `UInt8 allowCompression`) and a response (`UInt32 address`, `UInt16 actualLength`, `UInt8 compression`, data). Airframe requests compression type 0 and validates address and lengths before every file write.
 - Betaflight reserves 4,112 response bytes for FlashFS and supports a maximum 4,096-byte data block. The resulting 4,103-byte response payload is transported as one MSP v1 jumbo frame and may arrive fragmented across serial reads.
+- Real SpeedyBee Adapter 3 validation on 2026-07-24 exposed the V2 service as CoreBluetooth short UUID `ABF0`, with `ABF1` write and `ABF2` notify characteristics. Bluetooth UUID matching must normalize short and full base-UUID forms.
+- Uncompressed 4,096-byte FlashFS responses were not reliable through this BLE adapter and produced MSP checksum mismatches. Uncompressed 512-byte reads transferred steadily without checksum errors. The Configurator requests 4,096 bytes with compression enabled, so compatible Huffman decompression is the likely future throughput path.
