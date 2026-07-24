@@ -12,13 +12,50 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 
 ## Parking Lot
 
+### Deferred BLE FlashFS Throughput Optimization
+
+Do this after the complete USB/BLE import vertical slice is working end to end. Until then, keep the hardware-validated 400-byte compressed path as the stable reference even though its roughly 3.2 KiB/s throughput is not product-acceptable.
+
+Current evidence:
+
+- Betaflight Configurator requests one Huffman-compressed `MSP_DATAFLASH_READ` response at a time with a 4,096-byte compressed output budget. It does not pipeline requests or add deliberate pacing.
+- Betaflight compression consumes complete 256-byte source chunks. A 256-byte compressed budget can validly produce zero decoded bytes; a 400-byte budget is sufficient for one worst-case source chunk.
+- The SpeedyBee V2 path with a 400-byte budget completed 1,577 responses and decoded 837,120 bytes over more than four minutes without retries, timeouts, checksum failures, or disconnection.
+- The stable path still achieved only about 3.2 KiB/s. The earlier uncompressed 512-byte path was about 3.4 KiB/s, so Huffman correctness alone did not improve throughput.
+- A compressed 512-byte experiment initially transferred about 75 KiB and then stalled. The exact failure class was not captured. Uncompressed 4,096-byte responses produced MSP checksum failures.
+- Airframe currently uses a one-second general MSP timeout. At 3.2 KiB/s, a near-4,096-byte wire response needs more than 1.25 seconds before firmware and scheduling overhead, so Configurator-sized experiments require a BLE dataflash-specific timeout.
+- CoreBluetooth exposes the negotiated maximum write value length but does not let Apple-platform apps directly select ATT MTU, connection interval, PHY, or connection priority.
+- The user knows an additional capability or operational trick supported by SpeedyBee adapters. Capture and investigate it when this backlog item becomes active; do not guess or design around it before then.
+
+Implementation sequence:
+
+1. Add bounded aggregate telemetry without logging payloads, device identifiers, or paths: maximum write length, notification fragment-size histogram, notifications per MSP response, response wire bytes, decoded source bytes, compression ratio, request-to-first-byte time, first-to-last-byte time, retry count, checksum failures, and timeouts.
+2. Add a dataflash-request timeout override and use 5 seconds for large BLE reads while leaving handshake and ordinary MSP request timeouts unchanged.
+3. Benchmark compressed output budgets `400`, `448`, `480`, `496`, `512`, `640`, `768`, `1024`, `2048`, and `4096` on the same Mac, adapter, FC, firmware, distance, and log contents.
+4. Run the same FC and adapter through Betaflight Configurator on the same Mac and record its effective rate and failure behavior. Configurator's nominal 4,096-byte request is not proof that every Apple BLE path sustains it.
+5. Select the largest stable budget or implement bounded adaptive fallback. A failure must retry the same source address, reduce the budget only for eligible timeout/checksum failures, preserve already confirmed file bytes, and never loop indefinitely.
+6. Treat a zero-character compressed response as an insufficient output budget, not end-of-log and not a retry at the same size.
+7. Throttle UI progress delivery to a bounded cadence so every small data block does not await a main-actor update. Keep the final progress value exact.
+8. Measure whether buffered file output changes throughput. Preserve sequential writes, bounded memory, byte identity, cancellation cleanup, and resumable confirmed offsets.
+9. Investigate the SpeedyBee-specific trick supplied by the user and compare it against the generic CoreBluetooth path before choosing the final strategy.
+10. Only consider multiple in-flight `MSP_DATAFLASH_READ` requests if all preceding work is insufficient. Configurator and firmware are stop-and-wait oriented; pipelining risks ambiguous matching and TX contention.
+
+Acceptance criteria:
+
+- Imported bytes and SHA-256 match a USB download of the same FlashFS contents.
+- No payload bytes, configuration text, local paths, or device identifiers enter logs.
+- Automatic fallback is bounded, observable, cancellation-safe, and cannot duplicate or skip source bytes.
+- The selected strategy completes representative small and large imports on macOS and iOS/iPadOS without checksum errors, stalls, or premature cleanup.
+- Throughput is reported with median and low-percentile results across repeated runs, not one favorable sample.
+- The assistant shows legible progress below one percent and a useful transferred-byte/rate detail.
+
 - When an approved real motor anomaly/desync log is available, anonymize it (remove craft/pilot/GPS and unrelated headers), retain required motor/eRPM frames, document expected motor/time intervals, and add it as a public end-to-end regression fixture.
 
 - Consider an optimized internal or persisted log representation after profiling parsing, seeking, memory use, and app startup behavior.
 - Improve Airframe package autosave after profiling FileWrapper replacement costs for large main and reference logs; consider coordinated incremental package writes or native document subclasses if unchanged log payloads are repeatedly copied or uploaded.
 - Investigate an upstream Betaflight firmware patch that enters USB MSC from a local button gesture, e.g. triple-press on a configured button while disarmed and storage-ready, reusing `systemResetToMsc(...)`; scope depends on target button availability and upstream UX/safety acceptance.
 - Make the Flight Controller Import Assistant device list continuously live while visible: reflect USB attach/detach and BLE discovery/loss immediately, preserve an explicit valid selection, and recompute the preferred automatic selection when availability changes.
-- HIGH PRIORITY: Make BLE FlashFS import substantially faster; the validated uncompressed 512-byte transfer at roughly 3.4 KiB/s is not product-acceptable. Exhaust practical optimization paths while preserving byte correctness and bounded memory: implement Configurator-compatible Huffman-compressed 4,096-byte reads, benchmark safe block sizes, inspect negotiated ATT MTU and notification behavior, remove avoidable request/response latency, evaluate pipelining only where MSP and firmware ordering make it safe, and compare throughput against Betaflight Configurator on the same FC/adapter. Also make sub-percent progress visibly legible and show transferred bytes/rate or equivalent native detail.
+- Give the Flight Controller Import Assistant actionable connection failures when the cause is known. Preserve typed transport and handshake errors through the runtime instead of collapsing them into one generic failure. At minimum distinguish a USB serial port held by another application, permission denial, device removal, open/configuration failure, MSP timeout or incompatible FC, BLE connection failure, missing service/characteristics, and notification setup failure. Keep an honest generic fallback for unknown causes; never claim that another app owns a port unless the OS error supports it.
 - Add an SD-card flight-controller import path that activates USB mass-storage mode, then presents a native Open dialog so the user can select Blackbox logs from the mounted volume.
 - Design bookmarks for important log positions before adding persistence. Define behavior, typed data, source/segment identity, editing, and navigation first; do not reserve speculative fields in the Airframe document format.
 - Investigate whether `blackbox-tools` can provide reliable golden outputs for Swift parser tests.
