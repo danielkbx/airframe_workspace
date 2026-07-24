@@ -40,6 +40,14 @@ Implementation sequence:
 9. Investigate the SpeedyBee-specific trick supplied by the user and compare it against the generic CoreBluetooth path before choosing the final strategy.
 10. Only consider multiple in-flight `MSP_DATAFLASH_READ` requests if all preceding work is insufficient. Configurator and firmware are stop-and-wait oriented; pipelining risks ambiguous matching and TX contention.
 
+### Complete Configuration Snapshots over Legacy BLE CLI
+
+- Betaflight 4.5.2 over SpeedyBee V2 completed a 498-byte `diff all`, while `dump all` stopped after 975 received bytes and timed out. This isolates the failure to sustained legacy interactive CLI output through the BLE serial tunnel, not CLI entry or command handling.
+- Do not persist `diff all` as a complete configuration snapshot. It requires exact firmware, target, build options, and defaults to reconstruct effective values, which would obstruct future configuration display and analysis.
+- USB may continue using interactive `dump all` on older firmware. Betaflight 4.5.4 and newer may use framed MSP CLI over BLE.
+- For older firmware over BLE, either expose full configuration capture as unsupported or implement a complete structured acquisition path. Do not claim that `dump master`, `dump profile`, and `dump rates` solve the problem until each individual output is proven to fit the bridge and all profiles, rate profiles, battery profiles, resources, serial ports, modes, mixers, and target-specific values are covered.
+- The user-supplied SpeedyBee adapter trick applies only to fast log transfer through a non-MSP path. It cannot solve CLI configuration capture and must remain scoped to the deferred log-throughput work.
+
 Acceptance criteria:
 
 - Imported bytes and SHA-256 match a USB download of the same FlashFS contents.
