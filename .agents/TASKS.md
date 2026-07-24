@@ -17,7 +17,7 @@ Only approved near-term work and unresolved items belong here. Completed work be
 ## Flight Controller Import Assistant
 
 - Execute the approved commit sequence on `feature/flight-controller-import`, stopping after every commit for review.
-- Current review gate: commit 11 (CoreBluetooth discovery and transport) is committed and independently reviewed; commit 12 (full BLE assistant integration) is approved and may proceed.
+- Current review gate: commit 12 (cross-platform USB/BLE assistant integration) is committed and independently reviewed. Real SpeedyBee hardware validation on macOS and iOS/iPadOS remains before the feature can be considered complete.
 - Commit 1: feature branches, pinned Configurator reference, and durable project context.
 - Commit 2: generic `MSP` package.
 - Commit 3: `FlightController` domain and discovery.

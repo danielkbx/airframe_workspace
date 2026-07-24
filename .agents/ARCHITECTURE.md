@@ -54,6 +54,8 @@ Dependencies point downward. Domain packages never depend on captions, SwiftUI, 
 
 FC acquisition writes byte-identical logs and optional CLI configuration to a managed temporary directory. The assistant returns `FlightControllerImportPayload`; `AirframeImportMaterializer` either creates a package or atomically appends the payload without coupling acquisition to document lifecycle.
 
+The app's neutral flight-controller runtime consumes provider replacement streams. On macOS it merges serial and Bluetooth snapshots; on iOS/iPadOS it consumes Bluetooth only. Provider-qualified assistant IDs map back to exact provider-owned devices, source failures remove only that source's snapshot, and all transports feed the same acquisition pipeline.
+
 Main-frame time is the primary query axis. Valid auxiliary frames are associated with the active main-frame interval.
 
 ## Identity
@@ -88,6 +90,7 @@ Do not collapse source, segment, session, and runtime-window identity.
 - iOS: `WindowGroup` → `HomeView` → one `AirframeUIDocument` workspace.
 - macOS: `NSDocumentController`/`AirframeNSDocument` plus one start window when no document is visible.
 - `FlightControllerImportCompletionCoordinator` keeps assistant acquisition independent from new-document destination, persistence, opening, and post-success temporary cleanup. iOS transfers the payload out of the assistant before presenting `fileExporter`; cancellation restores the same completed assistant state.
+- `DefaultFlightControllerImportAssistantRuntime` owns cross-platform discovery aggregation and provider routing. Discovery cancellation preserves the latest route map for selected-device handoff; beginning a new scan replaces it.
 - `DocumentHomeView` owns the document `NavigationSplitView`.
 - Sidebar chooses a log; detail chooses Overview, Table, Graph, Spectrum, or Step Response.
 - `EnvironmentValues.airframeLogContext` passes the selected summary, decoded log, analysis workspace, issues, progress, and flight info.
