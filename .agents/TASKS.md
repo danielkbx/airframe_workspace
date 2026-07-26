@@ -61,6 +61,17 @@ Approved plan: add a Mass Storage import method beside the existing Direct Mode.
   - Accessibility: the step capsules were fully hidden, leaving VoiceOver without progress context; the row now reports "Step X of Y" (`stepProgress`). Cards carry the `.isSelected` trait. Spinners keep their adjacent text as the spoken state.
   - Previews added for the import method on flash and SD card, and for the activated mass storage screen (drives the mock runtime via `.task`). The delete/replug progress phases need a written payload and are not preview-reachable without adding test hooks.
 
+## SpeedyBee Adapter 3 Wi-Fi Import
+
+Approved plan: add a third bulk-transfer method beside Direct and Mass Storage. The SpeedyBee Adapter 3 brings up its own open Wi-Fi AP (triggered over BLE), and Airframe downloads the raw `.BBL` over UDP. Protocol is in `SPEEDYBEE_REVERSE_ENGINEERING.md`, reference client in `tools/speedybee_wifi_probe.py`. Confirmed decisions: build macOS + iOS together (iOS Wi-Fi join needs the HotspotConfiguration entitlement and a configured Developer Team); keep Direct as an iOS fallback; always show the method cards but stack them vertically full-width and equal-height with a short property blurb each; use a macOS `airframe fc-wifi` CLI subcommand as the hardware harness for the transport steps. `availableImportModes` becomes an ordered, capability-aware list (`supportsWiFiDownload` detected via BLE name `SBADAPTER3_*`, confirmed by DEVICE_INFO `ADPT03116`). Implemented in verifiable steps.
+
+- Step 1 (done): SpeedyBee protocol core in the FlightController package. Pure, transport-agnostic byte layer: control-channel protobuf codec + framing, WIFI_INFO/DEVICE_INFO blob parsers, LIST/STAT parse with the `^BTFL_\d+\.BBL$` filter, CRC-16/MODBUS, UDP reassembly (dedupe + truncate), and the shared typed `SpeedyBeeError` surface. 16 Swift Testing cases over the doc §13 vectors. Package tests and macOS app build green. No hardware needed. Airframe commit `aafc131`.
+- Step 2 (next): `SpeedyBeeWiFiClient` over the Network framework (TCP 4279 control, TCP 4278 MSP prepare, UDP 4281 data) + hidden `airframe fc-wifi list`/`download` subcommand assuming the Mac is already joined. Verify against real adapter hardware.
+- Step 3: BLE Wi-Fi activation over the ABF3/ABF4 control channel + `fc-wifi activate`.
+- Step 4: Wi-Fi join automation (macOS CoreWLAN with manual fallback + rejoin; iOS NEHotspotConfiguration) and the full end-to-end `fc-wifi import`.
+- Step 5: assistant UX (ImportMode.wifi, ordered `availableImportModes`, `.prepareWiFi` step, stacked cards, captions, mock runtime).
+- Step 6: runtime wiring, entitlements (macOS `network.client`; iOS HotspotConfiguration + `NSLocalNetworkUsageDescription`), end-to-end in the app.
+
 ## Product Decisions Needed
 
 - Decide whether a future transformed/persisted index is justified only after profiling package open, seek, memory, and autosave costs.
