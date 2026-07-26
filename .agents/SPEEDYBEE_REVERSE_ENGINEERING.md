@@ -380,8 +380,13 @@ Observed:
 | BTFL_001.BBL  | `00 30 1f 00`                    | 2,043,904    |
 | BTFL_002.BBL  | `00 d0 e0 00`                    | 14,733,312   |
 
-The stat size is authoritative and is used to truncate the padded UDP payload
-(section 6.3).
+The stat size is used to truncate the padded UDP payload (section 6.3), but it is NOT the
+exact byte count: **STAT sizes are rounded up to 2048-byte blocks.** Every size observed on
+a second flash-based FC was an exact multiple of 2048 (88064 = 43 x 2048, 112640 = 55 x 2048,
+352256, 94208, 3465216, 3305472, 970752 — and the primary FC's 2,043,904 = 998 x 2048). The
+adapter streams only the true bytes, so the true size lies in `(STAT - 2048, STAT]` and the
+true packet count in a two-value window (section 6.3). An implementation that expects exactly
+`ceil(STAT / 2044)` packets can wait forever for a final packet that does not exist.
 
 ### 5.7 File select (op 0x70)
 
@@ -389,6 +394,15 @@ The stat size is authoritative and is used to truncate the padded UDP payload
 - Reply: `08 70`, delivered only after the UDP transfer completes.
 
 This is the trigger that makes the adapter start streaming the selected file over UDP.
+
+**The reply is the burst-finished signal — use it.** Treat the `08 70` ack as "the adapter has
+sent every packet of this burst", and gate loss recovery on it: only re-issue SELECT once the
+ack for the current burst has arrived (or after a long true-silence budget, ~15 s). Large logs
+pause mid-burst for multi-second flash reads; a re-SELECT issued during such a pause interrupts
+the burst, and repeated interruptions progressively degrade the adapter until it stops
+streaming and eventually stops answering STATUS altogether (only a power cycle recovers it).
+This was observed on hardware with back-to-back multi-megabyte downloads; a naive fixed 2 s
+inactivity reburst works for small files but wedges the adapter on large ones.
 
 ## 7. UDP 4281 — bulk data channel
 
@@ -426,7 +440,42 @@ UDP has no built-in retransmission and the adapter does not implement selective 
 - Throughput observed: ~150 KiB/s (roughly 75 packets/s). A ~2 MB log takes ~14 s.
 
 There may be a smarter targeted re-request we have not found, but re-SELECT is confirmed to
-work and always converges.
+work and converges when the burst-finished ack gates it (section 5.7).
+
+### 6.1.2 Multi-file sessions (confirmed on hardware, 7 logs / 8.4 MB in one session)
+
+Downloading several logs back-to-back over one session works, but exposes behaviour that
+single-file downloads never show:
+
+- **Finishing a file mid-reburst leaves the adapter streaming the rest of that restream.**
+  The leftover datagrams keep arriving on the shared UDP socket. Two consequences: they can be
+  misread as the next file's packets (guard the reassembler against sequence numbers outside
+  `0..<packetCount`), and the adapter **ignores control requests such as STAT while it is
+  still streaming**. Before each file, drain the UDP socket until it stays quiet, with a budget
+  large enough for a worst-case leftover restream (tens of seconds for a multi-megabyte log at
+  ~150 KiB/s), and retry STAT a few times with drains in between. The quiet window must exceed
+  the multi-second mid-burst pauses (~3 s) whenever a leftover restream is possible; when the
+  previous file ended with its burst ack, a short safety window (~0.3 s) suffices.
+- **The adapter is a buffering relay, and large files change gear at a fixed offset.** The
+  adapter does not hold the logs; it reads them from the flight controller (in mass-storage
+  mode) over its wired link into RAM and streams from RAM at full WiFi speed. For files larger
+  than its buffer (~3.2 MB observed), the stream visibly slows at that fixed offset while the
+  adapter fetches the remainder from the FC; its display switches from the voltage readout to
+  a transfer glyph for the duration. This tail phase runs at the FC-read speed and is inherent
+  to the adapter; it happens at the same file positions on every run.
+- **Enumerate once per session.** LIST needs to be polled once after prepare to wait for the
+  flash enumeration, but re-polling it between files after large transfers has been observed to
+  stick at the "not ready" value 22. The enumeration persists for the session; go straight to
+  STAT for subsequent files.
+- **Keep the receive loop free of per-packet blocking work.** A synchronous progress callback
+  or log write per packet slows the loop enough to drop packets clustered at the end of each
+  burst (the losses look deterministic, always near the tail). Throttle progress reporting to a
+  timer (~150 ms) and never log per packet.
+- **If a re-SELECT yields nothing, re-arm the session** the way the handshake does: drain, then
+  re-send the `"SPEEDYBEE\0"` trigger and poll STATUS until the bare ack, then SELECT again.
+- Context: the official app downloads one user-picked file at a time, so real usage has long
+  user-paced gaps between files and never stresses these paths. An importer that fetches all
+  logs back-to-back must add the drains and ack-gating itself.
 
 ### 6.2 Data packet layout
 
@@ -451,8 +500,21 @@ offset 4..2047  : file data          2044 bytes
   999 carries 1948 real bytes.
 - The last packet's data region is still transmitted as a full 2044 bytes (padded). The
   client truncates the reassembled stream to the STAT size to drop the padding.
-- General rule: `packet_count = ceil(file_size / 2044)`; the last packet has
-  `file_size - (packet_count-1)*2044` real bytes; discard the rest.
+- **The packet count is a two-value window, not a single number.** STAT is block-rounded
+  (section 5.6), so the true size lies in `(STAT - 2048, STAT]` and the adapter streams
+  `ceil(true_size / 2044)` packets:
+  - upper bound `max = ceil(STAT / 2044)`
+  - lower bound `min = ceil((STAT - 2047) / 2044)` (equal to `max` or `max - 1`)
+  Verified on hardware and by packet capture: for STAT 112,640 the adapter streamed 55
+  packets (min) in nine consecutive bursts — the 56th never existed; for STAT 88,064 it
+  streamed the full 44 (max).
+- Completion rule: a transfer is done when a gap-free prefix of at least `min` packets has
+  arrived AND the SELECT completion ack (section 5.7) has been received. Assemble the prefix
+  and truncate to the received bytes (at most STAT). Interior gaps still require a reburst.
+- Note for capture tooling: each 2048-byte payload exceeds the WiFi MTU, so every data
+  datagram arrives as TWO IP fragments (~1514 + ~590 bytes). A BPF filter like
+  `udp port 4281` matches only the first fragment (the second has no UDP header); capture
+  with a host filter instead when the full payload matters.
 
 ### 6.4 Reassembly algorithm
 
@@ -527,10 +589,16 @@ Times are seconds relative to capture start.
 
 ## 9. Open questions
 
-None remain for the log-download workflow. Everything from BLE-triggered WiFi activation
-through the WiFi bulk transfer to a byte-valid `.BBL` file has been captured, reproduced,
-and verified. Ideas worth exploring later if we go deeper:
+The log-download workflow itself is fully captured, reproduced, and verified end to end.
+Remaining questions:
 
+- **Why do rebursts lose packets that initial bursts do not?** Interface-level captures show
+  restreams missing small clusters of consecutive sequences (3-5 packets) at partially
+  repeating positions, with no timing gap around them (neighbours 3-26 ms apart), while the
+  first burst of the same small, fully RAM-buffered file arrives complete. The packets are
+  absent at the receiver's interface, so the loss happens on air or inside the adapter. A
+  monitor-mode capture of the adapter's transmissions during a reburst would settle whether
+  they are ever sent. Practically the reburst-with-dedupe recovery converges anyway.
 - Op-code map beyond what we use (0x05..0x0c, 0x10..0x16, 0x19..0x6d, 0x71..0x72, 0x74..0x7f
   are unassigned in what we have seen). Some likely cover firmware update, reboot, disable
   WiFi, and adapter-side settings that Airframe does not need for imports.
@@ -716,11 +784,18 @@ work. Consult this list before writing code and again before declaring the impor
 - [ ] SELECT (op 0x70) to start the burst; the reply on TCP 4279 does **not** come back
       until the transfer completes. Don't block on it while receiving UDP data.
 - [ ] Receive UDP packets; verify each one's CRC-16/MODBUS over the 2044-byte data
-      region; keep a `seq → bytes` map to deduplicate. If a stall of ≥ 2 s occurs and
-      packets are missing, re-issue SELECT (bare `"SPEEDYBEE\0"` triggers are ignored
-      after a burst finishes).
-- [ ] Cap rebursts at ~5. Beyond that, surface a "download failed" typed error rather
-      than looping forever.
+      region; keep a `seq → bytes` map to deduplicate, ignoring sequence numbers outside
+      the file's `0..<packetCount` (leftovers from a previous file's restream).
+- [ ] Gate rebursts on the SELECT completion ack (section 5.7): on ≥ 2 s of UDP silence,
+      check the control channel for the pending `08 70` ack; re-issue SELECT only once it
+      has arrived, or after ~15 s of true silence. Never re-SELECT mid-burst — large logs
+      pause for flash reads, and repeated interruptions wedge the adapter (section 6.1.2).
+      Bare `"SPEEDYBEE\0"` triggers are ignored after a burst finishes.
+- [ ] Keep the receive loop free of per-packet blocking work; throttle progress reporting
+      to a timer (~150 ms). Per-packet UI or log writes cause tail-biased packet drops.
+- [ ] Cap rebursts (~8). If a reburst yields nothing, re-arm the session (drain, trigger +
+      STATUS to the bare ack) before the next SELECT. Beyond the cap, surface a "download
+      failed" typed error rather than looping forever.
 - [ ] Concatenate the data regions in seq order and truncate to the STAT size. Result is
       a raw Betaflight `.BBL`; it feeds the existing blackbox pipeline unchanged.
 - [ ] After completion, treat WiFi mode as one-shot: don't re-issue op 0x18 across
@@ -750,11 +825,18 @@ that were observed:
 ### 14.4 Timeouts (values that worked in practice)
 
 - Control-channel single-request/reply on BLE and TCP: 2 s per exchange.
-- STATUS poll interval: 0.7 s; overall STATUS-settle budget: 15 s.
-- MSP prepare: 2 s per attempt, 3 attempts.
+- STATUS poll interval: 0.7 s; overall STATUS-settle budget: 45 s. Session establishment
+  after joining the AP legitimately takes 20 s or more (the official app shows the same
+  delay); a 15 s budget produces false "stuck busy" failures.
+- MSP prepare: 2 s per attempt, up to 4 attempts while a present reply reports readiness 0.
 - LIST poll interval: 0.7 s; overall budget: 15 s.
-- UDP receive: 2 s inactivity → stall → reburst.
-- Reburst cap: 5.
+- UDP receive: 1 s inactivity → check for the SELECT completion ack; reburst only after the
+  ack, or after 15 s of true silence.
+- Reburst cap: 8, with a session re-arm (drain + trigger + STATUS settle) after a fruitless
+  reburst.
+- Inter-file drain: quiet window 3 s when a leftover restream is possible (must exceed the
+  mid-burst flash pauses), 0.3 s after a clean ack-terminated file; budget ~60 s.
+- STAT: 2 s per attempt, 3 attempts, draining between attempts.
 - WiFi AP appearance after WIFI_START: 10 s scan budget.
 
 ### 14.5 Do not
