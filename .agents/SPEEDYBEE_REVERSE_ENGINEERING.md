@@ -673,10 +673,16 @@ work. Consult this list before writing code and again before declaring the impor
 ### 14.2 WiFi
 
 - [ ] Scan/join the SSID from WIFI_INFO. Open, no PSK. Do not hardcode the channel.
-- [ ] On iOS use `NEHotspotConfiguration` with `joinOnce = true`; on macOS use the
-      `CWWiFiClient` join API. Both must handle the case where the user's current WiFi is
-      needed elsewhere — Airframe should offer to rejoin the prior network after the
-      import.
+- [ ] On iOS use `NEHotspotConfiguration` with `joinOnce = true` (needs the
+      HotspotConfiguration entitlement); on macOS use the `CWWiFiClient`/`CWInterface`
+      associate API. macOS CoreWLAN scanning and association require Location Services
+      authorization on macOS 14+, so a process without an app bundle (a plain CLI) is not
+      authorized and the join throws. Provide a manual fallback: tell the user which SSID to
+      join and poll the adapter's control port (`192.168.1.1:4279`) for TCP reachability until
+      it connects. Both paths must handle the case where the user's current WiFi is needed
+      elsewhere. Rejoin the prior network after the import (on macOS, re-associate if reachable
+      or disassociate and let the system auto-rejoin a remembered network; the manual path
+      cannot rejoin a secured network without its password, so it leaves that to the user).
 - [ ] The adapter is always at `192.168.1.1`; do **not** discover via mDNS (the adapter
       advertises nothing).
 - [ ] Open the UDP receive socket **early**, before starting STATUS polling. The adapter
