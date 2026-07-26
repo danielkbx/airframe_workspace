@@ -74,8 +74,23 @@ Approved plan: add a third bulk-transfer method beside Direct and Mass Storage. 
   - Multi-file readiness: the client already supports it (`listLogs()` returns all `BTFL_NNN.BBL`; multiple `download(name:)` on one client share a single prepare). The download-all loop is Step 4; not yet hardware-tested since the test FC has one log.
 - Step 4 (done, hardware-verified single-log): Wi-Fi join handling + full single-session import. `WiFiNetworkJoining` protocol with `CoreWLANWiFiJoining` (macOS; needs Location auth so it throws from a plain CLI), `HotspotConfigurationWiFiJoining` (iOS, compiled only, wired in Step 6), and `ManualWiFiJoining` (prompt + poll TCP reachability of 192.168.1.1:4279). `SpeedyBeeAdapter3WiFiImporter.importAllLogs(into:joining:progress:)` activates over BLE, joins, downloads every log with ONE client (single prepare, so the FC reboots to mass storage once), writes files, restores the previous network, reports a typed `SpeedyBeeImportProgress`. Package links CoreWLAN (macOS) / NetworkExtension (iOS). New `fc-wifi import` CLI (manual join by default, `--auto-join` for CoreWLAN). Verified on the Flywoo F405S: `fc-wifi import` produced `BTFL_001.BBL` (391168 bytes) end to end. Airframe commit `09e06a9`.
   - Still unexercised on hardware: the multi-file loop (test FC has one log). Code is single-prepare-safe for N files.
-- Step 5: assistant UX (ImportMode.wifi, ordered `availableImportModes`, `.prepareWiFi` step, stacked cards, captions, mock runtime).
-- Step 6: runtime wiring, entitlements (macOS `network.client`; iOS HotspotConfiguration + `NSLocalNetworkUsageDescription`), end-to-end in the app.
+- Step 5 (done, verified in app on macOS for the detectable cases): assistant UX. Added `ImportMode.wifi`; Wi-Fi reuses the existing `.import` step (automatic like Direct, `prepareWiFi()` mirrors `prepareImport()`); method cards are now a vertical full-width equal-height stack rendered from the ordered `availableImportModes`; captions + progress strings added; mock runtime advertises the three device classes and drives a canned Wi-Fi progress; import progress screen shows activating/joining/downloading/rejoining. Runtime `prepareWiFi` default throws `wifiUnsupported` (real wiring is Step 6). Capability model uses two orthogonal signals on the state: `wifiCapable` (device exposes the ABF3/ABF4 control channel, carried as `Controller.offersWiFiDownload`; the `SBADAPTER3` name always counts) and `isExternalWiFiAdapter` (BLE name `SBADAPTER3_*`, meaning no host USB path).
+  - Method availability matrix (canonical). Three independent rules: Direct offered iff blackbox is onboard flash (MSP cannot read SD); Mass Storage offered iff a host USB path is possible (i.e. NOT the external adapter; a cable over BT cannot be detected so it is offered whenever plausible); Wi-Fi offered iff the device is Wi-Fi-capable (ABF3/ABF4), only detectable over BLE. Ordering: USB puts Direct first; BLE puts Wi-Fi first (when present), then Mass Storage, then Direct last. Grid (star = default):
+
+    | Connection | Device / capability | Storage | Direct | Mass Storage | Wi-Fi |
+    |---|---|---|---|---|---|
+    | USB (macOS) | any FC | Flash | yes (default) | yes | - |
+    | USB (macOS) | any FC | SD | - | yes (default) | - |
+    | Bluetooth | plain FC (no Wi-Fi) | Flash | yes | yes (default) | - |
+    | Bluetooth | plain FC | SD | - | yes (default) | - |
+    | Bluetooth | external SpeedyBee adapter | Flash | yes | - | yes (default) |
+    | Bluetooth | external SpeedyBee adapter | SD | - | - | yes (default) |
+    | Bluetooth | built-in-Wi-Fi FC | Flash | yes | yes | yes (default) |
+    | Bluetooth | built-in-Wi-Fi FC | SD | - | yes | yes (default) |
+
+  - Caveat: Mass Storage over Bluetooth cannot detect whether a USB cable is actually attached, so it is offered but may be unusable (the "powered by a powerbank, no cable to host" case). No current signal distinguishes this.
+  - Hardware-verified by the user (macOS): adapter+SD = Wi-Fi only; adapter+flash = Wi-Fi+Direct; USB flash = Direct+MSC; BT plain FC = Direct+MSC (or MSC-first); BT+USB same FC = MSC; adapter with the same FC = Wi-Fi only. All correct.
+- Step 6: runtime wiring (real `prepareWiFi` via `SpeedyBeeAdapter3WiFiImporter.importAllLogs`; detect ABF3/ABF4 presence at connect to set `Controller.offersWiFiDownload`; classify external adapter by the `SBADAPTER3` name), entitlements (macOS `network.client` + Location for CoreWLAN; iOS HotspotConfiguration + `NSLocalNetworkUsageDescription`), end-to-end in the app.
 
 ## Product Decisions Needed
 
