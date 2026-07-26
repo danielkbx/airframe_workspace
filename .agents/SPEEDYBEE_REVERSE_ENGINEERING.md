@@ -662,6 +662,11 @@ work. Consult this list before writing code and again before declaring the impor
 - [ ] Send `02 00 08 17` (WIFI_INFO); parse SSID + MAC out of the reply. Show them to the
       user so they know which network the device is bringing up.
 - [ ] Send `02 00 08 18` (WIFI_START); do **not** wait for a reply.
+- [ ] After WIFI_START, hold the BLE link briefly (~0.75 s) before disconnecting. WIFI_START is
+      a write-without-response with no reply, so nothing forces its transmission; disconnecting
+      immediately can drop the still-queued write and the AP never comes up (verified on
+      hardware). Requests that do get a reply, such as WIFI_INFO, are safe because waiting for
+      the notification already guarantees the write went out.
 - [ ] Disconnect BLE before the WiFi join. The Espressif SoC time-shares the radio; the
       AP comes up faster and more reliably without a lingering BLE link.
 
@@ -689,8 +694,19 @@ work. Consult this list before writing code and again before declaring the impor
 - [ ] Poll LIST (op 0x6e) with ~0.7 s delay until the reply blob is non-empty. Filter
       filenames by `^BTFL_\d+\.BBL$` before offering them to the user; skip
       `BTFL_ALL.BBL`, `PADDING.TXT`, and anything else.
-- [ ] STAT (op 0x6f) each file the user selected to get its uint32 size. This size is
-      authoritative and is used to truncate the final packet's padding.
+- [ ] Match every control reply to the opcode you requested, skipping any frame that carries a
+      different opcode. The adapter leaves stale frames buffered on TCP 4279 (a leftover STATUS
+      or a second LIST reply once enumeration finishes mid-poll). Reading "the next frame" and
+      assuming it is your reply desyncs the channel: a leftover LIST filename blob gets parsed as
+      a STAT size, yielding an absurd file size. Verified on hardware.
+- [ ] Do the whole download in ONE session: prepare once, poll LIST to wait for enumeration,
+      then STAT and SELECT. Do not re-issue prepare per file. Prepare reboots the FC into mass
+      storage, so a second prepare mid-session reboots it again and the burst returns zero
+      packets. For multiple logs, loop STAT+SELECT over the enumerated names on the same
+      connection without re-preparing.
+- [ ] STAT (op 0x6f) each file to get its uint32 size. This size is authoritative and is used
+      to truncate the final packet's padding. STAT and SELECT only work after LIST has
+      enumerated the flash; issuing them before enumeration returns no reply.
 - [ ] SELECT (op 0x70) to start the burst; the reply on TCP 4279 does **not** come back
       until the transfer completes. Don't block on it while receiving UDP data.
 - [ ] Receive UDP packets; verify each one's CRC-16/MODBUS over the 2044-byte data
