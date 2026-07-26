@@ -25,9 +25,15 @@ in this document — extend it rather than re-running the investigation.
   bytes were captured end to end.
 - Hardware under test: SpeedyBee Adapter 3, firmware/model id `ADPT03116`, adapter MAC
   `04:83:08:E8:C5:71` (Espressif OUI `04:83:08`, so an ESP32-class SoC), SSID
-  `SBADAPTER3_C571`. FC under test: SpeedyBee F435-AIO / F7 running Betaflight 4.5.0,
-  MSP API 1.47, build date 2025.12.5. Behaviour beyond this exact combo (other adapter
-  firmware, INAV FCs, Betaflight variants that are not `BTFL`) has not been verified.
+  `SBADAPTER3_C571`. Primary FC under test: SpeedyBee F435-AIO / F7 running Betaflight 4.5.0,
+  MSP API 1.47, build date 2025.12.5.
+- Second verified FC: a Flywoo F405S AIO running Betaflight 4.5.2 (MSP API 1.46), blackbox on
+  onboard flash. A native reimplementation downloaded `BTFL_001.BBL` (391,168 bytes, all
+  192 packets CRC-valid) end to end over WiFi. This combo behaves identically except for the
+  "prepare" reply, which it does not return over the bridge (see section 5); the download
+  still succeeds. It confirms the flow generalizes beyond the primary FC.
+- Behaviour beyond these combos (other adapter firmware, INAV FCs, Betaflight variants that
+  are not `BTFL`) has not been verified.
 
 ## 0. Compatibility scope
 
@@ -195,8 +201,8 @@ either vestigial or used only in other modes.
 ## 5. TCP 4278 — MSP passthrough and the "prepare" command
 
 TCP 4278 is a transparent bridge to the FC's MSP interface. It carries one **required**
-command in the download flow — do not treat it as a mere probe. The single observed
-exchange is:
+command in the download flow — do not treat it as a mere probe. The observed exchange on the
+primary FC is:
 
 ```
 client -> adapter : 24 4D 3C 01 44 02 47    $M<  size=1 cmd=0x44 payload=0x02 crc=0x47
@@ -207,15 +213,42 @@ MSPv1 framing: `$M<` (request) / `$M>` (reply), one byte payload length, one byt
 payload, one byte XOR checksum over (length ^ command ^ payload...). Command `0x44` = 68
 with a one-byte payload `0x02`.
 
-This command makes the FC expose its blackbox flash to the adapter. It is a hard
-prerequisite for listing: **without it, LIST (op 0x6e) never populates and keeps returning
-the "busy" value 22.** It must be sent after the control-channel status handshake settles
-and before LIST (see the flow in section 9). This was confirmed with the probe: skipping it
-leaves LIST stuck at 22 indefinitely; sending it makes the file list appear within ~1 s.
+**Command identity.** Command 68 is `MSP_SET_REBOOT`, and payload `0x02` is reboot mode 2 =
+mass storage (MSC). So "prepare" is literally "reboot the flight controller into mass-storage
+mode": the FC re-presents its blackbox storage as a filesystem, which the adapter then reads
+and serves over WiFi (LIST/STAT on TCP 4279, bulk data on UDP 4281). The reply payload is the
+standard `MSP_SET_REBOOT` shape `[rebootMode, readiness]`, so `02 01` means reboot mode 2 with
+readiness 1.
 
-The exact semantics of command 68 / payload `0x02` (mount, mass-storage select, or flash
-enable) are not pinned down, but the byte sequence is fixed and reproducible. The FC can be
-slow to answer right after a previous session; retry on timeout.
+This command is the hard prerequisite for listing: **without it, LIST (op 0x6e) never
+populates and keeps returning the "busy" value 22.** It must be sent after the control-channel
+status handshake settles and before LIST (see the flow in section 9). Confirmed on both FCs:
+skipping it leaves LIST stuck at 22 indefinitely; sending it makes the file list appear within
+about a second.
+
+**The reply is NOT guaranteed — do not require it.** Because this is a reboot-class command,
+firmware behaviour varies:
+
+- Primary FC (BF 4.5.0, API 1.47): replies `[2, 1]` (readiness 1) before rebooting.
+- Second FC (Flywoo F405S, BF 4.5.2, API 1.46): returns **no reply at all** over the bridge,
+  yet still reboots and exposes the flash; the download succeeds. An implementation that waits
+  for the prepare reply before continuing (as an early version of ours did) fails here with a
+  false timeout even though the FC is healthy (its MSP answers ordinary queries such as
+  `MSP_API_VERSION` and `MSP_FC_VARIANT` fine on the same socket).
+
+Correct handling, verified on both FCs:
+
+- Send `MSP_SET_REBOOT` mode 2 and read a reply with a short timeout, but treat a **missing
+  reply as success** (the FC rebooted without acking over the bridge). Prove readiness later by
+  polling LIST, not by this reply.
+- If a reply **is** present, inspect its readiness byte (`payload[1]`). Readiness 0 means the
+  FC declined because its filesystem was briefly busy (common right after boot); resend a few
+  times (about 4 attempts, ~0.4 s apart) before giving up. Any nonzero readiness means accepted.
+- After a successful prepare the FC has effectively left normal MSP operation, so do not expect
+  further MSP replies on 4278; everything else happens over the control and data channels.
+
+The FC can also be slow to answer ordinary queries right after WiFi comes up (first reply seen
+after ~3 s on the second FC), so keep per-exchange timeouts generous.
 
 ## 6. TCP 4279 — control channel
 
@@ -501,8 +534,6 @@ and verified. Ideas worth exploring later if we go deeper:
 - Op-code map beyond what we use (0x05..0x0c, 0x10..0x16, 0x19..0x6d, 0x71..0x72, 0x74..0x7f
   are unassigned in what we have seen). Some likely cover firmware update, reboot, disable
   WiFi, and adapter-side settings that Airframe does not need for imports.
-- Whether the MSP "prepare" command 0x44 has a corresponding "release" that safely
-  dismounts the FC mass storage.
 
 Resolved during this work:
 
@@ -511,7 +542,13 @@ Resolved during this work:
 - Packet-loss recovery: a bare `"SPEEDYBEE\0"` re-trigger after a finished burst is ignored;
   recovery is done by re-issuing SELECT (op 0x70), which restarts the burst from sequence 0,
   with client-side dedupe. No selective NACK exists.
-- The MSP "prepare" command on 4278 is required before listing.
+- The MSP "prepare" command on 4278 is required before listing. It is `MSP_SET_REBOOT`
+  (code 68) with reboot mode 2 (mass storage), so it reboots the FC into MSC and the adapter
+  serves the exposed filesystem over WiFi. Its `[rebootMode, readiness]` reply is optional:
+  one FC returned `[2, 1]`, another returned nothing yet still exposed the flash and downloaded
+  successfully. Do not require the reply; retry only while a present reply reports readiness 0.
+  The implicit "release" is a normal FC reboot back to firmware or a power cycle; no explicit
+  dismount command is needed for the import workflow.
 - Session tokens (`"3197"`, `"1784904552"`) can be replayed verbatim.
 - STATUS must settle to a bare ack, and the UDP port must be registered early, before the
   session advances.
@@ -568,7 +605,9 @@ WiFi phase:
 9. Control: HELLO (0x03), SESSION (0x04, `"3197"`), DEVICE_INFO (0x0d, `"1784904552"`).
 10. Send `"SPEEDYBEE\0"` to `:4281` from the UDP socket, then poll STATUS (0x73), re-sending
     the trigger each poll, until STATUS returns a bare ack.
-11. MSP: send `$M< cmd=0x44 payload=0x02` on 4278; read the reply (retry on timeout).
+11. MSP: send `$M< cmd=0x44 payload=0x02` on 4278 (`MSP_SET_REBOOT` mode 2, mass storage).
+    Treat a missing reply as success; if a reply arrives, resend only while its readiness byte
+    is 0. Do not block the flow on the reply (see section 5).
 12. Poll LIST (0x6e) until the reply blob is non-empty; parse backslash-separated names.
 13. STAT (0x6f) the target file to get its uint32 size.
 14. SELECT (0x70) the file and send one `"SPEEDYBEE\0"`; the UDP burst begins.
@@ -641,10 +680,12 @@ work. Consult this list before writing code and again before declaring the impor
 - [ ] Set `SO_RCVBUF` on the UDP socket to at least 4 MiB (8 MiB is safer). Without this,
       the ~150 KiB/s burst overruns the default socket buffer and dozens of packets are
       lost.
-- [ ] After STATUS settles to a bare ack, send the MSP prepare command
-      `$M< 01 44 02 47` on TCP 4278 and wait for the reply `$M> 02 44 02 01 45`. Retry up
-      to three times on timeout — the FC can be slow after a prior session. Without this
-      step, LIST never populates.
+- [ ] After STATUS settles to a bare ack, send the MSP prepare command `$M< 01 44 02 47` on
+      TCP 4278 (`MSP_SET_REBOOT` mode 2, mass storage). Do **not** require the reply: one FC
+      returns `$M> 02 44 02 01 45`, another returns nothing yet still exposes the flash. Treat a
+      missing reply as success; if a reply arrives with readiness 0 (`payload[1] == 0`), resend
+      a few times (the filesystem can be briefly busy right after boot) before failing. Without
+      this step, LIST never populates. Prove success by LIST, not by this reply (see section 5).
 - [ ] Poll LIST (op 0x6e) with ~0.7 s delay until the reply blob is non-empty. Filter
       filenames by `^BTFL_\d+\.BBL$` before offering them to the user; skip
       `BTFL_ALL.BBL`, `PADDING.TXT`, and anything else.
