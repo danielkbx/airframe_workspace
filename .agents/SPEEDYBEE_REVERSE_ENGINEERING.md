@@ -741,16 +741,29 @@ work. Consult this list before writing code and again before declaring the impor
 ### 14.2 WiFi
 
 - [ ] Scan/join the SSID from WIFI_INFO. Open, no PSK. Do not hardcode the channel.
-- [ ] On iOS use `NEHotspotConfiguration` with `joinOnce = true` (needs the
-      HotspotConfiguration entitlement); on macOS use the `CWWiFiClient`/`CWInterface`
-      associate API. macOS CoreWLAN scanning and association require Location Services
-      authorization on macOS 14+, so a process without an app bundle (a plain CLI) is not
-      authorized and the join throws. Provide a manual fallback: tell the user which SSID to
-      join and poll the adapter's control port (`192.168.1.1:4279`) for TCP reachability until
-      it connects. Both paths must handle the case where the user's current WiFi is needed
-      elsewhere. Rejoin the prior network after the import (on macOS, re-associate if reachable
-      or disassociate and let the system auto-rejoin a remembered network; the manual path
-      cannot rejoin a secured network without its password, so it leaves that to the user).
+- [ ] On iOS use `NEHotspotConfiguration` with `joinOnce = true`; on macOS use the
+      `CWWiFiClient`/`CWInterface` associate API (verified working from a sandboxed app).
+      Platform requirements:
+      - macOS 14+ gates CoreWLAN scanning and association behind Location Services. A
+        sandboxed app needs the `com.apple.security.personal-information.location`
+        entitlement plus `NSLocationWhenInUseUsageDescription`, and must request When In Use
+        authorization at runtime. A process without an app bundle (a plain CLI) can never be
+        authorized, which is why the CLI always joins manually.
+      - iOS needs the `com.apple.developer.networking.HotspotConfiguration` entitlement, and
+        the App ID must have the Hotspot Configuration capability enabled in the developer
+        portal. Without it the build fails to provision, so the entitlement cannot simply be
+        added to the project.
+- [ ] Always provide a manual fallback and treat it as a first-class path: tell the user which
+      SSID to join and poll the adapter's control port (`192.168.1.1:4279`) for TCP reachability
+      until it connects. Fall back whenever the automatic join throws OR the adapter does not
+      become reachable after association.
+- [ ] Association is not connectivity. After a successful automatic join, still wait for the
+      adapter's control port to answer (DHCP and the AP's own startup add seconds) before
+      opening the session.
+- [ ] Rejoin the prior network after the import, but only after an automatic join: on macOS
+      re-associate if the network is reachable, otherwise disassociate and let the system
+      auto-rejoin a remembered network. After a manual join the previous network's password is
+      unknown, so leave the switch back to the user rather than pretending to restore it.
 - [ ] The adapter is always at `192.168.1.1`; do **not** discover via mDNS (the adapter
       advertises nothing).
 - [ ] Open the UDP receive socket **early**, before starting STATUS polling. The adapter
