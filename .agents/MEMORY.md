@@ -107,6 +107,8 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - The sidebar is contextual navigation; the selected log's data belongs in the detail area.
 - Current views are Overview, Table, Graph, Spectrum, and Step Response.
 - Table and Graph share one timeline position/range and one playback transport. Future video must synchronize to this master transport.
+- The Graph Craft preview shows one primary flight mode at the shared cursor: Failsafe, GPS Rescue, Autopilot, Turtle, Pos + Alt Hold, Position Hold, Altitude Hold, Angle, Horizon, Air, Acro, or Unknown. Air is only the Acro alternative; missing, truncated, or unverifiable evidence is Unknown and is never guessed.
+- The Graph Craft preview keeps its attitude timeline decimated to 10 ms, but resolves motor gauges from the same full main frame at or before the shared cursor as the inspector readout. The decimated motor values are only a temporary fallback while the bounded cursor query completes.
 - Table, Graph, Spectrum, and Step Response use reusable data-processing stages and document-scoped caches.
 - Per-window transient UI state lives in `DocumentStateStore`. Package-persistent state lives in metadata.
 - SwiftUI view files in the app target and `AirframeUI` require at least one realistic `#if DEBUG` preview using production model types.

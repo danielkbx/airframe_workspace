@@ -96,6 +96,7 @@ Do not collapse source, segment, session, and runtime-window identity.
 - `EnvironmentValues.airframeLogContext` passes the selected summary, decoded log, analysis workspace, issues, progress, and flight info.
 - One document-scoped `ProcessingActivityCounter` wraps all app-side data work.
 - One shared timeline position/range drives Table, Graph, playback, and future synchronized media.
+- The one-pass Reader overview retains a bounded flight-mode state timeline from slow frames and mode events. Graph resolves the primary Craft-preview mode synchronously at the shared cursor; unavailable or incomplete ranges remain explicitly unknown.
 
 ## State
 
