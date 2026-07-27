@@ -52,7 +52,7 @@ Dependencies point downward. Domain packages never depend on captions, SwiftUI, 
 5. Analysis maps Reader series to display-scaled or derived series.
 6. App/UI consumers build bounded render models and cache them per document.
 
-FC acquisition writes byte-identical logs and optional CLI configuration to a managed temporary directory. The assistant returns `FlightControllerImportPayload`; `AirframeImportMaterializer` either creates a package or atomically appends the payload without coupling acquisition to document lifecycle.
+FC acquisition writes downloaded logs and optional CLI configuration to a managed temporary directory. The assistant returns `FlightControllerImportPayload`; `AirframeImportMaterializer` either creates a package or atomically appends the payload without coupling acquisition to document lifecycle. Log payloads are normalized to the Reader-discovered segment end before package storage, trimming FlashFS tail bytes after a valid terminal log-end marker.
 
 The app's neutral flight-controller runtime consumes provider replacement streams. On macOS it merges serial and Bluetooth snapshots; on iOS/iPadOS it consumes Bluetooth only. Provider-qualified assistant IDs map back to exact provider-owned devices, source failures remove only that source's snapshot, and all transports feed the same acquisition pipeline.
 
@@ -79,7 +79,7 @@ Do not collapse source, segment, session, and runtime-window identity.
 ### Airframe packages
 
 - `UTType.package` directory with `metadata.json`.
-- Ordered equal `logs` descriptors and SHA-256-keyed byte-identical payloads.
+- Ordered equal `logs` descriptors and SHA-256-keyed source payloads normalized to valid log segment boundaries.
 - Format version 2 adds ordered flight-controller import snapshots and content-addressed configuration payloads; version 1 remains readable.
 - Metadata owns selection, per-source state, names, and other package UI state.
 - Mutations create coalesced snapshots and explicit silent saves.

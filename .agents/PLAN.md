@@ -9,7 +9,7 @@ Implement the Flight Controller Import Assistant on `feature/flight-controller-i
 - Keep Betaflight behavior and serial/BLE transports in `FlightController`.
 - The assistant returns a file-backed `FlightControllerImportPayload`; it never decides whether to create or extend a document.
 - The app-side materializer creates a new package now and exposes the same atomic append path for future imports into open documents.
-- Preserve downloaded Blackbox bytes exactly. Support onboard FlashFS only; do not imply MSP SD-card file access.
+- Preserve downloaded Blackbox bytes through the valid log segment and trim FlashFS tail bytes after a terminal log-end marker during materialization. Support onboard FlashFS only; do not imply MSP SD-card file access.
 - `Delete Logs After Import` toggle is wired to `MSP_DATAFLASH_ERASE`. Toggle (and log download) is only enabled when the blackbox device is `.flash`; otherwise both are forced off and a hint text explains the constraint. Erase runs after successful document materialization, guarded by a confirmation alert.
 - Use no new external dependency without explicit approval.
 
