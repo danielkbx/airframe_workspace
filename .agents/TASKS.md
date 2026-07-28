@@ -2,6 +2,27 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Completed: Semantic Flight Controller Status
+
+- Framed CLI capture prefers structured `env` and falls back to tolerant `status`; legacy interactive firmware is skipped to avoid a disruptive reboot.
+- Processor/clock, detected sensors, storage, and configuration state persist semantically with the import event; raw and volatile runtime values are not stored.
+- The Import Assistant presents only the processor from semantic status, while Overview uses associated status for MCU and sensor model precedence.
+- Direct, Wi-Fi, and Mass Storage payloads retain the same captured snapshot.
+- No document-format bump; older documents decode without status.
+- Post-import validation fixed an existential-dispatch regression that caused the first implementation to return `nil`; the explicit capture bridge is covered by the runtime integration test.
+- Presentation feedback completed: Overview removes PID Profile, GPS Provider, and Motor RPM, selects one nonzero idle value, shows Maximum Altitude, and title-aligns the visible `More…` button.
+
+## Completed: Overview Dashboard
+
+- Reusable equal-width cards and technical key/value rows support optional card and row actions.
+- Log File, Flight Controller, Blackbox, Configuration, Flight, and full-width Notes content are implemented.
+- Blackbox settings, deterministic Recorded Data classification, searchable detail, and unknown-field retention are implemented.
+- Versioned Overview snapshots persist in Airframe packages and are reused on open and raw-log conversion.
+- The conversion sheet explains the retained analyzed-log-details benefit.
+- Refinement completed: compact copy, Log Gaps placement, optional-row omission, equal row heights, sensor/MCU metadata, useful idle/PID configuration, and first/last-sample VBat.
+- Final compact-card feedback completed: Flight omits Disarms; reusable headers center icon/title/action; persisted debug mode uses firmware-specific semantic names instead of raw numbers.
+- Swift package tests, focused cache tests, and complete iOS/macOS builds passed on 2026-07-28.
+
 ## Maintenance
 
 - Keep `ReaderSeriesPresentation` and `AirframeCaptions` mappings synchronized when adding selectable field families or debug meanings. Add conversion and caption tests in the same change.

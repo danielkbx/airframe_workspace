@@ -2,6 +2,20 @@
 
 This file describes the current technical shape. Stable product and workflow rules live in `MEMORY.md`; future ideas live in `BACKLOG.md`.
 
+## Overview Dashboard
+
+- The Overview composes reusable technical cards in an adaptive `LazyVGrid`; Notes is outside the grid and spans the available width.
+- Card-level detail routes are auxiliary sheets, not primary `LogViewSelection` modes. The first routes are the imported configuration file and the Blackbox Recorded Data catalog; a GPS flight map is deferred.
+- Semantic Overview snapshots are cacheable package data. Cache identity includes the immutable source SHA-256, segment index, schema version, calculation algorithm version, and configuration input identity.
+- Blackbox availability comes from parsed frame definitions, never merely from configuration intent. Compact category summaries lead to a searchable detail that retains raw unknown fields.
+
+## Flight Controller Runtime Status
+
+- `BetaflightClient.runtimeStatus()` is a non-fatal framed-CLI enrichment step: it requests structured `env`, falls back to `status`, parses immediately into `FlightControllerStatusSnapshot`, discards the raw response, and restores MSP.
+- `FlightControllerStatusSnapshot` is shared by the connected-assistant presentation, `FlightControllerImportPayload`, package metadata import records, and associated-log Overview enrichment.
+- Direct, Wi-Fi, and Mass Storage imports retain the status captured during the original live connection. Package metadata stores it as an optional field on the same import event as its log hashes and configuration.
+- Overview selects the newest exact status-bearing import for a source hash and combines the semantic status hash with configuration identity for cache validity.
+
 ## Layers
 
 ```text

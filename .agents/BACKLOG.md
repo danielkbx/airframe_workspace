@@ -1,5 +1,9 @@
 # Backlog
 
+## Flight Controller Import Diagnostics
+
+- Consider a transient troubleshooting view for import-time uptime, temperature, CPU load, live voltage, I2C error count, and arming-disable flags. These are deliberately excluded from the persistent semantic FC status snapshot.
+
 Use this file to capture ideas, possible features, research leads, cleanup tasks, and future improvements without committing to implementation.
 
 ## Rules
@@ -99,6 +103,9 @@ Acceptance criteria:
 - Presets: the current preset UI (sidebar `PresetList`, `PresetControls`, `PresetManager` sheet) is hidden as of 2026-07-23. The user was not happy with the overall UX. Redesign later. Code remains in place under `DocumentHome/Sidebar.swift` (`PresetList` struct) and `DocumentHome/Content/Presets/` so it can be re-enabled after the redesign.
 - Let future named workspaces/presets own reusable document field-selection ID sets.
 - Add map view support for GPS-capable logs.
+  - Open it from the Flight Overview card's `More…` action only when valid GPS trajectory data is available.
+  - Consider a future Start Location row action that focuses the map on that coordinate.
+  - Decide whether the route belongs in a derived package cache or the Reader index before reserving persisted fields.
 - Spectrum follow-ups (base implemented 2026-07-15 with Frequency, Freq vs Throttle, Freq vs RPM; the user wants the deferred views later):
   - Power Spectral Density curve view: Welch method, default 512-sample segments, 75% overlap, Hanning, dB scale with a -70 dB floor, plus a segment-length control in the inspector.
   - PSD vs Throttle and PSD vs RPM heatmaps with minPSD/maxPSD/lowLevelPSD clamping (upstream defaults -40/+10 dB, low-level filter).

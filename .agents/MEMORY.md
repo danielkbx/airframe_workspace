@@ -104,6 +104,16 @@ This file stores durable decisions and constraints. It intentionally omits imple
 ## UI Architecture
 
 - `DocumentHomeView` owns document composition and the stable `NavigationSplitView`.
+- The log Overview is an adaptive dashboard of equal-width technical cards in this order: Log, Flight Controller, Blackbox, Configuration, and Flight, followed by a full-width Notes editor for writable Airframe documents. Cards stretch to the tallest peer in each adaptive row.
+- Overview cards use compact key/value tables. Cards may expose an explicit `More…` detail action and individual rows may expose explicit value-scoped action buttons; neither cards nor rows are implicitly tappable.
+- Overview-derived data is versioned and persisted inside Airframe documents so immutable logs do not need their Overview recalculated on every open. Raw logs keep calculated Overview data in memory only.
+- Loaded Overview cards omit unavailable rows. Hardware labels stay conservative: sensor models require explicit header/config evidence, gyro reuses an accelerometer model only for known combined IMUs, and MCU family is inferred only from recognized STM32 family tokens.
+- FC imports capture an optional semantic runtime status on framed-CLI firmware: `env` first, `status` fallback. It persists processor/clock, detected sensors, storage, and configuration state with the import event; raw CLI and volatile runtime diagnostics are never stored. Legacy interactive CLI is skipped because exiting would reboot and disrupt the live import.
+- Associated semantic FC status takes precedence over inferred MCU/sensor labels in Overview and participates in the Overview cache input identity. The Import Assistant shows the processor but intentionally omits clock, configuration state, and sensor chips.
+- Overview GPS hardware displays only a concrete concise module generation such as `M10`; configured providers and connection prose are not hardware model names. The compact Configuration card shows Dynamic Idle when nonzero, otherwise Motor Idle when nonzero.
+- The compact Flight card omits Disarms. Every card header vertically centers its icon, title, and optional `More…` action in one shared row.
+- Blackbox debug-mode numbers are resolved against the Betaflight-version-specific enum order before they enter the persisted Overview snapshot; unknown future numbers display honestly as `Unknown (n)`.
+- The Blackbox card distinguishes configured logging settings from fields actually recorded in frame definitions. Its Recorded Data detail preserves recognized and unknown fields.
 - The sidebar is contextual navigation; the selected log's data belongs in the detail area.
 - Current views are Overview, Table, Graph, Spectrum, and Step Response.
 - Table and Graph share one timeline position/range and one playback transport. Future video must synchronize to this master transport.

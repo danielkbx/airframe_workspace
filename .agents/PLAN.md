@@ -1,6 +1,89 @@
 # Current Plan
 
-Implement the Flight Controller Import Assistant on `feature/flight-controller-import`. Every numbered milestone ends in verification and one commit, followed by a mandatory review stop.
+Normalize the reusable Overview card header height.
+
+## Think Before Coding
+
+- The optional action currently raises only cards that contain it because its 44-point hit target becomes the HStack's intrinsic height.
+- Preserve the accessible action target and Dynamic Type expansion.
+
+## Simplicity First
+
+- Give every card's primary header row the same 44-point minimum height.
+
+## Surgical Changes
+
+- Change only the shared header HStack; do not add invisible placeholder buttons or per-card offsets.
+
+## Goal-Driven Execution
+
+- Verify compilation and confirm that action and non-action cards share identical content start positions.
+
+## Previous Overview Refinement Plan
+
+Refine the Overview card headers and compact pilot-facing values.
+
+## Think Before Coding
+
+- Resolve Blackbox debug numbers through the firmware's semantic debug-mode catalog rather than presenting raw numeric configuration values.
+- Keep removed rows in the domain snapshot when they may remain useful elsewhere; this change concerns compact Overview presentation.
+- Fix header alignment once in the reusable card component so every card receives the same geometry.
+
+## Simplicity First
+
+- Omit Disarms from the Flight card.
+- Present a known debug mode by name and retain an honest unknown fallback for future firmware values.
+- Vertically center icon, title content, and optional `More…` button in one shared header row.
+
+## Surgical Changes
+
+- Change only the Flight card row composition, the reusable card header layout, debug-mode resolution, focused tests, and the Overview cache algorithm identity if derived output changes.
+- Do not redesign card bodies, navigation, or recorded-data details.
+
+## Goal-Driven Execution
+
+- Delegate independent Reader and SwiftUI edits, integrate without overwriting existing uncommitted work, and verify focused package tests plus macOS/iOS builds.
+- Confirm the supplied Betaflight 4.6 value `19` presents as `GYRO_RAW`, all known values resolve deterministically, and future unknown values remain understandable.
+
+## Previous Overview Dashboard Plan
+
+Implement the adaptive Overview dashboard with persistent derived data.
+
+## Think Before Coding
+
+- Reuse the existing one-pass Reader scan and immutable source hashes; never rescan solely for Overview presentation.
+- Keep semantic Overview snapshots independent from localized UI strings and cache-envelope identity.
+- Derive recorded Blackbox availability from frame definitions, not from configuration intent.
+- Preserve raw logs as read-only; persist Overview snapshots and Notes only in writable Airframe documents.
+
+## Simplicity First
+
+- Use equal-width adaptive cards containing compact technical key/value tables.
+- Keep explicit card-level `More…` actions separate from optional value-scoped row buttons.
+- Show card structure while scan-backed values load.
+- Implement Recorded Data and configuration-file details as auxiliary sheets, not new primary log modes.
+
+## Surgical Changes
+
+1. Add typed Reader Overview snapshots, Blackbox classification, and scan-backed pilot metrics.
+2. Add bounded Betaflight `dump all` parsing and deterministic associated/older configuration selection.
+3. Store versioned Overview cache envelopes in existing package index data.
+4. Add reusable card, table, row, and action components.
+5. Compose Log File, Flight Controller, Blackbox, Configuration, and Flight cards plus full-width Notes.
+6. Add searchable Recorded Data detail and read-only configuration-file detail.
+7. Transfer already calculated snapshots during raw-log conversion and explain the benefit in the conversion prompt.
+8. Verify packages, document round trips, iOS/macOS builds, compact layouts, Dynamic Type, and accessibility.
+
+## Goal-Driven Execution
+
+- Run independent Reader, cache/config, UI, and captions work through agents with exclusive file ownership, then integrate centrally.
+- Accept only typed, tested, bounded data paths; missing values remain unknown rather than guessed.
+- Finish with green focused package tests, app tests, iOS/macOS builds, and durable `.agents/` updates.
+- Add the future GPS flight map and Start Location action to the backlog without reserving speculative persisted fields.
+
+## Completed Flight Controller Import Plan
+
+The prior Flight Controller Import Assistant plan is retained below for historical context.
 
 ## Think Before Coding
 
@@ -49,3 +132,56 @@ Do not start a later item before the user approves the preceding commit. Do not 
 - Import tests cover logs-only, config-only, combined payloads, duplicate hashes, atomic append, version-1 compatibility, and temp cleanup.
 - Hardware acceptance proves cable import on macOS and SpeedyBee Adapter 3 import on macOS and real iOS/iPadOS.
 - A milestone is complete only when its behavior is verified, its diff is reviewed for scope, and its commit exists in the correct repository.
+# Flight Controller Runtime Identity Capture
+
+## Think Before Coding
+
+- Capture runtime identity while Airframe already owns a live FC connection during import.
+- Prefer the structured Betaflight `env` command and fall back to tolerant `status` parsing for older firmware.
+- Keep stable identity/hardware facts separate from volatile import-time diagnostics and from configured state in `dump all`.
+- Persist only a typed semantic snapshot; do not store the raw CLI response.
+
+## Simplicity First
+
+- Use one optional semantic snapshot shared by the import payload, document import record, assistant summary, and Overview precedence.
+- Start with useful stable facts: firmware/build identity, target/board/manufacturer, exact MCU and clock, configuration state/size, detected hardware, and flash geometry.
+- The assistant shows only concise general FC facts; sensor-chip detail remains in Overview.
+- Unsupported or missing fields stay absent and never block log import.
+
+## Surgical Changes
+
+- Extend the existing CLI capture path rather than adding a second connection lifecycle.
+- Add focused parsers for `env` and `status`, typed transport APIs, backward-compatible optional document fields, and narrow UI rows.
+- Preserve current framed/interactive recovery behavior and all existing import modes.
+- Increment Overview cache semantics when runtime identity begins taking precedence over inferred values.
+
+## Goal-Driven Execution
+
+- Verify structured parsing, fallback behavior, old-firmware absence, semantic Codable compatibility, payload/document round trips, assistant presentation, and Overview precedence.
+- Run FlightController and format package tests, focused app tests, and complete iOS/macOS builds.
+- Record stable protocol/version findings in `.agents/RESEARCH.md` and keep deferred diagnostic presentation in `.agents/BACKLOG.md`.
+# Overview Information Hierarchy Refinement
+
+## Think Before Coding
+
+- Distinguish concrete detected GPS model names from configured providers; only the former belongs in the FC hardware row.
+- Prefer one meaningful idle mode and remove rows that do not help a pilot scan the Overview.
+- Keep persisted domain data intact when a value is merely removed from compact presentation.
+
+## Simplicity First
+
+- Assistant connected summary shows Board, Firmware, Processor, and Blackbox storage; Clock and Configuration State remain semantic data but are not displayed there.
+- Configuration shows Dynamic Idle when nonzero, otherwise Motor Idle when nonzero; PID summary and GPS Provider are omitted.
+- Flight shows Maximum Altitude only and omits Motor RPM.
+- `More…` uses one native prominent card action aligned with the card title.
+
+## Surgical Changes
+
+- Change presentation and captions without removing reusable domain fields.
+- Parse GPS runtime status into only concise module generations such as `M10`; unknown or provider-only values remain model-less.
+- Bump the Overview algorithm version because cached GPS presentation semantics changed.
+
+## Goal-Driven Execution
+
+- Verify GPS parsing, idle selection, row omission, caption copy, button accessibility/alignment, and complete iOS/macOS compilation.
+- Run FlightController, BlackboxReader, and AirframeCaptions tests plus focused app tests where applicable.

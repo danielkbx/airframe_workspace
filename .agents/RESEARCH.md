@@ -194,6 +194,18 @@ Initial Airframe compatibility baseline:
 - Local full-log staging currently includes Betaflight `4.4.3`, `4.6.0`, and `2025.12.5`-style logs.
 - Older Betaflight versions remain best-effort/unsupported until specific fixtures and golden outputs are added.
 
+Overview hardware metadata findings:
+
+- The current Betaflight Blackbox writer serializes configured `acc_hardware` and `baro_hardware` IDs, but no detected gyro-chip identity. `gyro_hardware_lpf` is a filter setting, not a sensor model.
+- A concrete accelerometer identity may also identify the gyroscope only for known combined IMUs such as BMI270, BMI160, MPU6xxx/9xxx, ICM20xxx/42xxx, and LSM6DSO/LSM6DSV16X. `AUTO`, `NONE`, and standalone accelerometers must not be promoted to a gyro identity.
+- A CLI `dump all` renders hardware lookup values as names, but `AUTO` describes configuration intent rather than the detected device and must remain unavailable in the Overview.
+- `motor_idle` is stored as percent times 100 (`motorConfig_t.motorIdle`), while `dyn_idle_min_rpm` directly names the minimum RPM enforced by the dynamic-idle controller.
+- The Blackbox header does not contain Betaflight's runtime MCU name. A separate `STM32…` family can only be conservatively inferred from explicit family tokens in board/target information; otherwise it remains unavailable.
+- Current Betaflight `env` emits machine-readable `KEY=VALUE` runtime identity including MCU/clock, detected sensor hardware, configuration state, and flash geometry. Older framed-CLI firmware can provide the corresponding facts through human-readable `status`.
+- Airframe requests `env` and falls back to `status` only on firmware supporting framed CLI, restoring MSP after each command. Interactive CLI firmware is intentionally skipped because `exit` reboots/disconnects and would destabilize legacy Bluetooth and duplicate wired reconnect cycles.
+- Runtime integration must call the explicit `FlightControllerImportClient.captureRuntimeStatus()` protocol bridge. A defaulted `BetaflightClient.runtimeStatus(options:)` parameter does not satisfy a parameterless protocol requirement; the original same-name default implementation silently returned `nil` through the existential and produced imports without status.
+- Betaflight's numeric `debug_mode` ordering is firmware-version dependent. Airframe maintains separate 4.3, 4.4, 4.5, and 4.6 name tables; for example, raw `19` is `GYRO_RAW` in 4.6 but `RX_SFHSS_SPI` in 4.5, where `GYRO_RAW` is raw `20`.
+
 ## Licensing
 
 The official viewer is GPL-3.0. GPL-3.0 is acceptable if code is reused or ported, but it is not automatically required for an independently written implementation based on public format behavior and original Swift design. App Store distribution is not required.

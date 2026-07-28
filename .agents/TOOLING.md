@@ -46,6 +46,9 @@ Agents must update this file proactively when they learn a better command, workf
 
 ## Swift and Xcode
 
+- A Swift method with a defaulted parameter, such as `runtimeStatus(options: Options = .init())`, does not satisfy a distinct parameterless protocol requirement `runtimeStatus()`. If the protocol also has a default implementation, existential calls silently dispatch to that default. Use a clearly named explicit bridge such as `captureRuntimeStatus()` and test through the protocol existential.
+- For independent app build/test jobs, use a distinct explicit `-derivedDataPath` per job. This permits safe parallel iOS build, macOS build, and focused macOS tests without `build.db` contention. Redirect each complete command to its own log and inspect only after it exits.
+- New app and app-test Swift files are not discovered automatically by this Xcode project. Register them in the appropriate group and target source phase with `xcodeproj`, then validate both platform builds because a successful SwiftPM test does not cover app target membership.
 - Use separate iOS and macOS entitlement files when one Universal target needs macOS App Sandbox plus iCloud Key-Value Storage. Set normal `CODE_SIGN_ENTITLEMENTS` to the shared iOS file and use `CODE_SIGN_ENTITLEMENTS[sdk=macosx*]` for macOS.
 - Verify a built app's effective signing with `codesign -d --entitlements :- /path/to/Airframe.app`; project settings alone do not prove the final signed payload.
 - Before iOS simulator tests, inspect available devices with `xcrun simctl list devices available`; simulator names are machine-local and can drift from old commands.
