@@ -125,6 +125,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Current views are Overview, Table, Graph, Spectrum, and Step Response.
 - Step Response draws no per-trace text inside the graph. Per-axis P/I/D/F, accepted-window count, normalized peak, and response time live in that order in the inspector's aligned log table; its localized column headers explain their semantics through help and accessibility text.
 - Step Response header help cells explicitly participate in hover tracking because framed `Text` alone does not reliably expose `.help` inside a macOS grouped `Form`.
+- Graph field rows and Step Response log rows use full-width continuous hover regions to reduce trace-highlight interruptions while the pointer crosses internal whitespace.
 - Table and Graph share one timeline position/range and one playback transport. Future video must synchronize to this master transport.
 - The Graph Craft preview shows one primary flight mode at the shared cursor: Failsafe, GPS Rescue, Autopilot, Turtle, Pos + Alt Hold, Position Hold, Altitude Hold, Angle, Horizon, Air, Acro, or Unknown. Air is only the Acro alternative; missing, truncated, or unverifiable evidence is Unknown and is never guessed.
 - The Graph Craft preview keeps its attitude timeline decimated to 10 ms, but resolves motor gauges from the same full main frame at or before the shared cursor as the inspector readout. The decimated motor values are only a temporary fallback while the bounded cursor query completes.
