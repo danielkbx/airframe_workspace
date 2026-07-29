@@ -4,7 +4,7 @@
 - Resolve validation paths relative to the command's explicit `workdir` exactly once. With `workdir` set to the public `Airframe/` submodule, package paths begin with `Packages/`, not `Airframe/Packages/`.
 - With `workdir` inside a package such as `Airframe/Packages/AirframeCaptions`, a workspace-relative command like `git -C Airframe ...` cannot resolve. Run repository Git checks from the workspace root or use paths relative to the selected package.
 - Validate `.xcstrings` catalogs as JSON with `jq empty`, not with `plutil -lint`; `plutil` reports valid String Catalog JSON as an unexpected leading `{`.
-- Xcode 26.5 ships `xcstringstool` at `$DEVELOPER_DIR/usr/bin/xcstringstool`, but `xcrun` may fail to resolve it. Invoke the full tool path for compile dry runs.
+- Xcode 26.5 ships `xcstringstool` at `$DEVELOPER_DIR/usr/bin/xcstringstool`; on machines with versioned Xcode app bundles, resolve it with `xcrun --find xcstringstool` before catalog compile dry runs instead of assuming `/Applications/Xcode.app`.
 - When several simulator runtimes contain identically named devices, take destination IDs from the scheme's `xcodebuild` available-destinations error/listing. `xcrun simctl list devices available` can include devices from runtimes that the active Xcode project cannot target.
 
 - In zsh, `status` is a read-only special parameter. When capturing an `xcodebuild` exit code before printing a log tail, use a task-specific name such as `build_result=$?` or `test_result=$?`.

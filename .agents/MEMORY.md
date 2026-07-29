@@ -95,6 +95,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - The shared start view offers Open Log, folder import, and the staged Flight Controller Import Assistant.
 - Raw-log opening policy is iCloud-synced and offers `Ask` or `Always Open Read-Only`.
 - Conversion language says `Airframe document`, not `editable document`.
+- Raw-log conversion benefits emphasize retained analysis setup, imported Betaflight configuration access, and keeping multiple logs together; avoid duplicating "analyzed details" and "faster reopen" as separate claims.
 - Package sidebars flatten all source segments into one `Logs` section. Raw sidebars preserve file/log/reference hierarchy.
 - Package source names may be customized per segment without changing bytes, hashes, parser titles, or original filenames.
 - Effective package names are used consistently in navigation, Graph/Spectrum, and Step Response.
