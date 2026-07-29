@@ -1,5 +1,59 @@
 # Current Plan
 
+Correct Overview configuration semantics and expose controller loop frequencies.
+
+## Think Before Coding
+
+- Resolve numeric protocol values through Betaflight's versioned enum definitions; never present opaque IDs or guess from unrelated fields.
+- Distinguish gyro sample frequency from PID loop frequency. Derive both only when loop time and PID process denominator provide sufficient evidence.
+- Apply Betaflight's documented Dynamic Idle scaling before persistence so every consumer receives RPM, not the encoded configuration unit.
+
+## Simplicity First
+
+- Hardware adds Gyro Sample Rate.
+- Configuration adds PID Loop Rate and keeps friendly Motor/Receiver protocol names.
+- Missing or unknown enum/frequency inputs omit the value rather than inventing a label.
+
+## Surgical Changes
+
+- Add focused semantic resolvers in the Reader/configuration domain, extend the existing Overview snapshot fields, and bump the Overview algorithm version.
+- Reuse existing frequency formatting and key/value rows; add only the required captions.
+- Preserve backward decoding of older snapshots and configuration-source precedence.
+
+## Goal-Driven Execution
+
+- Verify enum tables and encoded-unit formulas against local Betaflight and viewer references before coding.
+- Run mapping/scaling and snapshot compatibility tests, configuration/Reader package suites, focused cache tests, and macOS/iOS builds.
+
+## Previous Overview Card Reorganization Plan
+
+Reorganize the Overview dashboard around pilot-facing Log, Flight, Power, controller, hardware, and configuration concerns.
+
+## Think Before Coding
+
+- Keep persisted Overview values semantic and derive GPS metrics from the existing one-pass decoded scan.
+- Treat Hardware as a distinct concern from FC identity: Board and detected Gyro, Acc, Baro, and GPS move together.
+- Define Average Speed only from valid recorded GPS-speed samples and Maximum Distance from valid recorded positions relative to the flight start position; missing GPS evidence omits the row.
+
+## Simplicity First
+
+- Present cards in this order: Log, Flight, Power, Flight Controller, Hardware, Blackbox, Configuration, then full-width Notes. Hardware is placed after Flight Controller because the requested order omitted the newly requested card.
+- Remove Recovered Gaps, rename Log Gaps to Gaps, and use Start Voltage / End Voltage.
+- Move existing values without duplicating them across cards.
+
+## Surgical Changes
+
+- Extend the flight snapshot only with the two missing GPS aggregates and bump the Overview calculation algorithm version.
+- Add focused Hardware and Power card views using the existing reusable card and key/value components.
+- Update only the required caption identities, localized catalogs, previews, tests, and durable context.
+
+## Goal-Driven Execution
+
+- Run Reader metrics, card composition, and captions through agents with exclusive ownership, then integrate centrally.
+- Verify deterministic GPS calculations, optional-row omission, requested card ordering, equal adaptive sizing, caption coverage, focused package tests, and macOS/iOS builds.
+
+## Previous Header Alignment Plan
+
 Normalize the reusable Overview card header height.
 
 ## Think Before Coding

@@ -21,6 +21,8 @@ Only approved near-term work and unresolved items belong here. Completed work be
 - The conversion sheet explains the retained analyzed-log-details benefit.
 - Refinement completed: compact copy, Log Gaps placement, optional-row omission, equal row heights, sensor/MCU metadata, useful idle/PID configuration, and first/last-sample VBat.
 - Final compact-card feedback completed: Flight omits Disarms; reusable headers center icon/title/action; persisted debug mode uses firmware-specific semantic names instead of raw numbers.
+- Dashboard reorganization completed: Hardware and Power are separate cards; Flight owns GPS speed/distance metrics; Recovered Gaps is hidden and Log Gaps is presented as Gaps.
+- Configuration semantics completed: protocol IDs display names, Dynamic Idle uses physical RPM, and Hardware/Configuration expose Gyro Sample Rate/PID Loop Rate.
 - Swift package tests, focused cache tests, and complete iOS/macOS builds passed on 2026-07-28.
 
 ## Maintenance

@@ -205,6 +205,11 @@ Overview hardware metadata findings:
 - Airframe requests `env` and falls back to `status` only on firmware supporting framed CLI, restoring MSP after each command. Interactive CLI firmware is intentionally skipped because `exit` reboots/disconnects and would destabilize legacy Bluetooth and duplicate wired reconnect cycles.
 - Runtime integration must call the explicit `FlightControllerImportClient.captureRuntimeStatus()` protocol bridge. A defaulted `BetaflightClient.runtimeStatus(options:)` parameter does not satisfy a parameterless protocol requirement; the original same-name default implementation silently returned `nil` through the existential and produced imports without status.
 - Betaflight's numeric `debug_mode` ordering is firmware-version dependent. Airframe maintains separate 4.3, 4.4, 4.5, and 4.6 name tables; for example, raw `19` is `GYRO_RAW` in 4.6 but `RX_SFHSS_SPI` in 4.5, where `GYRO_RAW` is raw `20`.
+- Overview GPS speed and distance can be accumulated from decoded `G` frames during the existing scan: speed is stored in centimeters per second, coordinates in degrees times 10,000,000, and maximum distance is the greatest haversine displacement from the first valid coordinate. Main-frame GPS fields remain a compatibility fallback.
+- Betaflight 4.4+ `motor_pwm_protocol` follows the firmware motor enum: raw `7` is `DSHOT600`, `8` is `PROSHOT1000`, and `9` is `DISABLED`; the viewer's legacy table retains removed DSHOT1200 and must not be used for those slots.
+- `serialrx_provider` raw `9` is `CRSF`. Raw `0` is version-dependent: `SPEKTRUM1024` before Betaflight 4.5 and `NONE` from 4.5 onward; 4.5+ moves `SPEKTRUM1024` to raw `15`.
+- `dyn_idle_min_rpm` is encoded in hundreds of RPM. Firmware converts it to RPS with `raw × 100 / 60`, so Airframe must persist raw `65` as `6,500 RPM`.
+- Blackbox `looptime` is the gyro sample period in microseconds. Gyro Sample Rate is `1,000,000 / looptime`; PID Loop Rate is `1,000,000 / (looptime × pid_process_denom)`. Neither rate should be inferred from the potentially downsampled or damaged observed Blackbox frame rate.
 
 ## Licensing
 

@@ -2,6 +2,7 @@
 
 - A pure `.borderless` AppKit `NSWindow` hosting SwiftUI through `NSHostingController` collapsed to an AX-reported `900 × 0`/invisible window in Airframe. For a visually borderless fixed SwiftUI window, use a technically `.titled` + `.fullSizeContentView` window, hide title/traffic-light controls, make the title bar transparent, then call `setContentSize` after assigning the hosting controller. Verify runtime window geometry through System Events, not only by compiling.
 - Resolve validation paths relative to the command's explicit `workdir` exactly once. With `workdir` set to the public `Airframe/` submodule, package paths begin with `Packages/`, not `Airframe/Packages/`.
+- With `workdir` inside a package such as `Airframe/Packages/AirframeCaptions`, a workspace-relative command like `git -C Airframe ...` cannot resolve. Run repository Git checks from the workspace root or use paths relative to the selected package.
 - Validate `.xcstrings` catalogs as JSON with `jq empty`, not with `plutil -lint`; `plutil` reports valid String Catalog JSON as an unexpected leading `{`.
 - Xcode 26.5 ships `xcstringstool` at `$DEVELOPER_DIR/usr/bin/xcstringstool`, but `xcrun` may fail to resolve it. Invoke the full tool path for compile dry runs.
 - When several simulator runtimes contain identically named devices, take destination IDs from the scheme's `xcodebuild` available-destinations error/listing. `xcrun simctl list devices available` can include devices from runtimes that the active Xcode project cannot target.
