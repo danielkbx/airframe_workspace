@@ -8,6 +8,7 @@ This file describes the current technical shape. Stable product and workflow rul
 - Card-level detail routes are auxiliary sheets, not primary `LogViewSelection` modes. The first routes are the imported configuration file and the Blackbox Recorded Data catalog; a GPS flight map is deferred.
 - Semantic Overview snapshots are cacheable package data. Cache identity includes the immutable source SHA-256, segment index, schema version, calculation algorithm version, and configuration input identity.
 - Blackbox availability comes from parsed frame definitions, never merely from configuration intent. Compact category summaries lead to a searchable detail that retains raw unknown fields.
+- Flight GPS overview data includes GPS-home epoch date/time when the `H` frame provides it, falling back to a valid `Log start datetime` header. `GPS_time` is only GPS milliseconds-of-week and is not enough for a calendar date. The same overview also includes maximum displacement and total travelled distance from valid GPS coordinates.
 
 ## Flight Controller Runtime Status
 
@@ -147,3 +148,10 @@ Do not collapse source, segment, session, and runtime-window identity.
 - Parser tests assert deterministic typed failures and configured-budget enforcement.
 - App tests cover document/package invariants, state routing, commands, and view-model behavior.
 - External oracle comparison is supplementary, not the source of implementation structure.
+
+## Log Health Checks
+
+- `BlackboxAnalysis/Health/` owns plausibility checks beyond `ReaderLogQuality`: `BlackboxAnalysisWorkspace.healthReport(using:)` aggregates typed `AnalysisHealthFinding`s (motorPolesMismatch, motorDesync, logDataGaps, erpmWithoutRPMFilter, batteryChargeLowAtArm) plus first-class skip reasons.
+- The motor-poles detector reuses the `.frequencyVsRPM` sample buffer (one decode pass), chunked FFTs, and a robust median-ratio estimator. Precision comes from the RPM-span guard (fixed resonances produce RPM-dependent ratios) and the even-pole snap tolerance (2 %), not from the dispersion gates: on real quads every motor's search window latches onto the strongest ridge, so observation scatter equals the motors' RPM spread (~5 %).
+- Reports persist per source segment under `indexes/health-checks/<sha256>/<segment>.json` following the overview-cache envelope pattern (`healthCacheAlgorithmVersion`, bump on threshold changes). Raw logs keep reports in memory on `AirframeWorkspaceController.healthReports`.
+- The Overview container runs the checks in a deferred background task (1 s settle, `ProcessingActivityCounter`, utility priority) after cache lookup; the `ChecksCard` in the card grid shows its header spinner while this uncached health task is active. It renders Log Quality plus compact finding rows (severity icon, short value like `12 vs. 14`) with the full explanation as a tooltip via `overviewTooltip`.
