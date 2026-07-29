@@ -120,6 +120,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Flight GPS metrics include maximum and arithmetic-mean recorded speed plus maximum great-circle displacement from the first valid GPS coordinate. They are aggregated from GPS frames during the existing one-pass scan and omitted without valid evidence.
 - Blackbox debug-mode numbers are resolved against the Betaflight-version-specific enum order before they enter the persisted Overview snapshot; unknown future numbers display honestly as `Unknown (n)`.
 - The Blackbox card distinguishes configured logging settings from fields actually recorded in frame definitions. Its Recorded Data detail preserves recognized and unknown fields.
+- Searchable iOS sheets should stay close to system conventions with `NavigationStack`, `.navigationTitle`, `.searchable`, and toolbar actions. macOS sheets may use compact custom title-plus-search chrome when SwiftUI's navigation/search chrome creates excessive vertical spacing or misaligned headers.
 - The sidebar is contextual navigation; the selected log's data belongs in the detail area.
 - Current views are Overview, Table, Graph, Spectrum, and Step Response.
 - Table and Graph share one timeline position/range and one playback transport. Future video must synchronize to this master transport.
