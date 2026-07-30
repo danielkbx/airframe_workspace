@@ -102,9 +102,8 @@ Acceptance criteria:
 - Add workspace or graph preset support after the native chart model is proven.
 - Presets: the current preset UI (sidebar `PresetList`, `PresetControls`, `PresetManager` sheet) is hidden as of 2026-07-23. The user was not happy with the overall UX. Redesign later. Code remains in place under `DocumentHome/Sidebar.swift` (`PresetList` struct) and `DocumentHome/Content/Presets/` so it can be re-enabled after the redesign.
 - Let future named workspaces/presets own reusable document field-selection ID sets.
-- Add map view support for GPS-capable logs.
-  - Open it from the Flight Overview card's `More…` action only when valid GPS trajectory data is available.
-  - Consider a future Start Location row action that focuses the map on that coordinate.
+- Consider a future Start Location row action that switches to Map and focuses that coordinate.
+- Future Map ideas remain out of current scope: GPX export, follow camera, route coloring, geocoding/search, terrain/3D, and richer event-detail UI beyond the compact annotation popover.
   - Decide whether the route belongs in a derived package cache or the Reader index before reserving persisted fields.
 - Spectrum follow-ups (base implemented 2026-07-15 with Frequency, Freq vs Throttle, Freq vs RPM; the user wants the deferred views later):
   - Power Spectral Density curve view: Welch method, default 512-sample segments, 75% overlap, Hanning, dB scale with a -70 dB floor, plus a segment-length control in the inspector.

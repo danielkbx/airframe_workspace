@@ -1,5 +1,12 @@
 # Research Notes
 
+## Native Flight Map
+
+- SwiftUI MapKit on the current iOS/macOS 26 targets supports a bound `MapCameraPosition`, `MapPolyline`, custom `Annotation` content, and `.standard` / `.imagery` styles without an external dependency.
+- A custom historical position annotation is required: MapKit user-location APIs would imply live device location and permissions, which are outside log playback semantics.
+- Camera initialization can use the complete route `MKMapRect`; leaving the bound camera untouched during cursor updates preserves native user pan and zoom.
+- Betaflight GPS altitude and Home altitude are recorded in decimeters and ground course in decidegrees; Reader converts both once at its public scan boundary.
+
 ## Betaflight Configurator Flight Controller Transport
 
 - Repository: https://github.com/betaflight/betaflight-configurator

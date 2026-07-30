@@ -2,6 +2,56 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Completed: Map Picker Order and Document Title Stability
+
+- Move Map to the rightmost position in the segmented mode picker, menu, and shortcut order: Spectrum is `⌘4`, Step Response is `⌘5`, and Map is `⌘6`.
+- Keep macOS document windows titled with the opened document filename/source name instead of the selected log mode.
+- Hide the Overview GPS card and disable/reject the Map segment and command when the current log has no usable GPS route.
+- Focused `LogViewSelectionTests` passed on 2026-07-30.
+
+## Completed: Shared Graph Event Chips in Map
+
+- Extract the existing single Graph Event chip as reusable AirframeUI presentation.
+- Share Event-to-chip content projection between Graph and Map.
+- Replace Map's plain semantic detail line with the exact Graph chip.
+- Generic Events retain only their title and metadata so the chip does not duplicate the title.
+- AirframeUI's 118 tests, AirframeCaptions' 29 tests, and 16 focused app tests passed; complete macOS Release and iOS Simulator builds passed on 2026-07-30.
+
+## Completed: GPS Map Event Context
+
+- Flight Mode popovers identify which firmware-specific modes turned On or Off.
+- Inflight Adjustment popovers identify the adjusted function and scaled value.
+- Reuse centralized Event captions so Map, Table, and Graph terminology cannot drift.
+- Fourteen focused app tests and 31 caption tests passed; complete macOS Release and iOS Simulator builds passed on 2026-07-29.
+
+## Completed: GPS Map Annotation Information
+
+- Add anchored native information popovers for Home and progressively revealed Events.
+- Show coordinates plus available time/altitude without persistent labels, geocoding, or a detail sheet.
+- Bound only the rendered route geometry while retaining exact current-position/event semantics.
+- Route rendering is capped at 2,048 points while preserving endpoints and Event positions.
+- Fourteen focused app tests and 29 caption tests passed; complete macOS Release and iOS Simulator builds passed on 2026-07-29.
+
+## Completed: GPS Map Visual Refinement
+
+- Anchor the heading cone exactly at the current-position dot and make it widen in the direction of travel.
+- Force prompt MapKit route-prefix/position updates at recorded GPS-point boundaries without resetting user camera state.
+- Remove visible annotation titles while retaining localized accessibility labels.
+- Show every prepared event in the altitude timeline, independent of Current Position.
+- Label the altitude timeline's horizontal grid lines.
+- Follow-up refinement keeps the position/heading annotation identity stable to prevent blinking and omits negative grid values when all recorded relative altitudes are nonnegative.
+- Focused app tests passed; complete macOS Release and iOS Simulator builds passed on 2026-07-29.
+
+## Completed: GPS Overview and Native Flight Map
+
+- Reader retains a bounded, time-associated GPS route plus first valid Home during the existing scan.
+- Analysis exposes an immutable route, Home-relative altitude, normalized heading, event-to-route association, and binary-search cursor helpers.
+- Overview presentation splits GPS metrics into a GPS card without changing the cached flight snapshot; the app hides that GPS card when the selected log has no usable GPS route.
+- App integration adds `.map`, route availability/fallback, full-flight playback, per-segment settings, native MapKit rendering, progressive events, and altitude profile.
+- Progressive Map annotations and profile event lines are pure functions of the shared current position, so backward scrubbing hides future events deterministically.
+- BlackboxReader, BlackboxAnalysis, and AirframeCaptions package suites passed; focused app tests passed; complete macOS and iOS Simulator Release builds passed on 2026-07-29.
+- Automated verification excludes network-delivered map tiles; final native-map appearance still benefits from an interactive smoke check with a representative GPS log.
+
 ## Completed: Semantic Flight Controller Status
 
 - Framed CLI capture prefers structured `env` and falls back to tolerant `status`; legacy interactive firmware is skipped to avoid a disruptive reboot.
@@ -130,7 +180,7 @@ Approved plan: add a third bulk-transfer method beside Direct and Mass Storage. 
 
 ## Current Constraints
 
-- Implementation is approved only for the reviewed Flight Controller Import Assistant milestone; other product work remains planning-only.
+- The reviewed Flight Controller Import Assistant and GPS Map implementations are approved; other product work remains planning-only unless separately requested.
 - No new external dependency without explicit approval.
 - Raw Betaflight logs remain byte-identical and read-only.
 - Airframe document state belongs in package metadata; raw-log UI state remains external.

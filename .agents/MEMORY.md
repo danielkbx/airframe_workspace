@@ -12,6 +12,12 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Project language is English for code, documentation, comments, commits, and artifacts.
 - Build an independent implementation. Reference upstream behavior and formats, but do not translate source structure or implementation text.
 - GPL-3.0 is acceptable if required, but the final license is not chosen.
+- The primary log modes are Overview, Table, Graph, Spectrum, Step Response, and Map (`⌘1` through `⌘6` in that same order).
+- The Map mode is the rightmost item in the segmented mode picker, menu, and numeric command shortcuts.
+- macOS document windows leave the window title and File Proxy entirely to `NSDocument`/AppKit; no document content view may set a navigation or window title. The navigation subtitle is always exactly the effective name of the selected log. Log and mode changes must never alter the window title.
+- The Overview GPS card is shown only when the current log has a usable GPS route: at least two time-associated, monotonic, valid, distinct coordinates. Logs without that route also have the Map segment and command disabled.
+- Map playback is chronological and reversible: route and Map-event visibility are derived solely from the shared current position, while Home is contextual and visible independently. The altitude timeline always shows every prepared event when Events is enabled.
+- Map Event information reuses the actual Graph marker-chip renderer and shared Event-to-chip projection: Flight Mode changes show firmware-specific On/Off state segments, and Inflight Adjustments show the resolved function and scaled value. Generic Events do not repeat their title as a redundant chip.
 
 ## Repository Boundaries
 
@@ -124,7 +130,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - The Blackbox card distinguishes configured logging settings from fields actually recorded in frame definitions. Its Recorded Data detail preserves recognized and unknown fields.
 - Searchable iOS sheets should stay close to system conventions with `NavigationStack`, `.navigationTitle`, `.searchable`, and toolbar actions. macOS sheets may use compact custom title-plus-search chrome when SwiftUI's navigation/search chrome creates excessive vertical spacing or misaligned headers.
 - The sidebar is contextual navigation; the selected log's data belongs in the detail area.
-- Current views are Overview, Table, Graph, Spectrum, and Step Response.
+- Current views are Overview, Table, Graph, Map, Spectrum, and Step Response.
 - Step Response draws no per-trace text inside the graph. Per-axis P/I/D/F, accepted-window count, normalized peak, and response time live in that order in the inspector's aligned log table; its localized column headers explain their semantics through help and accessibility text.
 - Step Response header help cells explicitly participate in hover tracking because framed `Text` alone does not reliably expose `.help` inside a macOS grouped `Form`.
 - Graph field rows and Step Response log rows use full-width continuous hover regions to reduce trace-highlight interruptions while the pointer crosses internal whitespace.

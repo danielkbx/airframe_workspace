@@ -5,10 +5,24 @@ This file describes the current technical shape. Stable product and workflow rul
 ## Overview Dashboard
 
 - The Overview composes reusable technical cards in an adaptive `LazyVGrid`; Notes is outside the grid and spans the available width.
-- Card-level detail routes are auxiliary sheets, not primary `LogViewSelection` modes. The first routes are the imported configuration file and the Blackbox Recorded Data catalog; a GPS flight map is deferred.
+- Card-level details remain auxiliary sheets, while the GPS flight map is a primary `LogViewSelection` mode.
+- The requested data-card order is Log, Flight, GPS, Power, Flight Controller, Hardware, Blackbox, Configuration, then Notes; the existing Checks card follows Configuration without interrupting that data sequence. GPS uses the existing cached `AirframeFlightOverview` fields; no cache schema change is required.
 - Semantic Overview snapshots are cacheable package data. Cache identity includes the immutable source SHA-256, segment index, schema version, calculation algorithm version, and configuration input identity.
 - Blackbox availability comes from parsed frame definitions, never merely from configuration intent. Compact category summaries lead to a searchable detail that retains raw unknown fields.
 - Flight GPS overview data includes GPS-home epoch date/time when the `H` frame provides it, falling back to a valid `Log start datetime` header. `GPS_time` is only GPS milliseconds-of-week and is not enough for a calendar date. The same overview also includes maximum displacement and total travelled distance from valid GPS coordinates.
+
+## GPS Route and Map
+
+- `BlackboxReader` retains bounded `ReaderScanGPSPoint` values and the first valid `ReaderScanGPSHome` during the existing scan. Adaptive halving preserves the first and final usable route points while aggregate GPS metrics remain full-resolution.
+- `BlackboxAnalysisWorkspace.gpsRoute(using:)` builds an immutable MapKit-free `AnalysisGPSRoute`, drops non-monotonic points, calculates Home-relative altitude, normalizes heading, associates at most 256 events with preceding route points, and provides binary-search cursor projections.
+- The app owns transient MapKit camera state and persisted per-segment map display settings. Route prefixes, position, and Map event annotations read the shared document cursor; profile event lines show the complete prepared event set. Map playback always uses the complete Main-frame range. In the segmented mode picker, menu, and numeric command shortcuts, Map is displayed as the final/rightmost mode and uses `⌘6`.
+- `DocumentHomeView.LogContext.hasUsableGPSRoute` is the app-side shared gate for Map segment enablement, command routing, Map fallback, and Overview GPS-card visibility. It requires at least two monotonic time-associated GPS points with distinct coordinates; while scan/loading state is unresolved, Map fallback is deferred.
+- The route overlay uses the latest recorded GPS-point index as its SwiftUI identity, prompting immediate MapKit overlay replacement only when a new point is reached while preserving camera state. The current-position annotation keeps stable identity so its dot and heading cone do not blink during Playback.
+- Display-only route geometry is capped at 2,048 deterministically sampled points. First/final endpoints, every prepared Event route point, and the live current endpoint are retained; Analysis route data and position/event lookup remain unchanged.
+- Map annotations expose localized accessibility labels without visible titles. The current-position cone rotates around an apex fixed at the dot and widens in the recorded heading direction.
+- Home and progressively revealed Event symbols are native buttons with anchored transient popovers. Home shows coordinate and recorded absolute altitude; Events show localized title, flight-relative time, coordinate, and available relative altitude. Selection clears when scrubbing or settings hide its annotation.
+- `GraphMarkerChip` is the single AirframeUI renderer for Graph marker chips and compact Map Event context. `EventMarkerPresentation` is the shared app projection from `ReaderEvent` to text/state chip content: Flight Mode payloads resolve firmware-version-specific bit changes through the shared mode table, while Inflight Adjustment payloads reuse shared function/scaling captions. Generic Map Events omit the chip to avoid duplicating their popover title.
+- The altitude profile aligns its dynamic Y domain to a stable nice interval and labels every horizontal grid line. Its lower domain never drops below zero unless at least one recorded relative-altitude value is negative.
 
 ## Flight Controller Runtime Status
 
@@ -107,7 +121,8 @@ Do not collapse source, segment, session, and runtime-window identity.
 - `FlightControllerImportCompletionCoordinator` keeps assistant acquisition independent from new-document destination, persistence, opening, and post-success temporary cleanup. iOS transfers the payload out of the assistant before presenting `fileExporter`; cancellation restores the same completed assistant state.
 - `DefaultFlightControllerImportAssistantRuntime` owns cross-platform discovery aggregation and provider routing. Discovery cancellation preserves the latest route map for selected-device handoff; beginning a new scan replaces it.
 - `DocumentHomeView` owns the document `NavigationSplitView`.
-- Sidebar chooses a log; detail chooses Overview, Table, Graph, Spectrum, or Step Response.
+- Sidebar chooses a log; detail chooses Overview, Table, Graph, Spectrum, Step Response, or Map.
+- On macOS, the document content never sets a navigation or window title. `NSDocument`/AppKit owns the filename title and File Proxy automatically; `LogDataView` sets only the navigation subtitle to the selected log's effective name.
 - `EnvironmentValues.airframeLogContext` passes the selected summary, decoded log, analysis workspace, issues, progress, and flight info.
 - One document-scoped `ProcessingActivityCounter` wraps all app-side data work.
 - One shared timeline position/range drives Table, Graph, playback, and future synchronized media.

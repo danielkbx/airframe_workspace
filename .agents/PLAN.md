@@ -1,29 +1,182 @@
-# Current Plan
+# Current Plan (Completed 2026-07-30)
 
-Correct Overview configuration semantics and expose controller loop frequencies.
+Move Map to the rightmost mode segment, leave macOS document window titles entirely to AppKit, and hide GPS-specific UI when the current log has no usable route.
 
 ## Think Before Coding
 
-- Resolve numeric protocol values through Betaflight's versioned enum definitions; never present opaque IDs or guess from unrelated fields.
-- Distinguish gyro sample frequency from PID loop frequency. Derive both only when loop time and PID process denominator provide sufficient evidence.
-- Apply Betaflight's documented Dynamic Idle scaling before persistence so every consumer receives RPM, not the encoded configuration unit.
+- Treat the segmented picker order as the source of truth for menu and numeric shortcut order.
+- Set command routing to match the visible order: Spectrum `⌘4`, Step Response `⌘5`, Map `⌘6`.
+- Never set a navigation or window title from document content on macOS; `NSDocument`/AppKit owns the filename and File Proxy.
+- Set only the navigation subtitle, always to the selected log's effective name.
+- Use one shared app-side GPS route usability gate for Map selection, command routing, fallback, and GPS Overview-card visibility.
 
 ## Simplicity First
 
-- Hardware adds Gyro Sample Rate.
-- Configuration adds PID Loop Rate and keeps friendly Motor/Receiver protocol names.
-- Missing or unknown enum/frequency inputs omit the value rather than inventing a label.
+- Reorder the existing `LogViewSelection` cases.
+- Keep the menu shortcuts and event shortcut dispatcher aligned with `LogViewSelection.allCases`.
+- Remove the redundant document-title propagation path.
+- Reuse `LogContext.hasUsableGPSRoute` rather than duplicating route checks in each view.
+- Add no new persisted state, captions, or window-management abstraction.
 
 ## Surgical Changes
 
-- Add focused semantic resolvers in the Reader/configuration domain, extend the existing Overview snapshot fields, and bump the Overview algorithm version.
-- Reuse existing frequency formatting and key/value rows; add only the required captions.
-- Preserve backward decoding of older snapshots and configuration-source precedence.
+- Touch only mode ordering, document-title propagation, GPS UI availability, the focused selection tests, and durable context.
+- Do not alter playback, route rendering, inspector settings, or saved view state.
 
 ## Goal-Driven Execution
 
-- Verify enum tables and encoded-unit formulas against local Betaflight and viewer references before coding.
-- Run mapping/scaling and snapshot compatibility tests, configuration/Reader package suites, focused cache tests, and macOS/iOS builds.
+- Verify the mode order shows Map last and number shortcuts follow that same order.
+- Verify the macOS document content has no title setter and its subtitle is exactly the selected log name.
+- Verify no-route logs reject Map selection and do not show the GPS Overview card.
+- Run focused app tests and a macOS build.
+
+Implementation and automated verification are complete.
+
+## Previous Shared Graph Event Chips Plan (Completed 2026-07-30)
+
+Reuse Graph event-marker chips in Flight Map popovers.
+
+## Think Before Coding
+
+- Reuse the actual Graph chip renderer, not a visually similar reimplementation.
+- Share the `ReaderEvent` to text/state content projection so Graph and Map cannot diverge.
+- Keep Home information unchanged because it is not a Graph Event.
+
+## Simplicity First
+
+- Extract one public single-chip view from `GraphMarkerChips` and keep its styling in one place.
+- Replace only the Map Event detail text with that shared chip.
+
+## Surgical Changes
+
+- Touch the reusable AirframeUI chip, the app Event-content projection, the Map popover, focused tests, and durable context.
+- Do not change route/Event timing, map symbols, popover metadata rows, or captions.
+
+## Goal-Driven Execution
+
+- Verify Graph still renders through the extracted chip and Map builds the identical text/state content.
+- Add focused content-projection tests, then run AirframeUI/app tests and macOS/iOS builds.
+
+Implementation and automated verification are complete.
+
+## Previous GPS Map Event Context Plan (Completed 2026-07-29)
+
+Add semantic event context to Flight Map annotation popovers.
+
+## Think Before Coding
+
+- Resolve flight-mode bit changes with the same firmware-version-aware names used by Table and Graph.
+- Resolve Inflight Adjustment function IDs and stored scaling through the existing centralized caption logic.
+- Keep the short Event title distinct from its payload-derived detail.
+
+## Simplicity First
+
+- Add one optional semantic detail string to the existing annotation popover.
+- Reuse `CaptionSet.flightModeChangeSummary` and `inflightAdjustmentCaption`; add no duplicate mode tables or scaling rules.
+
+## Surgical Changes
+
+- Limit production changes to the shared event-caption API and Flight Map popover wiring.
+- Do not alter Reader events, Analysis markers, event reveal, route rendering, or persisted state.
+
+## Goal-Driven Execution
+
+- Add focused caption tests for Flight Mode and Inflight Adjustment context.
+- Verify the Map passes firmware-specific flight-mode names and renders the optional detail.
+- Run caption/app tests, macOS/iOS builds, diff review, and durable-context reconciliation.
+
+Implementation and automated verification are complete.
+
+## Previous GPS Map Annotation Plan (Completed 2026-07-29)
+
+Add native annotation information and reduce Flight Map polyline rendering work.
+
+## Think Before Coding
+
+- Home information is contextual and selectable whenever Home is shown; Event information is selectable only after the progressive event reveal reaches it.
+- Selection is transient and must clear when scrubbing/toggles remove the selected annotation.
+- Reduce only display polyline geometry; current-position lookup, heading, event association, and Analysis data retain every prepared GPS point.
+
+## Simplicity First
+
+- Use SwiftUI `Button` plus an anchored native popover on the existing custom annotations.
+- Show title, flight-relative time, coordinate, and available altitude without geocoding or a detail sheet.
+- Bound the rendered polyline with deterministic sampling while always retaining its first and current endpoint.
+
+## Surgical Changes
+
+- Limit production changes to Flight Map presentation, two typed captions, focused tests, and durable context.
+- Do not change Reader/Analysis retention, event semantics, Playback, camera persistence, or document state.
+
+## Goal-Driven Execution
+
+- Verify Home and revealed Events open one anchored info popover, hidden/future annotations cannot retain selection, and icon-only annotations remain accessible.
+- Verify rendered route coordinates stay bounded and preserve first/current endpoints.
+- Run focused app/caption tests, macOS/iOS builds, diff review, and durable-context reconciliation.
+
+Implementation and automated verification are complete. Real-log visual feedback should confirm the native popover placement and perceived route smoothness.
+
+## Previous GPS Map Refinement Plan (Completed 2026-07-29)
+
+Refine the native Flight Map from real-log visual feedback.
+
+## Think Before Coding
+
+- Keep Map event reveal chronological, but show the complete prepared event set in the altitude timeline.
+- Treat each recorded GPS point index as the visual identity of the route prefix and current-position annotation so MapKit receives prompt, bounded overlay updates.
+- Anchor the heading cone at the position dot and make it widen in the recorded course direction.
+
+## Simplicity First
+
+- Keep the native SwiftUI Map, shared cursor, existing route projection, settings, and camera behavior.
+- Remove only visible annotation titles; retain localized accessibility labels.
+- Draw altitude grid labels as a small overlay using the same grid values already rendered by the profile.
+
+## Surgical Changes
+
+- Limit production changes to the Flight Map surface/profile and their focused documentation/tests.
+- Do not change Reader/Analysis time association, playback cadence, Graph/Table timelines, or persisted settings.
+
+## Goal-Driven Execution
+
+- Verify the route polyline and position annotation receive a new identity at every recorded GPS point without recreating the Map camera.
+- Verify the cone apex remains centered on the dot, Map labels are hidden, profile events ignore cursor time, and horizontal grid labels match their lines.
+- Run focused tests, caption validation, complete macOS/iOS builds, diff review, and durable-context reconciliation.
+
+Implementation and automated verification are complete. Real-log visual feedback should confirm the MapKit overlay refresh behavior and final cone appearance.
+
+## Previous GPS Map Plan (Completed 2026-07-29)
+
+Complete and verify the GPS Overview card and native Flight Map implementation.
+
+## Think Before Coding
+
+- Associate each usable GPS coordinate with decoded G-frame time, falling back only to current Main-frame context.
+- Treat coordinates and time as untrusted input; keep route/event visibility as pure cursor-derived projections.
+- Preserve the shared playback cursor and existing Graph/Table ranges; Map always uses the full Main-frame range.
+
+## Simplicity First
+
+- Use native SwiftUI MapKit, recorded samples, and the existing timeline graph/playback primitives.
+- Add no dependency, interpolation, live location, camera following, range editing, or Overview-cache migration.
+- Keep missing heading, Home, or relative altitude optional without disabling an otherwise usable route.
+
+## Surgical Changes
+
+- Extend the one-pass Reader scan with bounded route/Home retention, then project it immutably in BlackboxAnalysis.
+- Split GPS metrics from Flight presentation, add `.map` command/state integration, and persist only per-segment display settings.
+- Add native route annotations and a timeline-styled altitude profile without changing Graph/Table behavior.
+
+## Goal-Driven Execution
+
+- Verify Reader retention/validation, Analysis binary searches and reversible event reveal, settings round trips, command routing, captions, accessibility, and both platform builds.
+- Finish with package suites, focused app tests, complete macOS/iOS builds, scope review, and durable context.
+
+Implementation and automated verification are complete. An interactive visual smoke check with a representative GPS log remains useful but is not required for the completed code/build gate.
+
+## Previous Overview Configuration Plan
+
+Correct Overview configuration semantics and expose controller loop frequencies.
 
 ## Previous Overview Card Reorganization Plan
 
