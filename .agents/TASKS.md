@@ -82,6 +82,7 @@ Only approved near-term work and unresolved items belong here. Completed work be
 
 ## Validation
 
+- Validate the Map timeline source picker and its blue/green/teal/purple source colors on the MAYA Betaflight 4.5.2 package on both macOS and iPadOS.
 - Validate Craft roll/pitch signs against the reference viewer on a representative real log.
 - Validate Craft motor gauge colors against Graph colors while scrubbing.
 - Expand automatic mixer-template checks beyond quad-X using representative bicopter, tricopter, Y4, V-tail, A-tail, Hex, Y6, X8, and octocopter logs.

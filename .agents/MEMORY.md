@@ -16,7 +16,10 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - The Map mode is the rightmost item in the segmented mode picker, menu, and numeric command shortcuts.
 - macOS document windows leave the window title and File Proxy entirely to `NSDocument`/AppKit; no document content view may set a navigation or window title. The navigation subtitle is always exactly the effective name of the selected log. Log and mode changes must never alter the window title.
 - The Overview GPS card is shown only when the current log has a usable GPS route: at least two time-associated, monotonic, valid, distinct coordinates. Logs without that route also have the Map segment and command disabled.
+- The Overview GPS card is visible when the snapshot has at least one GPS fact (speed, distance, start coordinate, or satellites). Maximum Altitude appears in that visible GPS card; otherwise an available altitude appears in Flight. Altitude alone does not make the GPS card visible, and the row is omitted when no altitude exists.
 - Map playback is chronological and reversible: route and Map-event visibility are derived solely from the shared current position, while Home is contextual and visible independently. The altitude timeline always shows every prepared event when Events is enabled.
+- Map timeline sources are `GPS Altitude` (default), `Barometer Altitude`, `GPS Speed`, and `Distance from Home`. Their stable colors are blue, green, teal, and purple. The smallest compact picker belongs on the right side of the Map timeline toolbar; unavailable sources remain visible but disabled.
+- GPS relative altitude uses GPS Home altitude when present and otherwise normalizes against the first valid retained GPS altitude. A usable route remains scrubbable even when no value source has enough samples.
 - Map Event information reuses the actual Graph marker-chip renderer and shared Event-to-chip projection: Flight Mode changes show firmware-specific On/Off state segments, and Inflight Adjustments show the resolved function and scaled value. Generic Events do not repeat their title as a redundant chip.
 
 ## Repository Boundaries

@@ -203,6 +203,7 @@ Initial Airframe compatibility baseline:
 
 Overview hardware metadata findings:
 
+- The real `MAYA_2025-04-26 07-44-35 Betaflight 4.5.2.airframe` logs contain `G:GPS_altitude` in decimeters and `I:baroAlt` in centimeters, but their `H` schema contains only `GPS_home[0]` and `GPS_home[1]`. Airframe previously decoded GPS altitude correctly but dropped it from `AnalysisGPSRoute` because relative altitude required `GPS_home[2]`. The Overview builder also searched for `GPS_altitude` only in the `I` schema even though these logs record it in `G`.
 - The current Betaflight Blackbox writer serializes configured `acc_hardware` and `baro_hardware` IDs, but no detected gyro-chip identity. `gyro_hardware_lpf` is a filter setting, not a sensor model.
 - A concrete accelerometer identity may also identify the gyroscope only for known combined IMUs such as BMI270, BMI160, MPU6xxx/9xxx, ICM20xxx/42xxx, and LSM6DSO/LSM6DSV16X. `AUTO`, `NONE`, and standalone accelerometers must not be promoted to a gyro identity.
 - A CLI `dump all` renders hardware lookup values as names, but `AUTO` describes configuration intent rather than the detected device and must remain unavailable in the Overview.
