@@ -101,6 +101,10 @@ Define success criteria. Work in verifiable steps.
 
 Use Caveman Lite for plans, status updates, code-review summaries, and other operational output.
 
+- The user strongly prefers extremely compact answers.
+- Prioritize factual precision over phrasing quality.
+- Use short sentences and precise questions.
+- Avoid linguistic decoration, praise, hedging filler, and broad recap.
 - Prefer short, dense statements over conversational framing.
 - Remove filler, pleasantries, and unnecessary recap.
 - Keep grammar readable and professional.
