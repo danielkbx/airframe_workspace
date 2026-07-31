@@ -34,7 +34,7 @@ This file describes the current technical shape. Stable product and workflow rul
 
 - `BlackboxReader` retains bounded `ReaderScanGPSPoint` values and the first valid `ReaderScanGPSHome` during the existing scan. Adaptive halving preserves the first and final usable route points while aggregate GPS metrics remain full-resolution.
 - `BlackboxAnalysisWorkspace.gpsRoute(using:)` builds an immutable MapKit-free `AnalysisGPSRoute`, drops non-monotonic points, calculates Home-relative altitude, normalizes heading, associates at most 256 events with preceding route points, and provides binary-search cursor projections.
-- The app owns transient MapKit camera state and persisted per-segment map display settings. Route prefixes, position, and Map event annotations read the shared document cursor; profile event lines show the complete prepared event set. Map playback always uses the complete Main-frame range. In the segmented mode picker, menu, and numeric command shortcuts, Map is displayed as the final/rightmost mode and uses `⌘6`.
+- The app owns transient MapKit camera state and document-wide map display settings. Route prefixes, position, and Map event annotations read the active log cursor; profile event lines show the complete prepared event set. Map playback always uses the complete Main-frame range. In the segmented mode picker, menu, and numeric command shortcuts, Map is displayed as the final/rightmost mode and uses `⌘6`.
 - `DocumentHomeView.LogContext.hasUsableGPSRoute` is the app-side shared gate for Map segment enablement, command routing, Map fallback, and Overview GPS-card visibility. It requires at least two monotonic time-associated GPS points with distinct coordinates; while scan/loading state is unresolved, Map fallback is deferred.
 - The route overlay uses the latest recorded GPS-point index as its SwiftUI identity, prompting immediate MapKit overlay replacement only when a new point is reached while preserving camera state. The current-position annotation keeps stable identity so its dot and heading cone do not blink during Playback.
 - Display-only route geometry is capped at 2,048 deterministically sampled points. First/final endpoints, every prepared Event route point, and the live current endpoint are retained; Analysis route data and position/event lookup remain unchanged.
@@ -171,6 +171,7 @@ Do not collapse source, segment, session, and runtime-window identity.
 - Progress updates are throttled before main-actor publication.
 - Whole-flight consumers project from the scan overview.
 - Full-resolution views use indexed range queries and bounded document-scoped caches.
+- Graph, Spectrum, Table chunks, analysis workspaces, and prepared Map routes survive log selection changes in document-scoped, log-keyed caches.
 - Speculative work yields to visible work and is cancelled when its request becomes stale.
 - Memory pressure trims caches by priority while protecting the currently visible model.
 

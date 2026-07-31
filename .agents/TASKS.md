@@ -27,6 +27,9 @@ Only approved near-term work and unresolved items belong here. Completed work be
 ## Completed: Missing Graph Fields and Timeline Data Fallbacks
 
 - Graph inspector rows now remain visible and disabled when their configured series is absent from the selected log; only a genuinely empty stored section shows the empty-state action.
+- Shared view state implemented: switching logs retains all presentation settings, while Timeline Range, Current Position, and transient Graph viewport remain per log. Map no longer falls back to Overview when GPS data is unavailable. Legacy appearance uses the last selected segment as migration source while old per-segment ranges remain independent.
+- Document-window caches now retain Graph, Table decode/projection, Spectrum, Step Response, and Map results across mode/log switches with log-aware keys, large platform budgets, and inactive-first memory-pressure trimming.
+- Spectrum compute results and prepared Map routes now survive log switches in document-scoped caches; Spectrum memory-pressure trimming protects the active log.
 - The shared Table/Graph timeline now resolves Motor Average %, mean Motor RPM, Setpoint Throttle, RC Command Throttle, then an empty time track, and stays scrub-capable for every usable main-frame time range.
 - Fallback and unavailable states use localized info-symbol help plus accessibility text.
 - Focused macOS app tests cover the field-row projection, every fallback source, RPM aggregation, and the sample-free loaded timeline.
