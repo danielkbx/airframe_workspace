@@ -2,6 +2,8 @@
 
 Airframe is a native Swift Betaflight Blackbox log analyzer. This file is only the workspace map and reading order; project decisions live in `MEMORY.md`.
 
+For document formats, pickers, sandbox access, imports, exports, persistence, or lifecycle work, `DOCUMENT_IO_MATRIX.md` is also mandatory context and must remain current.
+
 The workspace root is now a private wrapper Git repository:
 
 - Root repo: `git@github.com:danielkbx/airframe_workspace.git`

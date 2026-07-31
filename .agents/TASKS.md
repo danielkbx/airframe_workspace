@@ -2,6 +2,35 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Active: Regular-File Airframe Container
+
+- Public-repository branch: `feature/airframe-container`; no commits or pushes without explicit approval.
+- Container implementation committed in the public repository as `02477f1` (`Introduce regular-file Airframe containers`); it has not been pushed.
+- Characterization fixtures freeze legacy v1/v2 semantics and zero-write read-only opening.
+- A retained 1,001,472-byte real Betaflight legacy package fixture verifies byte-preserving read-only opening and first-mutation migration end to end.
+- Automatic in-place legacy migration and dual-UTI opening have been removed. The normal document path registers and accepts only regular-file `.airframe` containers.
+- The temporary File-menu command `Convert Legacy File…` selects a source package, asks for a destination through `NSSavePanel`, converts off the main actor, validates, preserves opaque files, and opens the result. Choosing the same URL atomically replaces the package only after validation; failure immediately before publication is regression-tested to preserve the source byte-for-byte.
+- `Packages/AirframeContainer` provides physical format v1 primitives, streaming writer/reader, recovery, transactions, logical deletion, APFS-aware compaction, raw export, privacy-safe logging, and 45 passing tests.
+- App integration includes a deterministic manifest, opaque-file retention, video-ready range reads, a revision-aware persistence actor, FC append durability, new-document conversion, close-time compaction, and explicit one-shot legacy conversion.
+- Raw-log conversion finalization now replaces SwiftUI's package-shaped picker placeholder with a validated regular container through a same-volume coordinated replacement; the completed user-visible result is never the legacy package format.
+- Raw-log and FC `Transferable` exports carry an explicit, non-empty suggested filename; regression coverage includes the folder-import save flow's user-facing `Kayoumini.airframe` name and empty-name fallbacks.
+- macOS raw-log conversion uses a native Save panel that hides but retains the required `.airframe` suffix and disallows other file types. No export path repairs an extensionless result by writing to an unauthorized sibling URL.
+- All macOS Save panels now share the same extension-enforcing factory, and preset/raw-log FileDocument exports receive extension-complete default names. Guard tests prevent unconfigured native Save panels from being added.
+- FC creation now stages outside the sandboxed destination, validates before publication, and atomically publishes/replaces the exact Save-panel URL. Failures log their NSError domain/code and show the underlying localized reason while retaining imported data.
+- Completed exhaustive I/O audit; permanent matrix is `DOCUMENT_IO_MATRIX.md`. BLOCK/HIGH remediations cover iOS close/replacement durability, Duplicate overwrite semantics, folder-scope lifetime, open regular-file validation, accurate legacy in-place wording, sandbox-safe package raw export, and artifact-level APF/BBL/BFL tests.
+- Remaining release-only/manual evidence is tracked explicitly in the matrix: actual macOS/iOS picker/exporter UI and iCloud/third-party provider behavior cannot be proven by ordinary `/tmp` tests.
+- The "legacy only in converter" isolation is implemented: generic directory/FileWrapper document APIs and native package write hooks are removed, normal Duplicate accepts regular containers only, raw-log and iOS FC exports use validated regular-container transfers, and a source guard confines legacy symbols to `LegacyAirframeConverter` plus dedicated compatibility tests.
+- Validation after simplification: AirframeContainer 45/45; full macOS app suite 520/520 plus Swift Testing 2/2 and package-hosted tests 4/5 with one expected skip; macOS Release and generic iOS Simulator Release builds succeeded.
+- Final automated gate on 2026-07-30: BlackboxCore 96 tests, BlackboxReader 224 tests, BlackboxAnalysis 178 tests, complete macOS app suite 521 tests, four UI smoke tests, macOS Release build, and generic iOS Simulator Release build all passed.
+- Manual environment acceptance remains for real iCloud Drive/security-scoped providers, cross-volume fallback, large real-world document performance, and Instruments profiling because no representative `.airframe` corpus or configured external provider was available locally.
+
+## Completed: Missing Graph Fields and Timeline Data Fallbacks
+
+- Graph inspector rows now remain visible and disabled when their configured series is absent from the selected log; only a genuinely empty stored section shows the empty-state action.
+- The shared Table/Graph timeline now resolves Motor Average %, mean Motor RPM, Setpoint Throttle, RC Command Throttle, then an empty time track, and stays scrub-capable for every usable main-frame time range.
+- Fallback and unavailable states use localized info-symbol help plus accessibility text.
+- Focused macOS app tests cover the field-row projection, every fallback source, RPM aggregation, and the sample-free loaded timeline.
+
 ## Completed: Map Picker Order and Document Title Stability
 
 - Move Map to the rightmost position in the segmented mode picker, menu, and shortcut order: Spectrum is `⌘4`, Step Response is `⌘5`, and Map is `⌘6`.

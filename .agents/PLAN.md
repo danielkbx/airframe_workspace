@@ -1,4 +1,52 @@
-# Current Plan (Completed 2026-07-30)
+# Current Plan
+
+## Regular-File Airframe Container
+
+### Think Before Coding
+
+- Preserve logical metadata v2 independently from physical container v1.
+- Freeze legacy behavior before switching persistence; read-only open never migrates.
+- Treat durable commit as the mandatory boundary before destructive FC/card cleanup.
+
+### Simplicity First
+
+- Keep all binary format, transaction, recovery, compaction, and export logic in `AirframeContainer`.
+- Keep `AirframeWorkspaceDocument` as the visible value model and place one actor-backed adapter between it and platform document lifecycle.
+- Use uncompressed immutable blobs, complete snapshot commits, APFS clone fast paths, and streaming fallbacks.
+
+### Surgical Changes
+
+- Land and verify package primitives, I/O, transactions, compaction, and export first.
+- Add app manifest/codec and read-only dual-format opening before writable platform integration.
+- Add opaque retention, first-mutation migration, then new-document and lifecycle paths.
+- Preserve all unrelated dirty UI/test changes and make no public-repository commit without approval.
+
+### Goal-Driven Execution
+
+- Gate each milestone with focused tests and macOS/iOS builds.
+- Completion requires invisible retryable migration, nonblocking saves, logical and physical deletion semantics, compact share/close snapshots, raw export, and video-ready range reads.
+
+# Previous Plan (Completed 2026-07-30)
+
+## Missing-Data Resilience
+
+### Think Before Coding
+
+- Treat stored graph field IDs and the main-frame time range as durable UI structure; data availability only controls whether a row or plot is active.
+
+### Simplicity First
+
+- Preserve missing graph rows with a local availability projection, and resolve the timeline through one deterministic source chain: Motor Average %, mean normalized Motor RPM, Setpoint Throttle, RC Command Throttle, or an empty time track.
+
+### Surgical Changes
+
+- Changes are confined to the Graph inspector projection, shared Timeline model/view, captions, and focused app tests. Public package APIs and persisted formats remain unchanged.
+
+### Goal-Driven Execution
+
+- Completed on 2026-07-30: missing Graph fields remain visible and disabled, and every log with a usable main-frame time range retains a scrub-capable Timeline with a clear fallback explanation.
+
+## Previous Completed Plan
 
 Move Map to the rightmost mode segment, leave macOS document window titles entirely to AppKit, and hide GPS-specific UI when the current log has no usable route.
 

@@ -1,6 +1,25 @@
 # Current Architecture
 
+## Airframe document storage
+
+- Normal `.airframe` documents are regular files backed by `AirframeContainer`; the application does not reconstruct or persist directory packages in ordinary open, save, duplicate, raw-log, or flight-controller flows.
+- Temporary legacy support is one-way and isolated in `WorkspaceDocument/Container/LegacyAirframeConverter.swift`. It preflights the selected package before presenting the destination dialog and publishes a fully validated regular container.
+- `AirframeContainerTransfer` prebuilds and validates regular files for SwiftUI export so platform document pickers never define the physical document format through a `FileWrapper` directory.
+- `LegacyFormatIsolationGuardTests` statically confines legacy directory symbols to the converter and dedicated legacy tests.
+- `DOCUMENT_IO_MATRIX.md` defines every user-visible URL boundary and its automated/manual verification status. `AirframeSavePanel` owns native save type/extension policy; candidate writers publish only to the exact selected URL through coordinated replacement.
+
 This file describes the current technical shape. Stable product and workflow rules live in `MEMORY.md`; future ideas live in `BACKLOG.md`.
+
+## AirframeContainer
+
+- `Packages/AirframeContainer` depends only on local `Logging` and supports iOS and macOS.
+- The file has a fixed 4 KiB header, two CRC-protected locator slots, aligned immutable blobs, complete snapshot commits, and a footer.
+- Locator publication after synchronized blob and commit writes is the durable boundary. Readers choose the newest valid commit and support bounded recovery.
+- Stable physical blob handles drive retention and logical deletion; commit-local identifiers may change.
+- Reader APIs provide bounded reads, range reads, and streaming copy without loading large blobs on open.
+- Full compaction streams live blobs into a validated sibling candidate. Tail compaction uses APFS clone-and-truncate with streaming fallback.
+- The app-owned manifest maps normalized logical paths to kind, byte count, and SHA-256 without persisting offsets or handles. Logical metadata remains schema v2.
+- `AirframeDocumentStore` serializes revisions outside the Main Actor while AppKit/UIKit objects retain lifecycle and security-scope ownership.
 
 ## Overview Dashboard
 

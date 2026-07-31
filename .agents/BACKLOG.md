@@ -16,6 +16,14 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 
 ## Parking Lot
 
+### Log Organization and Tuning Workflows
+
+- Add internal log folders inside Airframe documents. Keep the structure flat: folders are not nested, and logs can be moved between folders.
+- Add user-defined tags for logs.
+- Add specialized views for special-purpose logs, starting with a Hover Test view.
+- Add guided flight-controller setup for specific tasks, such as recommended Blackbox settings.
+- Add a Tuning Assistant that guides setup and test-flight execution end to end: FC setup, test-flight instructions, log import, tagging, and follow-up organization.
+
 ### Deferred BLE FlashFS Throughput Optimization
 
 Do this after the complete USB/BLE import vertical slice is working end to end. Until then, keep the hardware-validated 400-byte compressed path as the stable reference even though its roughly 3.2 KiB/s throughput is not product-acceptable.
@@ -82,8 +90,6 @@ Acceptance criteria:
 - Investigate fixture sources for representative Betaflight logs across firmware versions, GPS usage, multiple flights, and corrupted/truncated logs.
 - Evaluate whether `jcodemunch` indexing of `blackbox-log-viewer/` and `betaflight/` improves investigation speed.
 - Add a macOS Quick Look extension that shows the most important summary data for a Blackbox log without opening the full app.
-- Design and add the final Airframe app icon before App Store submission.
-- Configure Apple Developer Team ID in Xcode signing settings once the team is identified.
 - Build a native chart prototype that consumes `ReaderViewportResult` directly.
 - Consider optional min/max envelopes for scan-overview samples if profiling shows stride sampling hides important spikes. Also reconsider overview retention only if its per-log memory cost becomes material.
 - Timeline metric switcher (max RC deflection / motor differential styles) as alternative Y signals.
@@ -140,3 +146,5 @@ Acceptance criteria:
   - Hover crosshair with time/value readout in the step response panes (spectrum-style pointer tracking was deferred in v1).
 
 - Motor-poles mismatch detection: correlate the dominant spectral ridge in Frequency-vs-RPM with the eRPM-derived motor frequency; a stable ratio clearly off 1.0 (e.g. 12/14 = 0.857) indicates a wrong `motor_poles` setting at log time. Surface a hint in the Spectrum view or log quality classification. Real-world case: Flip btfl_007.bbl logged with motor_poles 14 on 12-pole motors (2026-07-29).
+
+- SwiftUI popup-menu rebuild storm during document load: while a document loads, the content-mode popup (Overview/Table/Graph/Spectrum/Step Response/Map) is rebuilt roughly 180 times per second for about 10 seconds, measured 2026-07-31 via `NSMenu.didAddItemNotification` counts. It is independent of `LogViewCommandBroker.revision` (the revision stayed constant across 1554 events). It saturates the main thread and delayed unrelated main-queue work by up to 182 ms. Worth tracking down; unclear which view re-render drives it.
