@@ -16,6 +16,13 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 
 ## Parking Lot
 
+### Legacy Format Removal Pass (planned in a few days)
+
+- Remove `LegacyAirframeConverter.swift`, the `Convert Legacy File…` menu entry, legacy fixtures, and the legacy compatibility/migration/isolation-guard tests once testers have converted their files.
+- Rename the cosmetic old-format echoes at the same time: `Storage.airframePackage`, `AirframePackage`, `AirframePackageDuplicator`. The metadata identifier string `com.kumkju.airframe.document` stays (validated logical format identifier inside the container).
+- Consider surfacing `ContainerReader.locatorIssues`/`recoveryWasUsed` in a user-visible diagnostic, currently log-only.
+- `VideoAsset.validate()` must be called once before range serving when the video feature ships; range reads are digest-unverified by design.
+
 ### Log Organization and Tuning Workflows
 
 - Add internal log folders inside Airframe documents. Keep the structure flat: folders are not nested, and logs can be moved between folders.
@@ -146,5 +153,36 @@ Acceptance criteria:
   - Hover crosshair with time/value readout in the step response panes (spectrum-style pointer tracking was deferred in v1).
 
 - Motor-poles mismatch detection: correlate the dominant spectral ridge in Frequency-vs-RPM with the eRPM-derived motor frequency; a stable ratio clearly off 1.0 (e.g. 12/14 = 0.857) indicates a wrong `motor_poles` setting at log time. Surface a hint in the Spectrum view or log quality classification. Real-world case: Flip btfl_007.bbl logged with motor_poles 14 on 12-pole motors (2026-07-29).
+
+### Flight map path lags during playback — migrate the map to an MKMapView representable
+
+Status 2026-07-31: diagnosed, deliberately not fixed yet. The evaluation is complete; when this becomes active, plan the MKMapView implementation directly without re-investigating.
+
+Symptom: during playback the blue flown-path `MapPolyline` in `DocumentHomeView.FlightMap.Surface` (`Airframe/App/Airframe/App/DocumentHome/Content/Map/MapContainer.swift`) appears many seconds late, sometimes only when playback is paused. Annotations (position marker, home, events) track playback smoothly the whole time.
+
+Verified findings (do not re-derive):
+
+- `LogPlaybackController` ticks every 16 ms and writes `DocumentStateStore.logPositions` (`@Observable`); `Surface.body` re-evaluates ~20x/s during playback, the `@MapContentBuilder` closure runs on every body pass, and the derived point index advances continuously (~10 GPS points/s). Confirmed with temporary os_log instrumentation (category `Claude-DEBUG`, since removed): `bodyEvals` == `contentEvals` every second, point index and chunk counts always fresh while the rendered line stood still. The app side is not the bottleneck.
+- `MapPolyline` with a stable structural identity does NOT pick up changed coordinates: the rendered overlay stays frozen until something else forces a rebuild (pausing playback did). This is why the original code wraps the polyline in `ForEach([currentPointIndex], id: \.self)` — the per-tick identity change is a redraw workaround.
+- Identity churn makes MapKit tear down and re-add the overlay. Neither the original full-path-per-tick rebuild nor a chunked variant (static completed 64-point chunk polylines with stable identity plus one small identity-churned tail polyline) rendered in time; both lag many seconds. Conclusion: MapKit's SwiftUI polyline commit/rasterization pipeline cannot keep up with a continuous overlay update stream, regardless of update size. Not fixable within SwiftUI `Map`.
+- Decimation is not the issue: the path is already capped at 2,048 rendered points via `Surface.renderedRoutePointIndices` (event indices preserved); keep this logic.
+
+Rejected alternatives:
+
+- Any further variant inside SwiftUI `Map` (chunking, throttling, equatable isolation): the pipeline itself defers commits; throttling to 1-2/s was estimated to only bound, not remove, the lag and makes the path tip jump.
+- Canvas overlay above the `Map` with `MapReader`/`MapProxy` projection (the chart-cursor technique): rejected by the user because the path would draw above the event/home annotations, which is not acceptable. The path must render below annotations.
+
+Accepted future fix: replace the SwiftUI `Map` in `FlightMap.Surface` with an `MKMapView` behind `NSViewRepresentable`/`UIViewRepresentable`.
+
+Implementation notes for the future plan:
+
+- Keep `Container`/`ProfileRegion` and the route loading untouched; only `Surface` changes. Keep `renderedRoutePointIndices` decimation and the exact-current-point tail behavior of `coordinates(through:)`.
+- Path updates become incremental in the coordinator: keep one `MKPolyline` for the completed prefix (replace only when the rendered prefix grows/shrinks, or append fixed-size chunk polylines) plus a tiny tail polyline to the exact current point; update overlays directly instead of diffing view content. `MKPolylineRenderer` with the current style (blue, lineWidth 4, round cap/join). Overlay level below annotations restores the correct z-order by construction.
+- Re-implement: home annotation (red house button), event annotations (orange exclamation buttons), position marker (`PositionMarker`/`DirectionCone` — reusable via `NSHostingView`/`UIHostingView` in an `MKAnnotationView`), the `AnnotationInfo` popovers (currently SwiftUI `.popover` on annotation content; needs a presentation strategy per platform), initial framing (`frameCompleteRouteOnce` → `setVisibleMapRect`), map style switching (standard/imagery), and the `Settings` toggles (`showsHomePoint`, `showsEvents`, `showsHeading`, `mapType`).
+- Two platforms: macOS (`NSViewRepresentable`) and iOS/iPadOS (`UIViewRepresentable`); consider one shared coordinator with small platform shims.
+- Optional follow-up enabled by the renderer control: speed/altitude-colored route (see "Future Map ideas" above).
+- Accessibility: preserve `accessibilityLabel`s currently set on the map and annotation buttons.
+
+Verification for the future implementation: play a GPS log (Barney_2026-07-04, Log 2) at 1x and max rate — the path tip must track the marker with no visible lag; scrub backwards — the path must shorten immediately; annotations, popovers, framing, and satellite mode must behave as before on macOS and iOS.
 
 - SwiftUI popup-menu rebuild storm during document load: while a document loads, the content-mode popup (Overview/Table/Graph/Spectrum/Step Response/Map) is rebuilt roughly 180 times per second for about 10 seconds, measured 2026-07-31 via `NSMenu.didAddItemNotification` counts. It is independent of `LogViewCommandBroker.revision` (the revision stayed constant across 1554 events). It saturates the main thread and delayed unrelated main-queue work by up to 182 ms. Worth tracking down; unclear which view re-render drives it.
