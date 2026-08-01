@@ -2,6 +2,11 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Completed: Automatic Sidebar Log Tags
+
+- Airframe-document log rows now show a fixed-height pill lane instead of the original filename. Versioned per-segment analysis tags are `Issues`, `Failsafe`, `Chirp`, and `GPS`; the live `Config` tag marks a valid configuration link from the same Flight Controller import snapshot and excludes older fallbacks. Background derivation reuses Reader scan facts and health reports, cache failures remain nonfatal, and empty lanes preserve row height.
+- Verified with BlackboxReader, BlackboxAnalysis, and AirframeCaptions package tests; focused macOS app cache tests; and full macOS plus generic iOS Simulator app builds.
+
 ## Completed: Spectrum Filter Settings
 
 - Add a native Filter Settings popover to the Spectrum inspector for logs that identify as Betaflight 4.5 or newer.
@@ -111,6 +116,7 @@ Only approved near-term work and unresolved items belong here. Completed work be
 - The conversion sheet explains the retained analyzed-log-details benefit.
 - Refinement completed: compact copy, Log Gaps placement, optional-row omission, equal row heights, sensor/MCU metadata, useful idle/PID configuration, and first/last-sample VBat.
 - Final compact-card feedback completed: Flight omits Disarms; reusable headers center icon/title/action; persisted debug mode uses firmware-specific semantic names instead of raw numbers.
+- Debug-mode catalog correction completed: explicit integer catalogs cover 4.3 best-effort, verified 4.4.3, 4.5.5, legacy 4.6 commit `0ca4fe879`, 2025.12.5, and 2026.6.0-rc3, with the newest catalog as the missing/future-version fallback. Full Reader tests, focused cache tests, the macOS build, and the supplied `debug_mode_chirp.bbl` confirm `2025.12.5` raw `97` as `CHIRP`.
 - Dashboard reorganization completed: Hardware and Power are separate cards; Flight owns GPS speed/distance metrics; Recovered Gaps is hidden and Log Gaps is presented as Gaps.
 - Configuration semantics completed: protocol IDs display names, Dynamic Idle uses physical RPM, and Hardware/Configuration expose Gyro Sample Rate/PID Loop Rate.
 - Swift package tests, focused cache tests, and complete iOS/macOS builds passed on 2026-07-28.
