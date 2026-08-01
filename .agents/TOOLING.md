@@ -1,5 +1,6 @@
 # Tooling Knowledge Base
 
+- In zsh, an unmatched unquoted glob aborts the command before `rg` runs (`no matches found`). Quote optional path patterns or pass only paths verified to exist when a reference checkout may omit a directory.
 - For SwiftUI `fileExporter(item:)` with CoreTransferable `FileRepresentation`, add a constant non-empty `.suggestedFileName` on the representation even when the view supplies `defaultFilename`. Without it, macOS SwiftUI can pass an empty string to `NSFileWrapper.preferredFilename`; the dynamic closure overload triggers recursive generic-metadata resolution and `EXC_BAD_ACCESS` on the current toolchain. Add a test that evaluates `transferRepresentation`, because tests of prepared files alone do not execute this runtime path.
 - App-hosted focused tests still compile the complete test target; every new test source must compile even when another suite is selected.
 - Launch Services can cache an older exported UTI declaration. Verify the built app's `UTExportedTypeDeclarations` rather than `UTType.conforms(to:)` on a development machine after changing conformance.

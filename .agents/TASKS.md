@@ -2,6 +2,14 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Completed: Spectrum Filter Settings
+
+- Add a native Filter Settings popover to the Spectrum inspector for logs that identify as Betaflight 4.5 or newer.
+- Group and label the recorded filter values using Betaflight Configurator concepts while keeping Airframe's native inspector presentation.
+- Show one effective value per setting: prefer the log, use Config only for missing log values, and explain differences or Config fallback through row warning tooltips.
+- Resolve the selected PID profile from `dump all` restoration markers so D-Term settings compare against the active profile.
+- Focused app, BlackboxReader, FlightController, and caption tests passed; macOS Release and generic iOS Simulator Release builds succeeded on 2026-08-01.
+
 ## Active: Regular-File Airframe Container
 
 - Public-repository branch: `feature/airframe-container`; no commits or pushes without explicit approval.
