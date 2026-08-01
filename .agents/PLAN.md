@@ -1,5 +1,23 @@
 # Current Plan
 
+## Individual Log Visibility (Completed 2026-08-01)
+
+### Think Before Coding
+
+- Persist stable source-hash/segment identities, never display names or ordinals, and keep at least one log visible even for malformed stored state.
+
+### Simplicity First
+
+- Filter one central presented-log projection and reuse the existing document state and macOS window-command broker.
+
+### Surgical Changes
+
+- Limit the feature to Airframe-document UI state, Sidebar context menus, View commands, captions, and focused tests; raw logs and payload bytes remain unchanged.
+
+### Goal-Driven Execution
+
+- Completed with persistent hide/show-all behavior, next-then-previous selection fallback, raw-log exclusion, 42 focused app tests, 29 caption tests, and green macOS/iOS Simulator builds.
+
 ## Regular-File Airframe Container
 
 ### Think Before Coding
