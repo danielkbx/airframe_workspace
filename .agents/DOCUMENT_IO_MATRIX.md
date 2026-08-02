@@ -12,6 +12,7 @@ This file is the authoritative inventory for user-visible file boundaries. A pat
 | FC → new Airframe | completion coordinator | Final regular `.airframe` | Candidate in replacement directory; exact coordinated publish; open before cleanup | Durability/order/overwrite tests | Hardware import to local/iCloud/provider |
 | FC append | workspace controller + persistence actor | Append existing container | Durable flush before erase/temp cleanup | Duplicate/config/flush tests | Native append, close, reopen |
 | Autosave | persistence actor | Append-only commit | Document-owned URL; no FileWrapper persistence | Retry/coalescing/native macOS tests | iCloud/provider mutation |
+| Per-log view state | document metadata | `source:<sha256>:<segmentIndex>` keys for position and In/Out range; numeric legacy fallback | Internal append-only autosave and close flush | Same-segment multi-source roundtrip and legacy-key tests | Provider-backed lifecycle remains covered by platform gates |
 | Close/compaction | NSDocument / UIDocument | Flush required; maintenance best effort | Flush failure vetoes close | Store/platform tests | iOS background/termination smoke |
 | Duplicate | `AirframeNSDocument` | Regular validated container | Flush; stage/validate; exact atomic replace; then open | Orchestration/overwrite tests | Native dialog/local/iCloud |
 | Rename/Move | NSDocument | Same regular container | Platform coordinated; backing follows new URL | Action-policy tests | Rename/move, mutate, reopen |

@@ -153,6 +153,7 @@ Do not collapse source, segment, session, and runtime-window identity.
 - `DocumentStateStore`: per-window transient state and raw-log restoration.
 - `DocumentStateRepository`: bounded content-fingerprint-keyed raw state, mirrored through iCloud KVS.
 - Package `metadata.json`: authoritative Airframe document state.
+- Log-specific document state (timeline position and In/Out range) is addressed by stable source hash plus segment index. Legacy numeric segment keys are read only as fallback; stable keys win and are written on mutation. The transient graph viewport follows the same identity model without being serialized.
 - App-global settings: local defaults plus iCloud KVS through `AirframeGlobalSettings`.
 - Raw bytes never receive xattrs or app state.
 

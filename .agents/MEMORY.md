@@ -44,6 +44,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Mid-session compaction triggers after a commit when reclaimable bytes exceed 25% of file size and 10 MiB (`.tail` unless a deletion occurred); close keeps `.full`. Thresholds are internal-injectable for tests.
 - Foundation's JSONDecoder caps nesting at ~512 levels (`DecodingError.dataCorrupted`), so `JSONValue`'s recursive decoding cannot stack-overflow on hostile container metadata; `JSONValueNestingTests` documents this. No depth limit needed.
 - Autosave failures surface through `workspace.saveError` in a `DocumentView` banner (`SaveFailureBanner`, retry via `retrySilentSave()`); iOS close-flush failures keep the error pending on the controller. Silent-save state must never be log-only.
+- Persisted per-log position and In/Out range use the stable `source:<sha256>:<segmentIndex>` identity, never the segment index alone. Numeric keys remain a read-only legacy fallback and are retained for compatibility; a new mutation writes the stable key, which takes precedence. Transient graph viewports use the same stable identity in memory.
 
 ## Product
 
