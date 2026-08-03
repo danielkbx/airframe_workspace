@@ -1,5 +1,63 @@
 # Current Plan
 
+## Firmware Quaternion Craft Attitude (Completed 2026-08-03)
+
+### Think Before Coding
+
+- Prefer the flight controller's fused orientation only when all three logged quaternion fields exist and produce usable samples; preserve the established estimator as a deterministic fallback.
+- Match Airframe's existing body-axis/world-frame signs exactly and keep CG reliability behavior unchanged.
+
+### Simplicity First
+
+- Reconstruct Betaflight's positive `w` from signed fixed-point x/y/z, normalize over-unit vectors exactly like upstream, and derive the orientation basis directly.
+- Expose one `AnalysisAttitudeSource` enum while retaining source-compatible timeline initializers and derived availability booleans.
+
+### Surgical Changes
+
+- Limit production changes to `BlackboxAnalysis/Attitude`; quaternion fields remain hidden from the selectable series catalog and no Reader, UI, persistence, or document format changes are required.
+- Decode quaternion instead of gyro/accelerometer when valid. Only a malformed complete quaternion pass incurs a second decode for gyro fallback.
+
+### Goal-Driven Execution
+
+- Added signed synthetic-log coverage for quaternion preference, quaternion-only logs, incomplete-triple fallback, coordinate signs, source provenance, positive-w reconstruction, and upstream-compatible normalization.
+
+## Craft Attitude Loading Label (Completed 2026-08-03)
+
+### Think Before Coding
+- Use the otherwise unnecessary flight-mode position during quick loading; do not reintroduce the removed status-caption area.
+
+### Simplicity First
+- Replace the flight-mode chip during quick loading with plain localized `Reading … data…` text selected from the complete attitude, gyro, and accelerometer field triples already declared by the log.
+
+### Surgical Changes
+- Use one adaptive top `HStack`, remove the redundant manual layout chevron, swap the leading chip in place, and inset only the canvas rendering by 24 points while preserving its 210-point outer height.
+
+### Goal-Driven Execution
+- The active read basis is visible while it matters, the flight mode returns with usable preview data, the layout menu has one native chevron, and the controls do not visually collide with the craft.
+- Verified all 214 `BlackboxAnalysis` tests and complete macOS and generic iOS Simulator app builds.
+
+## Craft Preview Integrated Loading Indicator (Completed 2026-08-03)
+
+### Think Before Coding
+
+- Keep loading, usable quick data, full-log refinement, and terminal failure distinct. The visual loader exists only while both the cached result and quick timeline are absent.
+- Preserve the preview's fixed 210-point geometry and all CG analysis, confidence, persistence, layout inference, and scrubbing behavior.
+
+### Simplicity First
+
+- `CraftSurfaceCanvas.ActivityState` is a two-case visual API with an `.idle` default. Only `.loading` creates a `TimelineView`; idle rendering remains event-driven.
+- Loading uses deterministic one-second progress: quarter-ring motor-colored arcs follow each placement's direction, while a centered CG marker pulses. Reduce Motion renders the same indicators statically.
+
+### Surgical Changes
+
+- The expanded Graph Craft section removes all captions below the canvas and turns the top-right layout icon into a compact current-name menu with a chevron and accessible current value.
+- `AirframeUI` owns rendering only; `Graph.CraftSection` derives the activity state from its existing quick/full timeline state. No analysis, persistence, document format, or external dependency changed.
+
+### Goal-Driven Execution
+
+- Added deterministic rotation, direction, normalization, and centered-CG tests plus loading/loaded SwiftUI previews.
+- Verified all 127 `AirframeUI` tests and complete macOS and generic iOS Simulator app builds.
+
 ## Per-Log PID Tune Settings (Completed 2026-08-03)
 
 ### Think Before Coding

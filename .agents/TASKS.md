@@ -2,6 +2,25 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Completed: Firmware Quaternion Craft Attitude
+
+- Craft and shared attitude timelines now prefer logged Betaflight `imuQuaternion[0...2]`, reconstruct positive `w`, and use the firmware-fused orientation without integrating gyro rates.
+- Added explicit source provenance and retained gyro+accelerometer, gyro-only, and unavailable fallbacks. A declared but unusable quaternion retries through gyro decoding.
+- Added signed synthetic fixtures and quaternion math/source tests; all 214 `BlackboxAnalysis` tests and full macOS plus generic iOS Simulator builds pass.
+
+## Completed: Craft Attitude Loading Label
+
+- During quick loading, the expanded Craft preview replaces its flight-mode chip with plain secondary text for the attitude, gyro-plus-accelerometer, or gyro read operation selected from the log fields; the unchanged flight-mode chip returns when quick data is usable.
+- Removed the duplicated manual layout chevron, retained the native menu indicator, and added fixed-height clearance between the controls and craft rendering.
+- Added localized captions and verified the caption package plus app builds.
+
+## Completed: Craft Preview Integrated Loading Indicator
+
+- Replaced the expanded Craft section's shifting layout, attitude, and CG captions with in-craft quick-load feedback: direction-aware quarter-ring propeller arcs at 360 degrees per second and a pulsing centered CG marker.
+- The loader ends at the first usable quick timeline, respects Reduce Motion, and yields to the existing motor gauges plus reliable final CG marker without changing full-log analysis or persistence.
+- Replaced the top-right layout icon with the current layout name and dropdown chevron while retaining the collapsed layout row.
+- Added deterministic rendering tests and loading/loaded previews; all 127 `AirframeUI` tests and full macOS plus generic iOS Simulator builds pass.
+
 ## Completed: Per-Log PID Tune Settings
 
 - Add a Tune Score companion popover that identifies the selected flight's recorded P/I/D/F and other materially tune-relevant controller settings.
