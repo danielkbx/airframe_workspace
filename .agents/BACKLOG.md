@@ -30,6 +30,9 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Add specialized views for special-purpose logs, starting with a Hover Test view.
 - Add guided flight-controller setup for specific tasks, such as recommended Blackbox settings.
 - Add a Tuning Assistant that guides setup and test-flight execution end to end: FC setup, test-flight instructions, log import, tagging, and follow-up organization.
+- Add a Blackbox Test Setup Assistant that configures and validates the exact firmware feature, flight mode, debug mode, logged fields, logging rate, and flight procedure required by a selected analysis. The CHIRP workflow must detect firmware generations that expose CHIRP mode but record only the legacy phase channel instead of the complete axis/frequency/excitation debug data.
+- Compare the existing time-domain Wiener-deconvolution Step Response against the Configurator's frequency-domain CHIRP-derived Step Response on the same modern complete-payload logs before deciding whether a second derived curve adds information or merely duplicates the current result.
+- Add CHIRP-based PID recommendations / Auto Tune only after the neutral measurements, coherence checks, sensitivity analysis, and derived response have been validated against representative real logs. Recommendations must remain reviewable and must not be applied blindly.
 
 ### Deferred BLE FlashFS Throughput Optimization
 

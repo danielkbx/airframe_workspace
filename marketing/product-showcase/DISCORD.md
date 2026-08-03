@@ -2,6 +2,16 @@
 
 Each numbered section is one independent Discord message followed by its image. Keep the image immediately after the matching text. The copy is deliberately short enough to work without a designed layout.
 
+## Early Access Update — Build 43
+
+**Build 43 is available**
+
+The highlight of this build is the new Filter Guides in Spectrum. They place craft motion, prop wash and control, motor-noise ranges, P90 references, and the configured filter and RPM-notch curves directly alongside the measured spectrum. This makes it easier to see not only where noise occurs, but whether the filters are targeting the right areas.
+
+Build 43 also adds aircraft settings, center-of-gravity diagnostics, battery cell information, and several state-restoration fixes.
+
+Image: `08-build-43-filter-guides.png`
+
 ## 00 — The Story Behind Airframe
 
 **Airframe**
@@ -111,3 +121,9 @@ It turns a folder of raw files into a reusable analysis workspace.
 **Native on Apple platforms. Local by design.**
 
 Airframe is built natively in Swift. The macOS version comes first; iPhone and iPad will follow after the interface has been properly adapted for smaller displays and touch interaction. Blackbox logs and Airframe documents are processed locally and are not uploaded to the developer. There are no analytics, ads, or tracking services in the app.
+
+## Website-Only Copy — Spectrum Filter Guides
+
+**See the noise and the filters in the same context.**
+
+Spectrum Filter Guides relate measured gyro data to the aircraft and its Betaflight configuration. Craft-motion, prop-wash and control, and expected motor-noise ranges appear alongside P90 noise references, configured low-pass filters, and RPM-notch harmonics. This helps show where noise occurs and whether the active filters target the relevant frequencies.

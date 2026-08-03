@@ -57,13 +57,17 @@ Agents must update `.agents/` proactively whenever stable project information ch
 
 Agents must also update `TOOLING.md` as a self-learning knowledge base. If a tool workflow works especially well, is faster than an alternative, or had to be corrected after a failed or unreliable attempt, write down the lesson.
 
+External facts, reproducible local observations, evidence grades, uncertainties, and product interpretations live in the thematic [`knowledge/`](knowledge/README.md) Knowledge Base. `RESEARCH.md` is its compact index and research inbox; `MEMORY.md` remains the normative source for accepted decisions.
+
 ## Recommended First Read
 
 1. `MEMORY.md`: durable decisions and constraints.
-2. `PRINCIPLES.md`: working and review rules.
-3. `ARCHITECTURE.md`: current technical shape.
-4. `TASKS.md`: active work and unresolved decisions.
-5. `PLAN.md`: current approved execution plan.
-6. `RESEARCH.md`: external facts and source findings.
-7. `TOOLING.md`: repeatable workflows and corrections.
-8. `BACKLOG.md`: unapproved future ideas.
+2. `MARKETING.md`: public identity, messaging, contact channels, and release communication.
+3. `PRINCIPLES.md`: working and review rules.
+4. `UI_GUIDE.md`: reusable native UI and interaction contracts.
+5. `ARCHITECTURE.md`: current technical shape.
+6. `TASKS.md`: active work and unresolved decisions.
+7. `PLAN.md`: current approved execution plan.
+8. `RESEARCH.md`: Knowledge Base index and research inbox; follow the relevant `knowledge/*.md` topic.
+9. `TOOLING.md`: repeatable workflows and corrections.
+10. `BACKLOG.md`: unapproved future ideas.

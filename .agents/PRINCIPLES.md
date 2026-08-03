@@ -58,6 +58,14 @@ Every SwiftUI view file in the app target and in the `AirframeUI` package must i
 - Debug-only `makeDebug...` factory methods on real model/state types are allowed and encouraged when they make previews fast and readable.
 - Minimal preview-only injection into views is allowed when a view otherwise owns too much state to preview directly. Prefer keeping that injection debug-only.
 
+## UI Guide Rule
+
+All native UI work must follow [`UI_GUIDE.md`](UI_GUIDE.md).
+
+- Before implementing any new collapsible sidebar or inspector section, explicitly ask the user what information or control should remain visible while collapsed.
+- Do not implement the collapsed state until that product decision is answered.
+- Never leave a collapsed macOS `Form` section empty; preserve the user-chosen summary or control.
+
 ## User-Facing String Rule
 
 Every user-facing string must be defined in `AirframeCaptions` and backed by Xcode-native localization resources.
@@ -115,3 +123,5 @@ Use Caveman Lite for plans, status updates, code-review summaries, and other ope
 # Commit Messages
 
 - Do not use Conventional Commit prefixes such as `fix:`, `feat:`, `chore:`, or `refactor:`. Write concise imperative commit subjects without a type prefix.
+- Before every commit in the public `Airframe/` repository, ask the user whether the change is changelog-relevant.
+- When the user says it is relevant, add one English, user-oriented `Changelog: <draft>` Git trailer after a blank line. Do not add the trailer to private workspace commits.

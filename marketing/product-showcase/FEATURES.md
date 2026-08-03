@@ -16,6 +16,7 @@ The first six features should anchor the Discord showcase. The remaining product
 3. **Noise analysis in Spectrum**
    - Frequency, Frequency vs Throttle, and Frequency vs RPM views.
    - Inspect gyro, D-term, motors, PID-related signals, and filter behavior, including RPM-notch overlays where available.
+   - Filter Guides relate measured noise to craft-motion, prop-wash and control, and motor-noise ranges derived from the aircraft profile, with P90 references and configured filter curves in the same view.
 
 4. **Step Response tuning comparison**
    - Compare Roll, Pitch, and Yaw response.
@@ -42,6 +43,10 @@ The first six features should anchor the Discord showcase. The remaining product
    - A native Swift app for macOS, with iPhone and iPad versions planned to follow later.
    - The iOS interface still needs dedicated adaptation for smaller displays and touch interaction before release.
    - Blackbox logs and Airframe documents are processed locally. Airframe contains no analytics, advertising, or tracking services.
+
+9. **Spectrum Filter Guides**
+   - Show measured noise, expected frequency regions, P90 references, low-pass filters, and RPM-notch harmonics together.
+   - Use the aircraft profile and recorded Betaflight configuration to help answer whether the active filters target the relevant noise.
 
 These are valuable trust and workflow details for the website, but do not need standalone Discord posts in the first showcase.
 

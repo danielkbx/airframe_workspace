@@ -18,6 +18,7 @@ The visible flight-controller UID in `01-overview.png` and the recognizable flig
 Current status:
 
 - Available: Overview, Graph and Playback, Spectrum, Step Response, Flight Map, Flight Controller Import.
+- Build update asset: `08-build-43-filter-guides.png`, showing the new Spectrum Filter Guides with measured gyro signals, frequency regions, P90 references, and filter curves.
 - This six-image set is final. No additional screenshots are planned for the Discord showcase.
 
 ### 01 — Overview

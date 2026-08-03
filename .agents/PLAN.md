@@ -1,5 +1,88 @@
 # Current Plan
 
+## Per-Log PID Tune Settings (Completed 2026-08-03)
+
+### Think Before Coding
+
+- Treat the selected Blackbox segment's own header as the only authoritative source. Never fall back to, merge with, or compare against an imported configuration because several flights in one source commonly use different PID settings.
+- Present the settings that identify and materially influence the scored PID tune, not an unfiltered header dump. Keep filter configuration in Spectrum's existing dedicated surface.
+- Preserve provenance explicitly: every displayed value must trace to a recognized header parameter in the currently selected log; absent values remain absent rather than being inferred from defaults, sliders, another segment, or firmware knowledge.
+- Support header-name evolution through the existing canonical Reader header catalog and semantic aliases, including Betaflight 2026.6, while retaining older supported logs where their headers contain equivalent values.
+
+### Simplicity First
+
+- Add one sendable, read-only per-log PID tune settings projection in `BlackboxReader`, built solely from `DecodedLogHeaderInfo`.
+- Group the presentation into `PID Gains`, `D Max`, `Feedforward`, and `Controller` values. Show P/I/D/F per Roll, Pitch, and Yaw first; include only additional logged values that materially affect PID behavior, such as D Max, TPA, I-Term Relax, anti-gravity, thrust linearization, and PID limits.
+- Reuse canonical parsed header values and their raw source values. Do not parse an imported CLI dump, calculate effective defaults, reconstruct slider intent, or duplicate Spectrum's filter settings model.
+- Expose availability as an optional projection so the UI omits the action when the selected log contains no useful tune settings.
+
+### Surgical Changes
+
+- Keep extraction and compatibility logic in `BlackboxReader`; keep labels, formatting, and the native popover in the Step Response/Frequency Response UI and `AirframeCaptions`.
+- Add a compact icon-only `PID Settings` action to the far right of the Tune Score section header, following the existing Spectrum filter-settings affordance. The fixed header order is title, flexible space, score info button, then PID Settings button. The popover header contains only `PID Settings`; the per-log data binding establishes provenance without repeating the log name or explanatory copy.
+- Reuse the same PID Settings popover from every Step Response log row. Place its primary-colored icon button immediately adjacent to the left of that row's visibility checkbox; both controls share one compact button group. A hidden trace still shows its title and PID Settings button in primary styling. The button must read `TraceSource.flightInfo.header` so document logs and attached reference logs always show their own recorded settings rather than the currently selected main log's settings.
+- Use a table-like axis layout for P/I/D/F and established grouped data rows for the remaining settings. Give CLI/header names as help text where useful, support long values without awkward wrapping, and provide accessible labels.
+- Make the popover follow the currently selected log. Switching logs closes or refreshes it deterministically; no settings choice is persisted in the document.
+- Do not alter score calculation, Confidence, CHIRP analysis, document configuration resolution, or stored document format.
+
+### Goal-Driven Execution
+
+1. Inventory tune-relevant canonical headers across the supported Betaflight fixtures and the pinned 2026.6 source; define the exact allowlist and aliases before building UI.
+2. Implement and unit-test the header-only projection with distinct settings in multiple segments, missing fields, legacy aliases, raw-value preservation, and an explicit test proving imported configuration data cannot enter the model.
+3. Add one reusable PID Settings popover, expose it from the Tune Score section header, and add a per-trace icon immediately left of each Step Response visibility checkbox. Reuse Spectrum's visual conventions while presenting PID-specific groups and axis columns.
+4. Test log switching and per-row presentation with different values, document and attached reference traces, no-settings omission, partial headers, long values, localization, accessibility, and both score and no-score states.
+5. Run focused Reader/app/caption tests, macOS and generic iOS Simulator builds, String Catalog validation, visual screenshots, and diff review.
+
+Success means a user can select any scored flight or inspect any Step Response trace and unambiguously recover the PID tune recorded for that exact segment, while no later imported configuration, currently selected log, or neighboring flight can contaminate the displayed values.
+
+Implemented with a header-only `ReaderPIDTuneSettings` projection, modern and legacy axis-gain normalization, raw additional tune values, one shared native popover, Tune Score header access, and per-trace Step Response access for document and reference logs.
+
+## Frequency Response Tune Score (Completed 2026-08-03)
+
+### Think Before Coding
+
+- Define the score as health of the PID tune observed in this one CHIRP log, never as PID optimality or proof that no better tune exists.
+- Keep measurement confidence independent from tune quality. Poor evidence lowers confidence or suppresses the score; it never lowers the tune score itself.
+- Score only dimensionless or defensible control-system properties. Do not reward absolute bandwidth because the desirable bandwidth depends on craft, filters, use case, and comparison data.
+- Avoid double counting correlated evidence. Phase margin, peak sensitivity, closed-loop resonance, and derived step behavior contribute through named components with explicit ownership.
+- Version the algorithm from its first release so later calibration can invalidate cached values and preserve interpretation.
+
+### Simplicity First
+
+- Add one pure `AnalysisFrequencyResponseTuneScoreCalculator` in `BlackboxAnalysis` returning a sendable result with overall score, rating, confidence, component scores, per-axis evidence, and explicit limitations.
+- Derive the result from the already loaded `AnalysisFrequencyResponse.Result`; add only missing summary metrics such as peak sensitivity and reliable-frequency coverage.
+- Use four user-facing components:
+  - `Stability Margin`: reconstructed open-loop phase margin per axis.
+  - `Robustness`: maximum sensitivity per axis relative to the +6 dB reference.
+  - `Damping`: closed-loop resonant peak plus derived-step overshoot and settling behavior, combined without counting the same failure twice.
+  - `Tracking Fidelity`: low-frequency closed-loop gain and normalized final step accuracy; bandwidth remains explanatory context, not a higher-is-better score input.
+- Aggregate each component conservatively across axes as `60% weakest axis + 40% axis mean`. Aggregate components with a weighted geometric mean so one weak safety-relevant component cannot be hidden by several strong ones. Apply documented hard caps for clearly critical phase margin, sensitivity, or resonance.
+- Present one decimal on a 1–10 scale and pair it with `Excellent`, `Good`, `Acceptable`, `Marginal`, or `Critical`; retain full precision internally.
+- Compute Confidence from CHIRP completeness, reliable coherence coverage, usable frequency span, run count, and metric availability. Expose `High`, `Medium`, or `Low`; below the minimum evidence gate return `No Score` with reasons.
+
+### Surgical Changes
+
+- Limit domain changes to Frequency Response metric summaries, the new score calculator/model, and focused `BlackboxAnalysis` tests.
+- Add a non-persisted `Tune Score` inspector section above `Axes`; the score always follows the selected log and loaded result.
+- Render a compact circular 1–10 gauge with the numeric score centered, rating and Confidence adjacent or below, using stable dimensions and accessible text equivalents.
+- List the four component rows below the gauge in the established data-row style. Each row shows component score plus concise measured evidence; an info button opens a native popover with formula, thresholds, per-axis facts, and any limiting condition.
+- Put an info button in the section header. Its popover explains component aggregation, weakest-axis treatment, hard caps, Confidence, algorithm version, and the single-log/non-optimality limitation requested by the user.
+- Do not make the section collapsible. Add all visible text through `AirframeCaptions`; add no persisted document setting or external dependency.
+
+### Goal-Driven Execution
+
+1. Specify and test piecewise scoring curves and safety caps before UI work. Boundary tests cover phase margin, sensitivity, resonance, step behavior, missing axes, non-finite values, and score range.
+2. Test aggregation independently: weakest-axis weighting, geometric component combination, hard caps, deterministic ordering, and no-score evidence gates.
+3. Test Confidence independently with complete/high-coherence, partial, legacy, incomplete, and insufficient-data inputs; verify Confidence never changes the tune score for identical valid metrics.
+4. Calibrate labels and thresholds against synthetic transfer functions plus representative Stock/current/Wobble CHIRP logs. Record unresolved empirical thresholds instead of silently hard-coding unsupported precision.
+5. Build the inspector section using existing score/data-row/info-popover patterns. Verify no empty section appears while loading or when no score can be explained.
+6. Add accessibility labels for gauge, rating, Confidence, component rows, and info buttons. Verify macOS and iOS layouts, long localized text, Reduce Motion, and Dynamic Type.
+7. Run focused analysis/app/caption tests, complete macOS and generic iOS Simulator builds, String Catalog validation, visual screenshots, and diff review.
+
+Success means the same input deterministically produces an explainable score, every displayed number traces to concrete per-axis facts, insufficient evidence cannot masquerade as a poor tune, and the UI explicitly states that the result evaluates only this tune in this log.
+
+Implemented with algorithm version 1, four independently explained components, conservative three-axis aggregation, weighted geometric overall scoring, hard safety caps, independent Confidence evidence, explicit no-score limitations, localized inspector presentation, and macOS/iOS verification.
+
 ## Individual Log Visibility (Completed 2026-08-01)
 
 ### Think Before Coding
