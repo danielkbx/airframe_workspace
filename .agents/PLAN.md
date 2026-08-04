@@ -1,5 +1,31 @@
 # Current Plan
 
+## UI Corrections: Frequency Response, Playback, and Log-Switch Focus (Implemented 2026-08-04)
+
+### Think Before Coding
+
+- Keep the fixes in presentation and focus ownership: no analysis, persistence, document-format, or shared chart-layout changes.
+- Treat the Sidebar selection as a focus transfer that must be reclaimed by the reused log-detail view when its stable log context changes.
+
+### Simplicity First
+
+- Use the same full-width header layout for Frequency Response guides as for axes, reserve a 28-point top inset for chips that share a canvas with a top crosshair chip, and draw playback state inside an explicit fixed-size button segment.
+- Reuse the existing `@FocusState`; remove its redundant tap write and restore it when `LogContext.stateKey` changes.
+
+### Surgical Changes
+
+- `ResponseGuideRow` now uses a leading detail stack with a full-width header, so its visibility control remains trailing regardless of one-line or per-axis details.
+- `ChartMarkerChips` accepts a source-compatible custom top inset for ordinary top-attached chips. Frequency Response Gain Crossover/Bandwidth and Spectrum filter/max-noise chips use 28 points, while explicitly on-line RPM-notch chips retain their exact line position.
+- The crosshair audit found no additional conflict: Frequency Response Spectrogram has guide lines but no guide chips, and Graph has marker chips but no top crosshair chip.
+- The playing background fills the complete 30-by-20-point leading playback segment through the divider.
+- Log switches refocus `LogDataView` without recreating it or changing `LogViewCommandBroker`.
+
+### Goal-Driven Execution
+
+- Completed: all 140 AirframeUI tests, including custom and default marker-chip inset coverage, pass.
+- Completed: macOS and generic iOS Simulator `Airframe Beta` builds pass.
+- Remaining acceptance: visually confirm the supplied Frequency Response and playback cases and exercise shortcuts immediately after repeated Sidebar log changes.
+
 ## Graph Interactive Cache Throughput (Render Retention Correction Complete 2026-08-04)
 
 ### Think Before Coding

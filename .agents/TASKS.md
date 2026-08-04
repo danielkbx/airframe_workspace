@@ -2,6 +2,15 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Implemented: Frequency Response, Playback, and Log-Switch UI Corrections
+
+- Frequency Response guide rows now keep their visibility controls at the inspector's trailing edge, matching the axis rows even when a guide has Roll/Pitch/Yaw detail lines.
+- Response Gain Crossover/Bandwidth and Spectrum filter/max-noise chips use a 28-point top inset, leaving the top crosshair-frequency chip unobstructed with only a small gap. The earlier Response-only 28-point offset was replaced, moving those chips 20 points back up. Explicitly on-line RPM-notch chips are unaffected.
+- A complete crosshair-canvas audit found no other chip collision: Frequency Response Spectrogram has guide lines but no guide chips, and Graph has marker chips but no top crosshair chip.
+- The Graph/Map playback control draws the active background across the complete leading 30-by-20-point segment through its divider.
+- `LogDataView` removes the redundant focus write from its tap gesture and reclaims focus when `LogContext.stateKey` changes, so Sidebar log selection should retain keyboard-command routing without recreating view state.
+- Automated verification passed all 140 AirframeUI tests and complete macOS plus generic iOS Simulator Beta builds. Live visual and repeated Sidebar-shortcut acceptance remains.
+
 ## Active Acceptance: Graph Interactive Cache Throughput
 
 - The macOS prepared-series RAM tier budgets 384 MB (192 MB under pressure), but the two cache-enabled live closes on 2026-08-04 released only 7.2 MB / 16 entries and 10.2 MB / 25 entries. Capacity is not the current limit; the cache is underfilled.
