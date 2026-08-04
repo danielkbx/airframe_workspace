@@ -1,5 +1,40 @@
 # Current Plan
 
+## Graph Interactive Cache Throughput (Render Retention Correction Complete 2026-08-04)
+
+### Think Before Coding
+
+- Measure separately the latency and allocation cost of Reader range decode, analysis projection/min-max bucketing, prepared-series lookup, render-model construction, and Canvas drawing during representative scrubbing and 1x/30x playback.
+- Treat the live finding as a fill-policy problem first: the 384 MB macOS prepared cache used only 7–10 MB, while overlapping misses repeatedly decode raw frames.
+
+### Simplicity First
+
+- Keep each individual render model bounded to its ordinary load window while allowing many such models to remain resident within an explicit byte budget.
+- Extend preparation through reusable fixed windows before introducing a new general-purpose time-series database or loading the complete full-resolution log.
+
+### Surgical Changes
+
+- Give `Graph.Surface` prewarm a stable log/section/zoom/direction identity so ordinary render updates do not cancel and restart the same frontier. Start it after a 20 ms publication yield instead of the 180 ms gesture debounce.
+- Fill a directional frontier beyond one neighbor up to the actual prepared-cache byte budget with exactly two concurrent decode workers. The user-initiated worker builds the next ordinary detail window. The utility worker merges up to four farther overlapping windows into one larger compact chunk and scales its point budget with duration so density remains unchanged. Prebuild render models only for near windows.
+- Avoid repeated overlapping Reader decode by consuming the existing main-frame chunk tier where practical or by adding a graph-specific fixed multi-resolution tile builder. Do not enlarge the Canvas model until it can binary-slice visible points and segment gaps in a sorted linear pass.
+- Coalesce persistent Graph publication across the complete frontier; a growing bundle must not be encoded and rewritten once per tile.
+- Replace the render cache's fixed 24-entry ceiling with a platform-specific byte budget. Preserve global LRU ordering and trim to a lower target under memory pressure.
+- Resolve Timeline In/Out through the same stable `LogContext.stateKey` used by toolbar, playback, and Graph; raw segment indexes are not sufficient for remapped source/reference logs.
+
+### Goal-Driven Execution
+
+1. Completed: add pure coverage/order tests and implement a stable, directional, byte-budget-bounded prepared-series frontier with two concurrent workers and duration-scaled background chunks.
+2. Completed: prebuild the nearest eight render models and coalesce the complete frontier into one debounced persistent write.
+3. Completed: binary-slice each series to the visible points (plus continuity neighbors) and segment sorted gaps in a linear pass.
+4. Completed: pass 134 AirframeUI package tests, 17 focused app cache tests, and Beta builds for macOS and generic iOS Simulator.
+5. Completed: allow covering prepared detail during interaction-tier overview selection. Reverted the partial-detail retention experiment after it produced empty playback regions; overview again fills any complete-coverage miss.
+6. Completed: add a range-only, document-scoped detail coverage projection and a separate three-point opaque Timeline strip for no detail, active loading/prewarm, prepared series, render-ready models, and displayed detail. Correct its Timeline/cache join to use `LogContext.cacheLogID` after live inspection proved cache data existed under the remapped identity while the baseline-only strip queried the raw model ID. AirframeUI passes 137 tests and the macOS Beta app builds.
+7. Completed: correct prepared-hit render ranges so a viewport-covering entry cannot claim the wider request outside its actual data. This restores honest displayed/render-ready coverage and lets the existing overview fallback activate before playback reaches a point-free region.
+8. Completed: fix Timeline In/Out lookup to use `LogContext.stateKey`; replace the render cache's fixed 24-window ceiling with approximate retained-byte budgets (192 MB normal / 64 MB pressure target on macOS, 64 MB / 24 MB on iOS). Render models now compete in one global LRU, so a complete playback may retain substantially more than 24 small windows while document shutdown still clears all entries.
+9. Completed: remove the redundant displayed/visible-detail color from the coverage strip and darken the remaining solid loading, prepared, and render-ready palette, with render-ready as the darkest green state.
+10. Next only if live acceptance still shows misses: use the strip to select the transition to instrument, then measure decode/projection/render publication latency and remove repeated raw decode through chunk reuse or fixed graph tiles only if it remains dominant.
+11. Live acceptance: verify correct In/Out markers, uninterrupted detail during long scrubs and maximum-rate playback, persistent render-ready coverage after one complete pass, bounded RAM, and correct close teardown.
+
 ## Document Task and Memory Lifetime Regression (Complete 2026-08-04)
 
 ### Think Before Coding
