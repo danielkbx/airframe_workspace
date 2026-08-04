@@ -15,6 +15,7 @@ Git safety rules:
 
 - Root workspace commits may be short, frequent, and attribution-free.
 - Commit inside `Airframe/` only with explicit user approval and with the stricter Airframe message rules.
+- **Mandatory public-commit gate:** Before every commit or amend inside `Airframe/`, explicitly determine with the user whether the change is changelog-relevant. Do not commit until this decision is known. Every changelog-relevant public commit must end, after a blank line, with exactly one English user-oriented `Changelog: <draft>` trailer. Never add this trailer to the private root repository.
 - Never commit or push inside `blackbox-log-viewer/`, `betaflight/`, or `betaflight-configurator/`.
 - A changed submodule pointer is committed in the root repo only when the new referenced commit should be synchronized across machines.
 - Always check which repository owns the current directory before git commit, push, or status-sensitive work.

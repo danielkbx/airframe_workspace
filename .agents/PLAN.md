@@ -1,5 +1,74 @@
 # Current Plan
 
+## Document Task and Memory Lifetime Regression (Complete 2026-08-04)
+
+### Think Before Coding
+
+- Measure Graph playback cadence, write frequency, outstanding tasks, cache-object lifetime, and resident memory. Separate live retained graph data from memory that the allocator keeps reserved after deallocation.
+- Treat playback and visible graph loading as higher priority than disposable persistence. Closing a document must end document-owned work and release its hot caches.
+- Audit global window registries separately from cache budgets: one retained command closure can keep the complete document graph alive even after all explicit cache shutdown calls run.
+- Treat close-time container work as another memory boundary: an unchanged close must not materialize a second document snapshot or rewrite all live blobs merely for maintenance.
+- Trace representative decoded-log allocations to process roots while the live app has no document open; distinguish allocator reservation from live `Data`, decoded scans, view graphs, and tasks.
+- Treat a close notification as a state transition: after `willClose`, no delayed SwiftUI callback may repopulate a global window registry for that same live window object.
+- Profile a fresh idle process after the broker fix separately: surviving native windows/hosting roots and task-owned analysis work are independent roots and require independent teardown.
+
+### Simplicity First
+
+- Keep one latest pending write per graph dataset identity and debounce/coalesce it after interaction becomes idle. Never queue full bundle snapshots for every viewport or prewarm result.
+- Add explicit document-cache shutdown/clear APIs rather than relying only on memory-pressure notifications.
+- Empty and detach the existing native hosting root at close instead of introducing a second document/resource ownership architecture.
+- Extend the existing command broker with one weak-identity closing-window guard; do not add another document owner or duplicate registry.
+- Make the existing activity counter own its workers and make the native document window the synchronous UI-root boundary; do not introduce a second document runtime hierarchy.
+
+### Surgical Changes
+
+- Change only persistent write scheduling, cache lifetime cleanup, and focused instrumentation/tests. Preserve graph calculation, render models, cache format/version, and normal visible-data behavior unless measurements require a format adjustment.
+- Make `NSWindow.willClose` the authoritative command-broker cleanup boundary; keep SwiftUI disappearance cleanup as an idempotent secondary path.
+- Reject all broker setters for a window after its `willClose` notification, while allowing a newly allocated window even if the runtime later reuses an old address.
+- Make successful `NSDocument`/`UIDocument` close explicitly sever all source-byte and decoded-state roots so delayed platform-wrapper deallocation cannot retain hundreds of megabytes.
+- Restore selected-log initialization order without changing storage keys or document-state format.
+- Add cancellation only at confirmed whole-log hot loops and clear the two confirmed omitted RAM stores; preserve analysis results and cache formats.
+
+### Goal-Driven Execution
+
+1. Add deterministic tests proving repeated graph stores coalesce and superseded payloads are released.
+2. Cancel pending document-owned persistence and clear document RAM caches on close/disappear.
+3. Skip persistence construction and full compaction on unchanged close while preserving mutation-driven deletion compaction.
+4. Profile playback and close-time memory with a representative large log.
+5. Run focused cache/graph tests plus complete macOS and iOS builds.
+5. Prove a broker-held closure releases its captured document lifetime token on window close.
+6. Verify OpenModel and Workspace shutdown empty decoded logs, flight information, histories, source payloads, and transient state.
+7. Prove a closed native window releases its hosting controller/view while its document wrapper remains alive, and prove a stored non-first log wins initial selection resolution.
+8. Completed: the regression posts `willClose`, invokes every broker setter afterward, and verifies the entry and captured lifetime state remain absent; it also proves the weak barrier does not retain the window and preserves popup filtering.
+9. Completed live acceptance both without and with persistent caching: after repeated large-document open/analyse/close cycles, physical footprint settled from a 1.0 GB peak to 145.6 MB without disk caching and 220.9 MB after exercising many cache-producing views. Both runs had idle CPU and zero live platform documents, document open models, workspace/hosting controllers, activity counters, and document-owned queried caches. The cache-enabled run persisted 91 entries / 40,859,018 bytes, closed Graph persistence with zero pending writes, and emitted no later writes. Remaining high RSS was allocator-reserved empty address space, not retained document data.
+10. Completed: a fresh live process proved three retained native windows/hosting roots and uncancelled detached health workers after the broker entry count reached zero.
+11. Completed: `window.performClose()` now synchronously releases its hosting controller/view; ActivityCounter cancellation reaches detached workers; initial scan, Reader range/projection, motor anomaly, and motor-poles work cooperatively stop.
+12. Completed automated gate: AirframeUI, BlackboxReader, and BlackboxAnalysis package suites, 10 focused macOS lifecycle/cancellation tests, and the signed macOS Beta build pass.
+
+## Persistent Derived-Data Cache (Approved 2026-08-03)
+
+### Think Before Coding
+
+- Persist only reproducible processed data for package-backed document logs. Keep source bytes authoritative and treat cache deletion, corruption, and OS purging as misses.
+- Use fixed platform defaults because quota is a device-local user preference: 2 GB iOS/iPadOS and 5 GB macOS. Do not query storage capacity.
+
+### Simplicity First
+
+- One actor-owned OS cache root, one SQLite LRU catalog, and one binary integrity envelope. Each dataset supplies its own static version and optimized payload.
+- Use exact decimal 100 MB units across the common 0...10 GB Settings slider. No migration; invalid versions recompute.
+
+### Surgical Changes
+
+- Add `AirframeCache`, app preferences/runtime, Settings controls, and package-backed Reader scan integration. Do not change source document formats or raw-log behavior.
+- Keep existing in-memory view caches as the hot tier and add persistent adapters only for stable, expensive semantic datasets.
+
+### Goal-Driven Execution
+
+1. Verify quota, corruption, LRU, zero-disable, and platform-default behavior with focused tests.
+2. Resolve quota before the first persistent lookup and save cache writes outside foreground loading.
+3. Show configured quota, current usage, and explicit clear behavior in Settings.
+4. Run package tests and complete macOS plus generic iOS Simulator builds.
+
 ## Firmware Quaternion Craft Attitude (Completed 2026-08-03)
 
 ### Think Before Coding

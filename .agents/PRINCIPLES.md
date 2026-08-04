@@ -105,6 +105,12 @@ Define success criteria. Work in verifiable steps.
   - Surgical Changes
   - Goal-Driven Execution
 
+## Persistent Cache Review Rule
+
+- Every new view or processed dataset must explicitly decide whether persistent caching improves warm-start latency.
+- Cache semantic processed data, not transient pixels or SwiftUI state. Give each dataset its own optimized file shape and static code version.
+- Never put derived cache data in user documents. Treat deletion, corruption, quota eviction, and OS purging as normal cache misses.
+
 ## Compact Output Style
 
 Use Caveman Lite for plans, status updates, code-review summaries, and other operational output.
@@ -122,6 +128,6 @@ Use Caveman Lite for plans, status updates, code-review summaries, and other ope
 - This is a compact style guideline, not exaggerated caveman speech. Clarity wins over maximum compression.
 # Commit Messages
 
+- **NON-NEGOTIABLE PUBLIC COMMIT GATE:** Before creating or amending any commit in `Airframe/`, explicitly obtain the user's changelog-relevance decision. A changelog-relevant commit is incomplete and must not be created without exactly one English user-oriented `Changelog: <draft>` trailer after a blank line. Verify the final message with `git show -s --format=%B` before updating the root submodule pointer.
 - Do not use Conventional Commit prefixes such as `fix:`, `feat:`, `chore:`, or `refactor:`. Write concise imperative commit subjects without a type prefix.
-- Before every commit in the public `Airframe/` repository, ask the user whether the change is changelog-relevant.
-- When the user says it is relevant, add one English, user-oriented `Changelog: <draft>` Git trailer after a blank line. Do not add the trailer to private workspace commits.
+- Do not add the `Changelog:` trailer to private workspace commits.
