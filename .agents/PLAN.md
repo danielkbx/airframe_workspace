@@ -1,5 +1,26 @@
 # Current Plan
 
+## Overview Aircraft Identity and Card Order (Implemented 2026-08-05)
+
+### Think Before Coding
+
+- Treat the craft name as aircraft identity, not flight-controller or hardware identity. Preserve it for directly opened BBL/BFL logs as well as writable Airframe documents.
+- Keep the full-width, Airframe-document-only Notes card outside the ordered Overview grid; the requested ten-card list already covers every grid card.
+
+### Simplicity First
+
+- Show `Name` as the first row of Aircraft and remove it from Flight Controller without changing the underlying Overview snapshot.
+- Order the grid as Checks, Log, Blackbox, Aircraft, Hardware, Flight Controller, Configuration, Flight, Power, GPS. Continue omitting data-dependent cards according to their existing availability rules.
+
+### Surgical Changes
+
+- Change only Aircraft card input/presentation and Overview container composition, plus focused presentation tests if existing coverage depends on the old location or order.
+- Make Aircraft available for raw logs so moving the name does not hide it; keep document-only customization behavior separate from read-only identity presentation.
+
+### Goal-Driven Execution
+
+- Verify the craft name is the first Aircraft row and no longer appears in Flight Controller, the requested relative order holds with optional cards present or absent, raw logs retain aircraft identity, and macOS/iOS builds remain clean.
+
 ## Betaflight 2026.6.1 and Blackbox Explorer Reference Refresh (Implemented 2026-08-05)
 
 ### Think Before Coding

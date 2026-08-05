@@ -1,5 +1,7 @@
 # Tooling Knowledge Base
 
+- In zsh command wrappers, do not assign an exit code to `status`; it is a read-only special parameter. Use a task-specific name such as `build_exit` before printing logs and returning the original command result.
+
 - When a command already runs with `Airframe/` as its working directory, use paths such as `App/Airframe.xcodeproj` and do not retain root-relative `Airframe/...` prefixes. For checks spanning both the public submodule and root `.agents/`, run from the workspace root instead. Mixing the two path bases caused repeated false “No such file or directory” diagnostics before otherwise valid builds.
 
 - On the current Xcode 26.5 toolchain, `xcrun xctrace record --template 'SwiftUI' --attach <pid>` can create an incomplete trace that fails export with `Document Missing Template Error`. Do not interpret macOS `ps` state `SX` as proof that the app is suspended: `S` means sleeping and `X` means traced/debugged; a stopped process is indicated by `T`. Verify responsiveness and CPU/process state directly. Prefer the Time Profiler template for reliable CLI attachment and open the SwiftUI template interactively in Instruments when its specialized lanes are required.
