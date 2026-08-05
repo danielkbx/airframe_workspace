@@ -131,6 +131,8 @@ This file stores durable decisions and constraints. It intentionally omits imple
 
 ## Safety And Performance
 
+- High-frequency pointer and crosshair state must live in a small interaction leaf above the static data canvas. A static canvas must never observe that state: moving the pointer may redraw only crosshair lines, chips, and snap markers, while model, size, visibility, zoom, and discrete guide/filter/legend highlights remain legitimate static redraw inputs.
+
 - Treat every input byte, header, frame definition, event payload, and caller option as hostile.
 - Validate bounds and configured budgets before reads, allocation, iteration, or filesystem work.
 - Malformed input must produce typed errors, retained issues, or compatibility blocking; never crashes, overflow traps, unbounded loops, or unbounded allocations.

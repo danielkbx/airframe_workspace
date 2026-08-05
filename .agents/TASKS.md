@@ -2,6 +2,24 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Implemented, Live Acceptance Pending: Active Analysis Crosshair Performance
+
+### Think Before Coding
+
+- The four active crosshair consumers shared high-frequency pointer state with expensive static drawing: Frequency Response Response/Spectrogram and Spectrum Frequency/Frequency-vs-Throttle-or-RPM. Graph, Step Response, and the preview-only legacy Spectrum canvas remain intentionally outside this change.
+
+### Simplicity First
+
+- Pointer state now belongs to interaction leaf views. Static response paths, FFT traces, heatmap images, grids, and labels no longer read it; guides and filters remain separate discrete redraw layers where required.
+
+### Surgical Changes
+
+- Added source-compatible public AirframeUI spectrum/heatmap crosshair overlays, retained the old chip overlay and canvas parameters, and passed `nil` from both active app canvases. Frequency Response now has dedicated static, guide, and crosshair canvases. Response-guide exit cancels pending activation immediately while retaining the shared 500 ms activation delay.
+
+### Goal-Driven Execution
+
+- AirframeUI passes 148 tests in 17 suites, with 13 spectrum crosshair tests covering zoom windows, pane boundaries, value projection, repeated semantic horizontal levels, snapping, and out-of-plot rejection. BlackboxAnalysis passes 214 tests; app hover tests pass 11/11; Frequency Response state/geometry tests pass 25/25 after one timing-only retry; macOS and generic iOS Simulator Release builds succeed. Live pointer/profile acceptance still requires a usable CHIRP document, which is not present in the checkout.
+
 ## Implemented, Live Acceptance Pending: Inspector Scroll and Hover Stability
 
 ### Think Before Coding

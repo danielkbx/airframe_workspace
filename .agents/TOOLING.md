@@ -357,6 +357,11 @@ Agents must update this file proactively when they learn a better command, workf
 - For a read-only diagnostic of a specific log embedded in an `.airframe` container, `AirframeContainer` can be compiled as a temporary command-line helper after first emitting the local `Logging` module and dylib into `/tmp`; compile the container sources with `-I /tmp -L /tmp -lLogging` and run with `DYLD_LIBRARY_PATH=/tmp`. This avoids launching the app and permits extracting one blob to `/tmp` without modifying the source document.
 - SwiftUI has no combined `frame(width:minHeight:)` overload. Apply fixed-width and minimum-height constraints as separate `.frame(width:)` and `.frame(minHeight:)` modifiers; a macOS build catches this even when the surrounding view is shared with iOS.
 
+# SwiftUI Canvas pointer-performance verification
+
+- A changing input captured by a SwiftUI `Canvas` invalidates its complete draw closure; passing `crosshair: nil` to a static renderer is insufficient when an ancestor still owns and reads the pointer `@State`. Move that state into an interaction leaf which is a sibling above the static canvas.
+- For a read-only diagnosis, temporarily place `Self._logChanges()` in the static, guide, and interaction bodies and/or wrap draw closures with signpost counters. During at least five seconds of rapid pointer movement, static draw counts must stay flat after initial layout; only the crosshair leaf should change. Then verify resize, zoom, visibility, and discrete highlight changes still redraw their intended layers and remove the temporary instrumentation.
+
 # PDF visual review
 
 - For multi-page PDF review, render every page with `pdftoppm`, then create a compact ImageMagick contact sheet before opening selected full-resolution pages. On macOS, `montage` can fail with `unable to read font`; pass `-font /System/Library/Fonts/Helvetica.ttc` explicitly, for example: `montage page-*.jpg -font /System/Library/Fonts/Helvetica.ttc -thumbnail 320x180 -tile 3x -geometry +8+12 contact.jpg`.

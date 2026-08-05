@@ -1,5 +1,25 @@
 # Current Plan
 
+## Active Analysis Crosshair Performance (Implemented 2026-08-05)
+
+### Think Before Coding
+
+- Audit confirmed that pointer motion invalidated the complete renderer in Frequency Response Response/Spectrogram and Spectrum Frequency/Frequency-vs-Throttle-or-RPM. Graph remains out of scope because its time cursor moves the data window; Step Response has no crosshair; the legacy single `SpectrumSurfaceCanvas` remains preview-only.
+- Preserve all projection, snapping, chip placement, colors, and the exact 500 ms Response-guide activation delay. Exit or cancellation of a pending Response-guide hover must remain immediate.
+
+### Simplicity First
+
+- Each active plot now separates the static data canvas, the optional discretely invalidated guide/filter layer, and a small state-owning crosshair interaction leaf. No cache, persistence, task infrastructure, dependency, or model change was introduced.
+
+### Surgical Changes
+
+- Frequency Response splits response curves and spectrogram heatmaps from their guide and crosshair canvases; response chips and both pointer trackers own crosshair state below the static siblings. Spectrum uses new public `StackedSpectrumCrosshairOverlay` and `StackedHeatmapCrosshairOverlay` types while preserving the existing source-compatible canvas initializers and chip overlay.
+- The app passes `crosshair: nil` into both active Spectrum canvases. Local frequency and heatmap interaction leaves handle pointer exclusion, Option snapping, and pan forwarding. `clearResponseGuideHover()` cancels the pending task and clears an active guide immediately.
+
+### Goal-Driven Execution
+
+- AirframeUI's complete 148-test suite passes, including 13 crosshair projection tests; BlackboxAnalysis passes 214 tests. Focused hover tests pass 11/11, Frequency Response state/geometry tests pass 25/25 after one timing-only retry, and fresh macOS plus generic iOS Simulator Release builds succeed. Live five-second pointer profiling remains the final acceptance step because the checkout contains no usable CHIRP document fixture.
+
 ## Overview Aircraft Identity and Card Order (Implemented 2026-08-05)
 
 ### Think Before Coding
