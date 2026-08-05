@@ -29,6 +29,5 @@ Reference PID terms and derived sums are shown as mixer-authority percent by div
 | Source ID | Title | Author/project | Version/date | URL or local path | Accessed | Notes |
 |---|---|---|---|---|---|---|
 | APPLE-MAP | MapKit/SwiftUI Map APIs | Apple | Xcode 26 target SDK | Apple SDK/documentation | 2026-08-01 | Primary platform API evidence |
-| BLV | Graph and map implementation | Betaflight Blackbox Explorer | commit `a039b74492cdbaca6f94852a7958df1c2dc064b1` | `blackbox-log-viewer/src/graph_config.js`, `grapher.js`, `graph_map.js` | 2026-08-01 | Reference behavior |
-| BF-SRC | GPS and PID units | Betaflight | commit `6ecfb45f938e4996fbb568b21eafa7057446a906` | `betaflight/src/main/` | 2026-08-01 | Firmware semantics |
-
+| BLV | Graph and map implementation | Betaflight Blackbox Explorer | commit `1222587e162fd2c881ee2ea3d74ec91c2397891d` | `blackbox-log-viewer/src/graph_config.js`, `grapher.js`, `graph_map.js` | 2026-08-05 | Reference behavior; functional source unchanged from prior pin |
+| BF-SRC | GPS and PID units | Betaflight | tag `2026.6.1`, commit `6dbc4218fd6bc33bf16ea32c670304d4f89321d5` | `betaflight/src/main/` | 2026-08-05 | Stable firmware semantics |

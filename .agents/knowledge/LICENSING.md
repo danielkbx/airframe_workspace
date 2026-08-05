@@ -20,5 +20,4 @@ Airframe uses upstream projects as behavioral and format references and should a
 
 | Source ID | Title | Author/project | Version/date | URL or local path | Accessed | Notes |
 |---|---|---|---|---|---|---|
-| BLV-LICENSE | LICENSE | Betaflight Blackbox Explorer | commit `a039b74492cdbaca6f94852a7958df1c2dc064b1` | `blackbox-log-viewer/LICENSE` | 2026-08-01 | GPL-3.0 text |
-
+| BLV-LICENSE | LICENSE | Betaflight Blackbox Explorer | commit `1222587e162fd2c881ee2ea3d74ec91c2397891d` | `blackbox-log-viewer/LICENSE` | 2026-08-05 | GPL-3.0 text unchanged |

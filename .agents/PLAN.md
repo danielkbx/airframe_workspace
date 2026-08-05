@@ -1,5 +1,23 @@
 # Current Plan
 
+## Betaflight 2026.6.1 and Blackbox Explorer Reference Refresh (Implemented 2026-08-05)
+
+### Think Before Coding
+
+- Separate the stable 2026.6.1 tag, the maintenance branch, and 2026.12-alpha master before assigning compatibility meaning. Treat the MSP box list and the 32-bit Blackbox flight-mode payload as different contracts.
+
+### Simplicity First
+
+- Advance the read-only BF/BE references and recognize only the new logged header `ap_position_f`. Keep MSP API 1.48, Blackbox Data version 2, frame decoding, and the logged flight-mode catalog unchanged.
+
+### Surgical Changes
+
+- BF now references tag 2026.6.1 and BE current master. Airframe recognizes `ap_position_f`, cites the final 2026.6 debug enum, and explicitly leaves `WP CAPTURE` out because its late box bit is not serialized by Blackbox. BE's intervening changes are workflow/lockfile-only.
+
+### Goal-Driven Execution
+
+- Focused Reader tests prove the new header is typed and known while 2026.12-alpha debug value 102 remains unknown under the stable catalog. A representative real 2026.6.1 log remains follow-up evidence.
+
 ## Inspector Scroll and Hover Stability (Implemented 2026-08-05)
 
 ### Think Before Coding

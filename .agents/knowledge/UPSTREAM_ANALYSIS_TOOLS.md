@@ -6,6 +6,7 @@
 - The 2026 Configurator Autotune path segments CHIRP recordings, uses logged setpoint as input and gyro as output, estimates a Welch transfer function, and derives magnitude, phase, coherence, sensitivity, and a step response. Its step response is not event-derived: it inverse-transforms the measured closed-loop transfer function into an impulse response and cumulatively integrates that impulse response.
 - The Unmanned Tech/UAV Tech review `Betaflight Autotune review, promising maths, reckless buttons` treats measurement graphs as the current value and automatic PID application as unsafe. It recommends validating a distinct spectrogram sweep and high coherence before interpretation, using Acro rather than Angle to reduce cross-axis contamination, and deliberately preparing firmware, CHIRP mode, Blackbox debug mode, and tuning settings before flight. The article does not identify an exact tested firmware commit, so implementation compatibility must remain source- and fixture-verified.
 - Product interpretation: Airframe's existing Wiener-deconvolution Step Response already derives a step response from arbitrary logged setpoint/gyro excitation, including CHIRP. The Configurator derives a conceptually equivalent curve from its measured frequency-domain transfer function. Compare both outputs on complete modern CHIRP payloads before introducing a second user-visible curve. PID recommendations remain backlog until neutral CHIRP measurements are validated.
+- Blackbox Explorer was advanced from `a039b74492cdbaca6f94852a7958df1c2dc064b1` to `1222587e162fd2c881ee2ea3d74ec91c2397891d` on 2026-08-05. The five intervening commits change only GitHub workflow permissions and indirect package-lock versions; parser, analysis, and presentation source is unchanged. Its 2026.6 debug list appends `AUTOPILOT_PID` but omits firmware's final `POSITION_NAV` and `AUTOPILOT_STOP`; Airframe's explicit final-tag catalog remains the authoritative product mapping.
 
 ## Real Nilpferd tuning document observation (2026-08-02)
 
@@ -52,7 +53,7 @@ Potential behavioral references include Rust `blackbox_log`, Rust `bbl_parser`, 
 
 | Source ID | Title | Author/project | Version/date | URL or local path | Accessed | Notes |
 |---|---|---|---|---|---|---|
-| BLV | Blackbox Explorer | Betaflight | commit `a039b74492cdbaca6f94852a7958df1c2dc064b1`, observed 2026.6.0 | `blackbox-log-viewer/src/` | 2026-08-01 | Read-only reference |
+| BLV | Blackbox Explorer | Betaflight | commit `1222587e162fd2c881ee2ea3d74ec91c2397891d`, observed 2026.6.0 | `blackbox-log-viewer/src/` | 2026-08-05 | Read-only reference; functional source unchanged from prior pin |
 | PTB | PIDtoolbox free source | PIDtoolbox | commit `1e12abb23188183f0f21998a6a89af3719ded22a` | `PIDtoolbox/` | 2026-08-01 | Algorithmic ancestor; Pro source unavailable |
 | BFT | Blackbox tools | Betaflight | current upstream | https://github.com/betaflight/blackbox-tools | 2026-08-01 | Candidate golden oracle |
 | RUST1 | blackbox_log | community | current listing | https://docs.rs/blackbox-log/latest/blackbox_log/ | 2026-08-01 | Not deeply evaluated |

@@ -37,11 +37,13 @@
 - Extract a numbered Betaflight `debugType_e` catalog directly from any local ref with the enum as the source of raw values:
 
   ```sh
-  ref=2026.6.0-rc3
+  ref=2026.6.1
   git -C betaflight show "$ref":src/main/build/debug.h | awk '/^typedef enum \{/{inside=1; next} inside && /DEBUG_COUNT/{exit} inside { line=$0; sub(/^[[:space:]]*/, "", line); sub(/,.*/, "", line); if (line ~ /^DEBUG_/) { sub(/^DEBUG_/, "", line); print rawValue++, line } }'
   ```
 
   Compare the result with the designated names in `src/main/build/debug.c`; do not infer raw values by counting an Airframe array. Run this for each supported ref because insertions and removals change later integer meanings.
+- For a release-day upstream audit, use `git ls-remote` to resolve official tags/branch heads, then GitHub's compare API to list commits/files without first moving the local reference. Audit the stable release, maintenance branch, and next-cycle master separately; on 2026-08-05 this prevented unreleased Betaflight 2026.12-alpha `DEBUG_PITOT` from being folded into the stable 2026.6 catalog.
+- After checking out a Betaflight release, run `git -C betaflight submodule update --init --recursive` before judging cleanliness. The top-level release may advance `src/config`; leaving its nested worktree at the prior commit makes Betaflight appear modified even though no source file was edited.
 - In zsh, an unmatched unquoted glob aborts the command before `rg` runs (`no matches found`). Quote optional path patterns or pass only paths verified to exist when a reference checkout may omit a directory.
 - For SwiftUI `fileExporter(item:)` with CoreTransferable `FileRepresentation`, add a constant non-empty `.suggestedFileName` on the representation even when the view supplies `defaultFilename`. Without it, macOS SwiftUI can pass an empty string to `NSFileWrapper.preferredFilename`; the dynamic closure overload triggers recursive generic-metadata resolution and `EXC_BAD_ACCESS` on the current toolchain. Add a test that evaluates `transferRepresentation`, because tests of prepared files alone do not execute this runtime path.
 - App-hosted focused tests still compile the complete test target; every new test source must compile even when another suite is selected.
@@ -351,3 +353,4 @@ Agents must update this file proactively when they learn a better command, workf
 - If a freshly launched Graph document pins one CPU while the main thread is idle, `/usr/bin/sample <pid> 3 -file <path>` distinguishes expected background work from a UI loop. On 2026-08-05 it exposed `GraphPreparedSeriesCache.restoreIfNeeded` decoding a large binary property-list bundle for roughly 54 seconds, with substantial transient memory amplification.
 - Package-backed reference-log UI state must never use `replaceLogSources` as its ordinary publication path: that method deliberately SHA-256-hashes each source and rebuilds descriptors. Profile stacks through `DocumentStateStore.notifyPackageChange` -> `ReferenceLogStore.notifyPackageChange` -> `replaceLogSources` identify this mistake immediately; publish state-only changes through metadata and reserve source replacement for attach/remove.
 - For a read-only diagnostic of a specific log embedded in an `.airframe` container, `AirframeContainer` can be compiled as a temporary command-line helper after first emitting the local `Logging` module and dylib into `/tmp`; compile the container sources with `-I /tmp -L /tmp -lLogging` and run with `DYLD_LIBRARY_PATH=/tmp`. This avoids launching the app and permits extracting one blob to `/tmp` without modifying the source document.
+- SwiftUI has no combined `frame(width:minHeight:)` overload. Apply fixed-width and minimum-height constraints as separate `.frame(width:)` and `.frame(minHeight:)` modifiers; a macOS build catches this even when the surrounding view is shared with iOS.

@@ -47,6 +47,6 @@ Detailed packet captures, protocol hypotheses, and experiment logs live in `../S
 | Source ID | Title | Author/project | Version/date | URL or local path | Accessed | Notes |
 |---|---|---|---|---|---|---|
 | BFC | Betaflight Configurator | Betaflight | commit `14a050b7b57b4addadc209e5b67b3cfd9fdef943` | `betaflight-configurator/` | 2026-08-01 | Pinned read-only reference |
-| BF-SRC | MSP, VCP, MSC, and Blackbox source | Betaflight | commit `6ecfb45f938e4996fbb568b21eafa7057446a906` | `betaflight/src/main/` | 2026-08-01 | Primary firmware evidence |
+| BF-SRC | MSP, VCP, MSC, and Blackbox source | Betaflight | tag `2026.6.1`, commit `6dbc4218fd6bc33bf16ea32c670304d4f89321d5` | `betaflight/src/main/` | 2026-08-05 | Primary stable firmware evidence; MSP API remains 1.48 and dataflash wire behavior is unchanged |
 | AF-HW | Airframe hardware validation notes | Airframe research | 2026-07-23 through 2026-07-24 | Original `.agents/RESEARCH.md` history and test fixtures | 2026-08-01 | Reproducible local observations |
 | SB | SpeedyBee reverse-engineering notebook | Airframe research | active | `.agents/SPEEDYBEE_REVERSE_ENGINEERING.md` | 2026-08-01 | Specialized lab notebook |

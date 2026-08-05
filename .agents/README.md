@@ -19,7 +19,7 @@ The upstream reference project is cloned at:
 
 - `blackbox-log-viewer/`
 - Upstream: https://github.com/betaflight/blackbox-log-viewer
-- Local observed commit: `a039b74492cdbaca6f94852a7958df1c2dc064b1`
+- Local observed commit: `1222587e162fd2c881ee2ea3d74ec91c2397891d`
 - Observed version: `2026.6.0`
 - Workspace role: read-only reference submodule. Pull only; never commit or push from this workspace.
 
@@ -27,7 +27,8 @@ The Betaflight firmware reference is cloned at:
 
 - `betaflight/`
 - Upstream: https://github.com/betaflight/betaflight
-- Local observed commit: `6ecfb45f938e4996fbb568b21eafa7057446a906`
+- Local observed commit: `6dbc4218fd6bc33bf16ea32c670304d4f89321d5`
+- Observed version: `2026.6.1`
 - Workspace role: read-only reference submodule. Pull only; never commit or push from this workspace.
 
 The Betaflight Configurator reference is cloned at:

@@ -285,7 +285,7 @@ Public Airframe commit: `44f0a7e`.
 - The conversion sheet explains the retained analyzed-log-details benefit.
 - Refinement completed: compact copy, Log Gaps placement, optional-row omission, equal row heights, sensor/MCU metadata, useful idle/PID configuration, and first/last-sample VBat.
 - Final compact-card feedback completed: Flight omits Disarms; reusable headers center icon/title/action; persisted debug mode uses firmware-specific semantic names instead of raw numbers.
-- Debug-mode catalog correction completed: explicit integer catalogs cover 4.3 best-effort, verified 4.4.3, 4.5.5, legacy 4.6 commit `0ca4fe879`, 2025.12.5, and 2026.6.0-rc3, with the newest catalog as the missing/future-version fallback. Full Reader tests, focused cache tests, the macOS build, and the supplied `debug_mode_chirp.bbl` confirm `2025.12.5` raw `97` as `CHIRP`.
+- Debug-mode catalog correction completed: explicit integer catalogs cover 4.3 best-effort, verified 4.4.3, 4.5.5, legacy 4.6 commit `0ca4fe879`, 2025.12.5, and final 2026.6.1, with the newest catalog as the missing/future-version fallback. Full Reader tests, focused cache tests, the macOS build, and the supplied `debug_mode_chirp.bbl` confirm `2025.12.5` raw `97` as `CHIRP`. Obtain a representative real 2026.6.1 log to supplement the source-backed header and catalog tests.
 - Dashboard reorganization completed: Hardware and Power are separate cards; Flight owns GPS speed/distance metrics; Recovered Gaps is hidden and Log Gaps is presented as Gaps.
 - Configuration semantics completed: protocol IDs display names, Dynamic Idle uses physical RPM, and Hardware/Configuration expose Gyro Sample Rate/PID Loop Rate.
 - Swift package tests, focused cache tests, and complete iOS/macOS builds passed on 2026-07-28.
