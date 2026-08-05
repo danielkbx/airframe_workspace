@@ -32,7 +32,33 @@ Use this file to capture ideas, possible features, research leads, cleanup tasks
 - Add a Tuning Assistant that guides setup and test-flight execution end to end: FC setup, test-flight instructions, log import, tagging, and follow-up organization.
 - Add a Blackbox Test Setup Assistant that configures and validates the exact firmware feature, flight mode, debug mode, logged fields, logging rate, and flight procedure required by a selected analysis. The CHIRP workflow must detect firmware generations that expose CHIRP mode but record only the legacy phase channel instead of the complete axis/frequency/excitation debug data.
 - Compare the existing time-domain Wiener-deconvolution Step Response against the Configurator's frequency-domain CHIRP-derived Step Response on the same modern complete-payload logs before deciding whether a second derived curve adds information or merely duplicates the current result.
-- Add CHIRP-based PID recommendations / Auto Tune only after the neutral measurements, coherence checks, sensitivity analysis, and derived response have been validated against representative real logs. Recommendations must remain reviewable and must not be applied blindly.
+- Add CHIRP-based PID recommendations / Auto Tune only after the neutral measurements, coherence checks, sensitivity analysis, and derived response have been validated against representative real logs. Recommendations must remain reviewable and must not be applied blindly. A full concept exists; see "CHIRP-Based PID Tuning Assistant" in the Parking Lot.
+
+### CHIRP-Based PID Tuning Assistant (concept agreed 2026-08-04, planned for a later version)
+
+Guided iterative PID tuning built on the firmware CHIRP mode (BF >= 2026.6). Agreed assumptions: the filter tune is already good and the assistant never changes filters (it only validates that noise stays acceptable after gain increases); FC communication is available (USB serial on macOS, BLE on iOS, external BT hardware acceptable); when no connection exists, the assistant emits the settings as a CLI diff for manual application.
+
+Why Airframe can beat the Configurator Autotune tab (reference: `betaflight-configurator/src/js/blackbox/spectral_analysis.js`, `src/composables/useAutotune.js`): the Configurator measures only the closed loop T(f) = setpoint→gyro via Welch estimation and then applies craft-agnostic heuristics (bandwidth ∝ P toward fixed 45 Hz, D from phase margin toward fixed 50°, everything clamped 0.5–2x per iteration, stateless across flights). The measurement layer is sound; the recommendation layer is the weak part.
+
+Algorithm concept:
+
+1. Estimation: port the proven Welch cross-spectral estimate (Hanning, 50% overlap, magnitude-squared coherence, bins with coherence < 0.3 excluded) plus the derived metrics (−3 dB bandwidth, resonant peak, phase margin at gain crossover, sensitivity S = 1 − T, step response via IFFT).
+2. Controller reconstruction: build C(f) analytically from the log header (PID, D-max, FF, D-term filters, loop rate are all known).
+3. Plant identification: L = T/(1 − T) over coherent bins, plant G = L/C; fit a second-order-plus-dead-time model weighted by coherence; report fit quality as a first-class output.
+4. Gain synthesis: derive an achievable bandwidth/phase-margin target from the identified dead time (optionally biased by a Racing/Freestyle/Cinematic profile) and compute P/I/D/FF directly via loop shaping instead of scaled heuristics. Map to simplified-tuning slider values so the firmware slider validation remains a safety net. Goal: 1–2 flight iterations instead of 4–5.
+5. Safety layer kept from the Configurator: per-iteration change clamp, resonant-peak backoff, never loosen filtering; additionally refuse to recommend when mean coherence or fit quality is below threshold and tell the user how to improve the next flight instead.
+6. Yaw has different dynamics (integrating behavior, no D by default); v1 may use model-based synthesis for roll/pitch only.
+
+Assistant loop: setup (read craft config, verify firmware/blackbox settings, set chirp parameters derived from craft data) → fly → import via existing acquisition pipeline → automatic flight-quality gate (chirp segments per axis, amplitude, coherence, saturation, stick input during sweep; on failure give a concrete instruction, no recommendation) → show current vs. proposed values with evidence (Bode, phase margin, step response, coherence) → apply via MSP + EEPROM write after explicit confirmation, or CLI diff → convergence verdict when metrics are in the target band and stable across two consecutive flights. Per-craft iteration history persists.
+
+Phasing (Phase 1 gates everything else):
+
+1. Offline algorithm spike: estimation + controller reconstruction + plant fit + gain synthesis in `BlackboxAnalysis` (pure Swift), exposed through an `AirframeCLI` command that takes a chirp `.bbl` and prints metrics, fit quality, and proposed sliders. Validate with Swift Testing round-trips on synthetic known plants (generate closed-loop data from known SOPDT + controller, verify recovery) and side-by-side against the Configurator Autotune output on the same real chirp logs. Real chirp logs must be collected; the existing Step Response test logs are not chirp logs.
+2. FC parameter I/O: MSP messages for simplified-tuning read/write and chirp-mode configuration in `MSP`/`FlightController`, plus CLI-diff generation.
+3. Assistant UI + tuning-session state machine with per-craft persistence, following the existing FC assistant patterns; overlaps with the Blackbox Test Setup Assistant entry above (including its legacy-CHIRP-debug-channel detection requirement).
+4. Convergence tracking, profile targets, yaw decision, localization.
+
+Open points for Phase 1: exact BF 2026.6 chirp/blackbox debug field layout (verify against pinned firmware source; `chirp_*` fields in `betaflight/src/main/flight/pid.h`); whether slider granularity suffices or per-term PID output is needed; yaw heuristic vs. model-based; where tuning-session state persists (package vs. app-level per-craft store).
 
 ### Deferred BLE FlashFS Throughput Optimization
 

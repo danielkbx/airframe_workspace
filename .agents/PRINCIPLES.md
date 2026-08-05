@@ -91,6 +91,21 @@ Every data-processing operation in the app target — reading, decoding, transfo
 - The spinner is the only consumer of the counter's `isActive`. Do not branch app or domain logic on activity state.
 - Domain packages (`BlackboxReader`, `BlackboxAnalysis`, …) stay unaware of the counter; tracking happens at the app-side boundary where their synchronous APIs are detached.
 
+## Document Lifetime And Cache Ownership Rule
+
+Every new data-backed view, analysis, cache, prefetcher, and persistent-cache adapter must define ownership and teardown before implementation. This is a strict review gate. A feature that can retain log data but does not satisfy these rules is incomplete.
+
+- Classify every long-lived object as exactly one of: process-global infrastructure, document-scoped state, or transient view state. Log bytes, decoded logs, analysis workspaces/results, render models, cache adapters, and tasks that capture them are document-scoped unless there is proof they contain no document identity or data.
+- Process-global infrastructure may retain only bounded, document-independent services or reproducible disk-cache metadata. It must never retain document views, native windows, closures capturing document state, document cache actors, source buffers, or per-document task handles.
+- A document-scoped owner must expose an idempotent `shutdown()` or equivalent permanent terminal transition. Shutdown cancels owned work, rejects all later registrations/stores/publications, clears strong references and RAM entries, and reports privacy-safe release/pending-work statistics where useful. Memory-pressure trimming is not teardown.
+- Every task that reads, decodes, transforms, analyzes, prewarms, or persists document data must be owned by the document lifetime through `ProcessingActivityCounter` or a document-owned structured parent. Cancelling only the awaiting SwiftUI task is insufficient. Long synchronous Reader/Analysis loops must cooperatively check cancellation.
+- Fire-and-forget work must not capture a full value snapshot per event. Debounce/coalesce by stable dataset identity, construct only the latest payload after the debounce, bound parallelism, suspend disposable persistence during playback/direct manipulation, and cancel pending publication during shutdown.
+- Native platform close is authoritative; SwiftUI `onDisappear` is only idempotent backup cleanup. On macOS, `NSWindow.close` must synchronously prevent global re-registration and detach the hosting root before asynchronous document persistence. Successful platform-document close must then explicitly clear open models, workspace/controller state, source bytes, decoded logs, histories, caches, persistence adapters, and worker registries.
+- Any global registry that accepts a window/document callback must use weak identity and a permanent close barrier for that live object. Removing the current entry is insufficient because delayed SwiftUI callbacks can repopulate it after `willClose`.
+- Persistent disk data surviving document close is expected and is not a leak. Its process-global store must not retain document adapters or queued document snapshots. RAM cache capacity and eviction policy do not excuse retention after close.
+- New view/cache work must add focused lifecycle coverage appropriate to its ownership: shutdown empties state, pending work is cancelled, late store/register calls are rejected, captured lifetime tokens release, and repeated close is harmless. A macOS window-owned feature must also be exercised through `window.performClose(nil)`, not only direct `NSDocument.close()`.
+- Before completion, perform one live repeated open/use/close acceptance with the feature exercised. Require idle CPU, no post-close cache writes/analysis logs, zero live document/window/hosting/open-model/workspace/cache roots, and bounded physical footprint. Do not use RSS or `leaks` alone as proof.
+
 ## 4. Goal-Driven Execution
 
 Define success criteria. Work in verifiable steps.

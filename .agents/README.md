@@ -4,6 +4,8 @@ Airframe is a native Swift Betaflight Blackbox log analyzer. This file is only t
 
 For document formats, pickers, sandbox access, imports, exports, persistence, or lifecycle work, `DOCUMENT_IO_MATRIX.md` is also mandatory context and must remain current.
 
+For every new data-backed view, analysis, in-memory cache, persistent-cache adapter, prefetcher, or document/window integration, the **Document Lifetime And Cache Ownership Rule** in `PRINCIPLES.md` is mandatory. Its shutdown and live-close gates apply even when the feature itself is not described as lifecycle work.
+
 The workspace root is now a private wrapper Git repository:
 
 - Root repo: `git@github.com:danielkbx/airframe_workspace.git`
