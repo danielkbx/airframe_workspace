@@ -1,5 +1,23 @@
 # Current Plan
 
+## Inspector Scroll and Hover Stability (Implemented 2026-08-05)
+
+### Think Before Coding
+
+- Hover-driven Graph, Spectrum, Frequency Response, and Step Response highlights are transient window state. Delay activation centrally in the shared highlight states, not in individual inspector rows; keep exit, explicit clear, and tap toggles immediate.
+
+### Simplicity First
+
+- Use one small app-internal `DebouncedHover<Value>` helper with a fixed 500 ms activation delay, making highlight an intentional dwell interaction. Spectrum keeps independent helpers for its seven independently valid highlight channels. No setting, persistence, dependency, or AppKit bridge is added.
+
+### Surgical Changes
+
+- Graph, Table, Spectrum, and Step Response inspector Forms hide only their vertical scroll indicators. Inactive Spectrum filters/groups, hidden Step/Frequency traces and axes, and hidden response/spectrogram guides never publish hover highlights. Scrollable popovers and unrelated toolbar/reorder hover styling remain unchanged.
+
+### Goal-Driven Execution
+
+- Eight focused tests cover delayed activation, early exit, target replacement, repeated active events, immediate tap toggles, explicit clear, independent Spectrum channels, and Step Response behavior. Fresh macOS and generic iOS Simulator Beta builds pass; live macOS scroll/checkbox acceptance remains.
+
 ## Graph Playback and Scrubbing Presentation Cadence (Implemented and Live-Profiled 2026-08-05)
 
 Live acceptance on `Tuning.airframe` is complete for the scoped performance work. The user reports that playback and aggressive scrubbing feel “very, very much better” and close to ideal. Final traces contain no per-cursor SHA-256/log-source replacement, no Graph prepared-series persistence during scrubbing, and no raw `Graph.loadPoints` work during the final covered scrub. Remaining CPU is predominantly SwiftUI/AppKit layout and Core Animation presentation while the Graph now delivers substantially more visible frames instead of blocking behind document hashing. Persistent Graph bundle restore/encode amplification remains a separate follow-up candidate, not approved scope for this pass.

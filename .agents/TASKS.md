@@ -2,6 +2,24 @@
 
 Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
 
+## Implemented, Live Acceptance Pending: Inspector Scroll and Hover Stability
+
+### Think Before Coding
+
+- Canvas highlight activation is delayed centrally in `GraphHighlightState`, `SpectrumHighlightState`, and `StepResponseHighlightState`; pointer exit and explicit clearing remain immediate so highlights cannot linger.
+
+### Simplicity First
+
+- The internal fixed policy is 500 ms, making highlight an intentional dwell interaction. Repeated active events for the same target do not restart the delay; selecting another target cancels the pending activation. Tap toggles remain immediate.
+
+### Surgical Changes
+
+- Vertical scroll indicators are hidden only on the Graph, Table, Spectrum, and Step Response inspector Forms. Inactive Spectrum filters/groups, hidden Step/Frequency traces and axes, and hidden response/spectrogram guides do not react to hover. Popovers and unrelated hover-sensitive UI chrome are unchanged.
+
+### Goal-Driven Execution
+
+- Eight focused tests and fresh macOS plus generic iOS Simulator Beta builds pass. Live macOS confirmation of checkbox hit testing and stutter-free inspector scrolling remains the acceptance gate.
+
 ## Implemented and Live-Accepted: Graph Playback and Scrubbing Performance
 
 - Playback stutter analysis (2026-08-04) located the cost on the per-tick main-thread path, not in data or caches: every ~16 ms tick invalidated the complete `Surface.body` (legend, overlays, gestures, marker concat), each Canvas draw copied the visible point slice into fresh arrays and re-sorted gaps per series, and the refinement glow double-stroked every series at animation rate on top of playback ticks.
