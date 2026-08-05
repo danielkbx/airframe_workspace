@@ -64,6 +64,18 @@ Agents must also update `TOOLING.md` as a self-learning knowledge base. If a too
 
 External facts, reproducible local observations, evidence grades, uncertainties, and product interpretations live in the thematic [`knowledge/`](knowledge/README.md) Knowledge Base. `RESEARCH.md` is its compact index and research inbox; `MEMORY.md` remains the normative source for accepted decisions.
 
+## Document Role Hygiene
+
+- `MEMORY.md`: accepted durable decisions and constraints; no implementation diary.
+- `ARCHITECTURE.md`: current implemented technical shape; no future design.
+- `TASKS.md`: approved work or live acceptance still pending; remove completed work after its durable outcome is reflected elsewhere.
+- `PLAN.md`: current approved, not-yet-complete execution plans; Git preserves completed plans.
+- `BACKLOG.md`: unapproved future work only; keep research evidence and detailed approved designs out.
+- `RESEARCH.md` and `knowledge/`: research index plus evidence, uncertainty, source registers, and product interpretation; no duplicated implementation specification.
+- `TOOLING.md`: current repeatable workflows and corrections; remove superseded command variants instead of accumulating them.
+
+Git history is the archive for superseded snapshots and implementation diaries. Do not maintain a second in-tree archive unless a historical artifact is itself required evidence.
+
 ## Recommended First Read
 
 1. `MEMORY.md`: durable decisions and constraints.

@@ -12,7 +12,7 @@ Durable research lives in the thematic [Knowledge Base](knowledge/README.md). `M
 | [Upstream Analysis Tools](knowledge/UPSTREAM_ANALYSIS_TOOLS.md) | Blackbox Explorer, PIDtoolbox, CHIRP/Autotune, spectrum algorithms, and related parser references | 2026-08-05 |
 | [Flight Controller Connectivity](knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md) | Configurator transport, MSP/CLI, BLE/USB, FlashFS, hardware validation, and helpers | 2026-08-01 |
 | [Apple Platforms and CI](knowledge/APPLE_PLATFORMS_AND_CI.md) | iPadOS USB feasibility and Xcode Cloud entitlement findings | 2026-08-01 |
-| [Map and Graph Research](knowledge/MAP_AND_GRAPH_RESEARCH.md) | MapKit route semantics and reference graph-section behavior | 2026-08-01 |
+| [Map and Graph Research](knowledge/MAP_AND_GRAPH_RESEARCH.md) | MapKit route semantics and playback limitations plus reference graph-section behavior | 2026-08-05 |
 | [Licensing](knowledge/LICENSING.md) | Upstream license evidence and project implications | 2026-08-01 |
 
 Specialized lab notebooks remain separate:

@@ -25,8 +25,8 @@ This file describes the current technical shape. Stable product and workflow rul
 
 - The Overview composes reusable technical cards in an adaptive `LazyVGrid`; Notes is outside the grid and spans the available width.
 - Card-level details remain auxiliary sheets, while the GPS flight map is a primary `LogViewSelection` mode.
-- The requested data-card order is Log, Flight, GPS, Power, Flight Controller, Hardware, Blackbox, Configuration, then Notes; the existing Checks card follows Configuration without interrupting that data sequence. GPS uses the existing cached `AirframeFlightOverview` fields; no cache schema change is required.
-- Semantic Overview snapshots are cacheable package data. Cache identity includes the immutable source SHA-256, segment index, schema version, calculation algorithm version, and configuration input identity.
+- Checks leads the adaptive card grid, followed by Log, Blackbox, Aircraft, Hardware, Flight Controller, Configuration, Flight, Power, and GPS. Data-dependent cards may be omitted. Full-width Notes remains outside the grid and is available only for writable Airframe documents.
+- Semantic Overview snapshots use a versioned OS derived-data cache for Airframe documents and RAM only for raw logs. Cache identity includes immutable source SHA-256, segment index, schema version, calculation algorithm version, and configuration input identity.
 - Blackbox availability comes from parsed frame definitions, never merely from configuration intent. Compact category summaries lead to a searchable detail that retains raw unknown fields.
 - Flight GPS overview data includes GPS-home epoch date/time when the `H` frame provides it, falling back to a valid `Log start datetime` header. `GPS_time` is only GPS milliseconds-of-week and is not enough for a calendar date. The same overview also includes maximum displacement and total travelled distance from valid GPS coordinates.
 
@@ -36,7 +36,7 @@ This file describes the current technical shape. Stable product and workflow rul
 - `BlackboxAnalysisWorkspace.gpsRoute(using:)` builds an immutable MapKit-free `AnalysisGPSRoute`, drops non-monotonic points, calculates Home-relative altitude, normalizes heading, associates at most 256 events with preceding route points, and provides binary-search cursor projections.
 - The app owns transient MapKit camera state and document-wide map display settings. Route prefixes, position, and Map event annotations read the active log cursor; profile event lines show the complete prepared event set. Map playback always uses the complete Main-frame range. In the segmented mode picker, menu, and numeric command shortcuts, Map is displayed as the final/rightmost mode and uses `⌘6`.
 - `DocumentHomeView.LogContext.hasUsableGPSRoute` is the app-side shared gate for Map segment enablement, command routing, Map fallback, and Overview GPS-card visibility. It requires at least two monotonic time-associated GPS points with distinct coordinates; while scan/loading state is unresolved, Map fallback is deferred.
-- The route overlay uses the latest recorded GPS-point index as its SwiftUI identity, prompting immediate MapKit overlay replacement only when a new point is reached while preserving camera state. The current-position annotation keeps stable identity so its dot and heading cone do not blink during Playback.
+- The current SwiftUI route overlay changes identity at each recorded GPS point because stable `MapPolyline` identity does not adopt new coordinates. Live testing proved that repeated overlay replacement can lag playback by many seconds even though app state is current. The accepted future replacement is an `MKMapView` representable; evidence and constraints live in [Map and Graph Research](knowledge/MAP_AND_GRAPH_RESEARCH.md#swiftui-map-polyline-playback-limitation). The current-position annotation keeps stable identity and remains responsive.
 - Display-only route geometry is capped at 2,048 deterministically sampled points. First/final endpoints, every prepared Event route point, and the live current endpoint are retained; Analysis route data and position/event lookup remain unchanged.
 - Map annotations expose localized accessibility labels without visible titles. The current-position cone rotates around an apex fixed at the dot and widens in the recorded heading direction.
 - Home and progressively revealed Event symbols are native buttons with anchored transient popovers. Home shows coordinate and recorded absolute altitude; Events show localized title, flight-relative time, coordinate, and available relative altitude. Selection clears when scrubbing or settings hide its annotation.
@@ -46,8 +46,8 @@ This file describes the current technical shape. Stable product and workflow rul
 ## Flight Controller Runtime Status
 
 - `BetaflightClient.runtimeStatus()` is a non-fatal framed-CLI enrichment step: it requests structured `env`, falls back to `status`, parses immediately into `FlightControllerStatusSnapshot`, discards the raw response, and restores MSP.
-- `FlightControllerStatusSnapshot` is shared by the connected-assistant presentation, `FlightControllerImportPayload`, package metadata import records, and associated-log Overview enrichment.
-- Direct, Wi-Fi, and Mass Storage imports retain the status captured during the original live connection. Package metadata stores it as an optional field on the same import event as its log hashes and configuration.
+- `FlightControllerStatusSnapshot` is shared by the connected-assistant presentation, `FlightControllerImportPayload`, Airframe-document import records, and associated-log Overview enrichment.
+- Direct, Wi-Fi, and Mass Storage imports retain the status captured during the original live connection. Document metadata stores it as an optional field on the same import event as its log hashes and configuration.
 - Overview selects the newest exact status-bearing import for a source hash and combines the semantic status hash with configuration identity for cache validity.
 
 ## Layers
@@ -110,7 +110,7 @@ Main-frame time is the primary query axis. Valid auxiliary frames are associated
 
 - `SourceID`: physical imported source.
 - `LogID`: one Blackbox segment/session inside a source.
-- Full SHA-256: package source identity and payload key.
+- Full SHA-256: Airframe-document source identity and payload key.
 - Ephemeral UUID: runtime document/window identity only.
 - Raw document-state identity: versioned content fingerprint; never a persisted source URL.
 
@@ -124,14 +124,13 @@ Do not collapse source, segment, session, and runtime-window identity.
 - One primary source plus at most eight session-only references.
 - UI state persists externally through the bounded document-state repository and iCloud KVS mirror.
 
-### Airframe packages
+### Airframe documents
 
-- `UTType.package` directory with `metadata.json`.
-- Ordered equal `logs` descriptors and SHA-256-keyed source payloads normalized to valid log segment boundaries.
-- Format version 2 adds ordered flight-controller import snapshots and content-addressed configuration payloads; version 1 remains readable.
-- Metadata owns selection, per-source state, names, and other package UI state.
-- Mutations create coalesced snapshots and explicit silent saves.
-- Physical duplicate coordinates, copies, validates, then opens the package.
+- Regular `.airframe` files use physical `AirframeContainer` version 1 with an append-only blob/commit structure and logical metadata format version 2.
+- The manifest maps ordered log descriptors and normalized SHA-256-keyed source/configuration payloads to immutable container blobs; logical format version 1 remains readable.
+- Metadata owns selection, per-source state, names, aircraft settings, import snapshots, and other document state.
+- Mutations create coalesced complete metadata snapshots; autosave appends and publishes a new commit without rewriting unchanged payloads.
+- Duplicate stages, validates, and atomically publishes a regular container before opening it.
 
 ## App Composition
 
@@ -156,7 +155,7 @@ Do not collapse source, segment, session, and runtime-window identity.
 
 - `DocumentStateStore`: per-window transient state and raw-log restoration.
 - `DocumentStateRepository`: bounded content-fingerprint-keyed raw state, mirrored through iCloud KVS.
-- Package `metadata.json`: authoritative Airframe document state.
+- Airframe document metadata: authoritative persistent document state.
 - Log-specific document state (timeline position and In/Out range) is addressed by stable source hash plus segment index. Legacy numeric segment keys are read only as fallback; stable keys win and are written on mutation. The transient graph viewport follows the same identity model without being serialized.
 - App-global settings: local defaults plus iCloud KVS through `AirframeGlobalSettings`.
 - Raw bytes never receive xattrs or app state.

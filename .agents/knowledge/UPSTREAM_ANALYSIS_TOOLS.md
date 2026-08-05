@@ -1,5 +1,11 @@
 # Upstream Analysis Tools
 
+- Status: active
+- Last reviewed: 2026-08-05
+- Scope: analysis/reference tools inspected to inform an independent Swift implementation
+- Normative decisions: `../MEMORY.md`
+- Related implementation: Airframe Reader, BlackboxAnalysis, Graph, Map, Spectrum, Step Response, and Frequency Response
+
 ## Betaflight CHIRP / Autotune
 
 - Spectrogram contract verified against current Configurator `master` and pinned commit `14a050b7b57b4addadc209e5b67b3cfd9fdef943` on 2026-08-03: one-axis gyro output, 256-sample Hann STFT, 75% overlap / 64-sample hop, 129 one-sided bins, cell power `10*log10(re²+im²+1e-20)`, time on X, frequency on Y, and display capped at `min(500 Hz, Nyquist)`. Configurator presentation uses per-axis min/max dB normalization, D3 Inferno, opaque pixelated rendering, separate axes per canvas, no image smoothing, and start/end-frequency markers. Airframe retains a different monotonic palette and shared multi-axis timeline; its multi-run extension averages linear power before dB conversion.
@@ -15,12 +21,6 @@
 - The current Configurator PID UI order is: PID Tuning Sliders; Basic/Acro P, I, version-correct D/D Max, Feedforward; optional Angle/Horizon; then Feedforward, TPA, I Term Relax, Anti Gravity, Dynamic Damping, Throttle and Motor Settings, and Miscellaneous Settings. Some UI values require presentation transforms: simplified sliders raw/100, Feedforward Transition raw/100, Feedforward Averaging enum 0...3 = OFF/2/3/4 Point, I Term Relax and Type enums, TPA Mode 0/1 = PD/D, and Anti Gravity gain version-dependent scaling.
 - Over each log's persisted Step Response range, the existing calculator produced plausible accepted-window results. `Stock` peak values were Roll 1.342, Pitch 1.196, Yaw 1.101; `Wobble` produced Roll 1.116, Pitch 1.150, Yaw 1.081. Two additional CHIRP comparison logs produced approximately `(1.036, 1.198, 1.020)` and `(0.964, 1.065, 1.003)`.
 - Isolation by CHIRP flight-mode interval confirmed that the active axis produces qualifying logged-setpoint windows and a plausible Wiener-deconvolution Step Response. The three `Stock` activations had inferred active axes Pitch, Yaw, and Roll because the firmware's static axis counter had already advanced before the logged sequence; their active-axis results were approximately Pitch `(peak 0.975, latency 5.5 ms, 12 accepted windows)`, Yaw `(1.189, 10.0 ms, 8)`, and Roll `(1.139, 9.0 ms, 8)`. Exact firmware source confirms CHIRP is added to `currentPidSetpoint`, copied to `pidRuntime.previousPidSetpoint`, and then logged as `setpoint[]`. The legacy debug payload still prevents the modern Configurator frequency-response path, but it does not invalidate Airframe's existing Step Response.
-
-- Status: active
-- Last reviewed: 2026-08-01
-- Scope: analysis/reference tools inspected to inform an independent Swift implementation
-- Normative decisions: `../MEMORY.md`
-- Related implementation: Airframe Reader, BlackboxAnalysis, graph, map, spectrum, and step-response packages
 
 ## Evidence Matrix
 

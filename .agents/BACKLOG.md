@@ -1,216 +1,100 @@
 # Backlog
 
-## Flight Controller Import Diagnostics
+Unapproved future ideas only. Promote an item to [TASKS.md](TASKS.md) or an approved section in [PLAN.md](PLAN.md) when the user selects it. Completed work belongs in Git, current behavior in `ARCHITECTURE.md`, stable decisions in `MEMORY.md`, and evidence in the Knowledge Base.
 
-- Consider a transient troubleshooting view for import-time uptime, temperature, CPU load, live voltage, I2C error count, and arming-disable flags. These are deliberately excluded from the persistent semantic FC status snapshot.
+## Near-Term Cleanup
 
-Use this file to capture ideas, possible features, research leads, cleanup tasks, and future improvements without committing to implementation.
+- Remove `LegacyAirframeConverter.swift`, `Convert Legacy File…`, legacy fixtures, and compatibility/migration/isolation tests after testers have converted their files. Rename remaining package-era type names at the same time; keep the logical metadata identifier `com.kumkju.airframe.document`.
+- Surface `AirframeContainer` recovery/locator issues in a user-visible diagnostic.
+- Add a transient Flight Controller import diagnostics view for uptime, temperature, CPU load, voltage, I2C errors, and arming-disable flags. Do not persist these runtime values.
 
-## Rules
+## Tuning and Log Workflows
 
-- Add ideas here when they are worth preserving but not part of the current task.
-- Keep entries short and concrete.
-- Do not treat backlog entries as approved scope.
-- Promote an entry to `TASKS.md` or a concrete plan only when the user chooses to work on it.
-- Keep all entries in English.
+- The approved, ordered roadmap for guides, Step Response evidence, Filter Review/Score, comparison, next-flight guidance, setup assistance, CHIRP PID assistance, and the separately gated future Filter Assistant lives in [PLAN.md](PLAN.md#tuning-interpretation-filter-score-and-assistance-roadmap-approved-2026-08-05). Do not duplicate its contracts here.
+- Add flat internal log folders and user-defined tags inside Airframe documents.
+- Add specialized views for purpose-built recordings, starting with a Hover Test view.
+- Compare Airframe's time-domain Wiener Step Response with the Configurator's CHIRP-derived frequency-domain Step Response on the same complete modern CHIRP logs before exposing a second curve.
 
-## Parking Lot
+## Flight Controller Connectivity
 
-### Legacy Format Removal Pass (planned in a few days)
+### BLE FlashFS Throughput
 
-- Remove `LegacyAirframeConverter.swift`, the `Convert Legacy File…` menu entry, legacy fixtures, and the legacy compatibility/migration/isolation-guard tests once testers have converted their files.
-- Rename the cosmetic old-format echoes at the same time: `Storage.airframePackage`, `AirframePackage`, `AirframePackageDuplicator`. The metadata identifier string `com.kumkju.airframe.document` stays (validated logical format identifier inside the container).
-- Consider surfacing `ContainerReader.locatorIssues`/`recoveryWasUsed` in a user-visible diagnostic, currently log-only.
-- `VideoAsset.validate()` must be called once before range serving when the video feature ships; range reads are digest-unverified by design.
+- Keep the hardware-validated 400-byte Huffman-compressed path as the stable baseline (~3.2 KiB/s) until a replacement completes end to end.
+- Add privacy-safe aggregate telemetry, a dataflash-specific timeout, bounded output-budget benchmarks from 400 through 4096 bytes, progress throttling, and same-offset adaptive fallback for timeout/checksum failures.
+- Treat a zero-character compressed response as insufficient output budget, not end-of-log. Preserve confirmed bytes, cancellation cleanup, and resumable offsets.
+- Compare against Configurator on the same hardware. Consider pipelining only after stop-and-wait optimization is exhausted.
 
-### Log Organization and Tuning Workflows
+### Legacy BLE Configuration Capture
 
-- Add internal log folders inside Airframe documents. Keep the structure flat: folders are not nested, and logs can be moved between folders.
-- Add user-defined tags for logs.
-- Add specialized views for special-purpose logs, starting with a Hover Test view.
-- Add guided flight-controller setup for specific tasks, such as recommended Blackbox settings.
-- Add a Tuning Assistant that guides setup and test-flight execution end to end: FC setup, test-flight instructions, log import, tagging, and follow-up organization.
-- Add a Blackbox Test Setup Assistant that configures and validates the exact firmware feature, flight mode, debug mode, logged fields, logging rate, and flight procedure required by a selected analysis. The CHIRP workflow must detect firmware generations that expose CHIRP mode but record only the legacy phase channel instead of the complete axis/frequency/excitation debug data.
-- Compare the existing time-domain Wiener-deconvolution Step Response against the Configurator's frequency-domain CHIRP-derived Step Response on the same modern complete-payload logs before deciding whether a second derived curve adds information or merely duplicates the current result.
-- Add CHIRP-based PID recommendations / Auto Tune only after the neutral measurements, coherence checks, sensitivity analysis, and derived response have been validated against representative real logs. Recommendations must remain reviewable and must not be applied blindly. A full concept exists; see "CHIRP-Based PID Tuning Assistant" in the Parking Lot.
+- Betaflight 4.5.2 over SpeedyBee V2 completed a small `diff all` but truncated `dump all`; do not persist `diff all` as a complete configuration.
+- USB may use interactive `dump all`; Betaflight 4.5.4+ may use framed MSP CLI over BLE. Older BLE firmware remains log-only unless a complete structured configuration path is proven.
 
-### CHIRP-Based PID Tuning Assistant (concept agreed 2026-08-04, planned for a later version)
+### Mass Storage and Wi-Fi
 
-Guided iterative PID tuning built on the firmware CHIRP mode (BF >= 2026.6). Agreed assumptions: the filter tune is already good and the assistant never changes filters (it only validates that noise stays acceptable after gain increases); FC communication is available (USB serial on macOS, BLE on iOS, external BT hardware acceptable); when no connection exists, the assistant emits the settings as a CLI diff for manual application.
+- Validate Mass Storage import on physical iOS/iPadOS: deletion/flush semantics, external-volume presentation, flash replug over BLE, compact layout, and the deliberate absence of interactive legacy-BLE configuration capture.
+- Investigate a reliable host-side signal that a USB cable is actually attached before offering Mass Storage from a Bluetooth connection.
+- Give known import failures typed, actionable messages while retaining an honest generic fallback.
+- Add a `Connecting to the adapter…` state during the SpeedyBee Wi-Fi session-establishment delay.
+- Determine why Adapter 3 rebursts lose packet clusters although initial bursts do not. Use monitor-mode capture; interface capture already ruled out receive-buffer overflow and Wi-Fi power-save keepalives. The current deduplicating reburst path remains correct but slower.
+- Investigate SpeedyBee F7 V3 storage reporting and Wi-Fi protocol before adding any board-specific behavior.
+- Consider an upstream Betaflight disarmed local-button gesture for entering USB MSC only after target hardware and safety/UX feasibility are understood.
 
-Why Airframe can beat the Configurator Autotune tab (reference: `betaflight-configurator/src/js/blackbox/spectral_analysis.js`, `src/composables/useAutotune.js`): the Configurator measures only the closed loop T(f) = setpoint→gyro via Welch estimation and then applies craft-agnostic heuristics (bandwidth ∝ P toward fixed 45 Hz, D from phase margin toward fixed 50°, everything clamped 0.5–2x per iteration, stateless across flights). The measurement layer is sound; the recommendation layer is the weak part.
+Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.md](SPEEDYBEE_REVERSE_ENGINEERING.md); general transport evidence remains in [Flight Controller Connectivity](knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md).
 
-Algorithm concept:
+## Analysis, Compatibility, and Security
 
-1. Estimation: port the proven Welch cross-spectral estimate (Hanning, 50% overlap, magnitude-squared coherence, bins with coherence < 0.3 excluded) plus the derived metrics (−3 dB bandwidth, resonant peak, phase margin at gain crossover, sensitivity S = 1 − T, step response via IFFT).
-2. Controller reconstruction: build C(f) analytically from the log header (PID, D-max, FF, D-term filters, loop rate are all known).
-3. Plant identification: L = T/(1 − T) over coherent bins, plant G = L/C; fit a second-order-plus-dead-time model weighted by coherence; report fit quality as a first-class output.
-4. Gain synthesis: derive an achievable bandwidth/phase-margin target from the identified dead time (optionally biased by a Racing/Freestyle/Cinematic profile) and compute P/I/D/FF directly via loop shaping instead of scaled heuristics. Map to simplified-tuning slider values so the firmware slider validation remains a safety net. Goal: 1–2 flight iterations instead of 4–5.
-5. Safety layer kept from the Configurator: per-iteration change clamp, resonant-peak backoff, never loosen filtering; additionally refuse to recommend when mean coherence or fit quality is below threshold and tell the user how to improve the next flight instead.
-6. Yaw has different dynamics (integrating behavior, no D by default); v1 may use model-based synthesis for roll/pitch only.
+- When an approved real motor anomaly/desync log is available, anonymize it, retain required motor/eRPM frames, document expected intervals, and add a public end-to-end fixture.
+- Obtain representative fixtures across supported Betaflight versions, multiple flights, GPS, different mixer layouts, and damaged/truncated logs.
+- Validate parser output against `blackbox_decode` or `blackbox-tools` goldens.
+- Add optional coverage-guided parser/reader fuzzing with sanitizers, separate from normal `swift test`.
+- Consider an optimized internal/persistent log representation only after profiling startup, seeking, autosave, and memory.
+- Add large-log performance work only when profiling identifies a specific bottleneck.
+- Harden Graph/Timeline gap rendering against pathological logs with coalesced spans and bounded chip construction.
+- Consider scan-overview min/max envelopes only if profiling or fixtures show stride sampling hides material spikes.
 
-Assistant loop: setup (read craft config, verify firmware/blackbox settings, set chirp parameters derived from craft data) → fly → import via existing acquisition pipeline → automatic flight-quality gate (chirp segments per axis, amplitude, coherence, saturation, stick input during sweep; on failure give a concrete instruction, no recommendation) → show current vs. proposed values with evidence (Bode, phase margin, step response, coherence) → apply via MSP + EEPROM write after explicit confirmation, or CLI diff → convergence verdict when metrics are in the target band and stable across two consecutive flights. Per-craft iteration history persists.
+## Analysis and Presentation Follow-Ups
 
-Phasing (Phase 1 gates everything else):
+### Spectrum
 
-1. Offline algorithm spike: estimation + controller reconstruction + plant fit + gain synthesis in `BlackboxAnalysis` (pure Swift), exposed through an `AirframeCLI` command that takes a chirp `.bbl` and prints metrics, fit quality, and proposed sliders. Validate with Swift Testing round-trips on synthetic known plants (generate closed-loop data from known SOPDT + controller, verify recovery) and side-by-side against the Configurator Autotune output on the same real chirp logs. Real chirp logs must be collected; the existing Step Response test logs are not chirp logs.
-2. FC parameter I/O: MSP messages for simplified-tuning read/write and chirp-mode configuration in `MSP`/`FlightController`, plus CLI-diff generation.
-3. Assistant UI + tuning-session state machine with per-craft persistence, following the existing FC assistant patterns; overlaps with the Blackbox Test Setup Assistant entry above (including its legacy-CHIRP-debug-channel detection requirement).
-4. Convergence tracking, profile targets, yaw decision, localization.
+- Add Welch PSD frequency and PSD-vs-Throttle/RPM views after defining estimator compatibility, controls, dB normalization, and presentation metadata.
+- Add PID Error vs Setpoint.
+- Validate throttle-locus RPM-notch aggregation against PIDtoolbox Pro on the Q700 log; consider median or a minimum bin count only if evidence shows outlier/sparsity problems.
+- Add Spectrum CSV import/export for compatible curves.
 
-Open points for Phase 1: exact BF 2026.6 chirp/blackbox debug field layout (verify against pinned firmware source; `chirp_*` fields in `betaflight/src/main/flight/pid.h`); whether slider granularity suffices or per-term PID output is needed; yaw heuristic vs. model-based; where tuning-session state persists (package vs. app-level per-craft store).
+### Step Response
 
-### Deferred BLE FlashFS Throughput Optimization
+- Restore reference logs across relaunch with local security-scoped bookmarks; never mirror bookmarks through iCloud document-state storage.
+- Synthesize setpoint from `rcCommand` plus recorded rates for older logs without `setpoint[]` only after versioned equivalence tests.
+- Expose high/low-rate windows as separate trace choices.
+- Integrate Step Response workspaces/results with the document memory-pressure path.
+- Add a PIDtoolbox regression harness for peak/latency and document the estimator/latency-definition differences.
+- Add a hover crosshair with time/value readout.
 
-Do this after the complete USB/BLE import vertical slice is working end to end. Until then, keep the hardware-validated 400-byte compressed path as the stable reference even though its roughly 3.2 KiB/s throughput is not product-acceptable.
+### Craft, Timeline, and Graph
 
-Current evidence:
+- Add a yaw readout or compass rose without rotating the craft model.
+- Validate mixer-template inference beyond Quad X and expose attitude as selectable derived series only after complete presentation metadata exists.
+- Persist the attitude timeline only if long-log recomputation becomes a measured problem.
+- Add a Timeline metric switcher and hover/drag time readout.
+- Redesign the hidden preset/workspace UX before re-enabling `PresetList`, `PresetControls`, or `PresetManager`; future presets own semantic field-selection IDs.
+- Add remaining native chart interactions or aggregation only when the current Graph model lacks a concrete workflow.
 
-- Betaflight Configurator requests one Huffman-compressed `MSP_DATAFLASH_READ` response at a time with a 4,096-byte compressed output budget. It does not pipeline requests or add deliberate pacing.
-- Betaflight compression consumes complete 256-byte source chunks. A 256-byte compressed budget can validly produce zero decoded bytes; a 400-byte budget is sufficient for one worst-case source chunk.
-- The SpeedyBee V2 path with a 400-byte budget completed 1,577 responses and decoded 837,120 bytes over more than four minutes without retries, timeouts, checksum failures, or disconnection.
-- The stable path still achieved only about 3.2 KiB/s. The earlier uncompressed 512-byte path was about 3.4 KiB/s, so Huffman correctness alone did not improve throughput.
-- A compressed 512-byte experiment initially transferred about 75 KiB and then stalled. The exact failure class was not captured. Uncompressed 4,096-byte responses produced MSP checksum failures.
-- Airframe currently uses a one-second general MSP timeout. At 3.2 KiB/s, a near-4,096-byte wire response needs more than 1.25 seconds before firmware and scheduling overhead, so Configurator-sized experiments require a BLE dataflash-specific timeout.
-- CoreBluetooth exposes the negotiated maximum write value length but does not let Apple-platform apps directly select ATT MTU, connection interval, PHY, or connection priority.
-- The user knows an additional capability or operational trick supported by SpeedyBee adapters. Capture and investigate it when this backlog item becomes active; do not guess or design around it before then.
+### Map and Export
 
-Implementation sequence:
+- Replace the playback route surface with an `MKMapView` representable; the diagnosed SwiftUI `MapPolyline` update limitation and accepted constraints live in [Map and Graph Research](knowledge/MAP_AND_GRAPH_RESEARCH.md#swiftui-map-polyline-playback-limitation).
+- Add optional GPX export through CLI and app.
+- Consider follow camera, speed/altitude route coloring, geocoding/search, terrain/3D, and richer event detail only as separate features.
+- Add video synchronization/export on the shared Graph playback timeline rather than a separate transport clock.
+- Add a macOS Quick Look extension for compact Blackbox summaries.
 
-1. Add bounded aggregate telemetry without logging payloads, device identifiers, or paths: maximum write length, notification fragment-size histogram, notifications per MSP response, response wire bytes, decoded source bytes, compression ratio, request-to-first-byte time, first-to-last-byte time, retry count, checksum failures, and timeouts.
-2. Add a dataflash-request timeout override and use 5 seconds for large BLE reads while leaving handshake and ordinary MSP request timeouts unchanged.
-3. Benchmark compressed output budgets `400`, `448`, `480`, `496`, `512`, `640`, `768`, `1024`, `2048`, and `4096` on the same Mac, adapter, FC, firmware, distance, and log contents.
-4. Run the same FC and adapter through Betaflight Configurator on the same Mac and record its effective rate and failure behavior. Configurator's nominal 4,096-byte request is not proof that every Apple BLE path sustains it.
-5. Select the largest stable budget or implement bounded adaptive fallback. A failure must retry the same source address, reduce the budget only for eligible timeout/checksum failures, preserve already confirmed file bytes, and never loop indefinitely.
-6. Treat a zero-character compressed response as an insufficient output budget, not end-of-log and not a retry at the same size.
-7. Throttle UI progress delivery to a bounded cadence so every small data block does not await a main-actor update. Keep the final progress value exact.
-8. Measure whether buffered file output changes throughput. Preserve sequential writes, bounded memory, byte identity, cancellation cleanup, and resumable confirmed offsets.
-9. Investigate the SpeedyBee-specific trick supplied by the user and compare it against the generic CoreBluetooth path before choosing the final strategy.
-10. Only consider multiple in-flight `MSP_DATAFLASH_READ` requests if all preceding work is insufficient. Configurator and firmware are stop-and-wait oriented; pipelining risks ambiguous matching and TX contention.
+## CLI Follow-Ups
 
-### Complete Configuration Snapshots over Legacy BLE CLI
+- Add `airframe frames`, `summary`, `stats`, `derived`, and `dump-config` commands.
+- Add value predicates and aggregate window filters only after the basic field/time query model is stable.
 
-- Betaflight 4.5.2 over SpeedyBee V2 completed a 498-byte `diff all`, while `dump all` stopped after 975 received bytes and timed out. This isolates the failure to sustained legacy interactive CLI output through the BLE serial tunnel, not CLI entry or command handling.
-- Do not persist `diff all` as a complete configuration snapshot. It requires exact firmware, target, build options, and defaults to reconstruct effective values, which would obstruct future configuration display and analysis.
-- USB may continue using interactive `dump all` on older firmware. Betaflight 4.5.4 and newer may use framed MSP CLI over BLE.
-- For older firmware over BLE, either expose full configuration capture as unsupported or implement a complete structured acquisition path. Do not claim that `dump master`, `dump profile`, and `dump rates` solve the problem until each individual output is proven to fit the bridge and all profiles, rate profiles, battery profiles, resources, serial ports, modes, mixers, and target-specific values are covered.
-- The user-supplied SpeedyBee adapter trick applies only to fast log transfer through a non-MSP path. It cannot solve CLI configuration capture and must remain scoped to the deferred log-throughput work.
+## Deferred Data and UX Ideas
 
-Acceptance criteria:
-
-- Imported bytes and SHA-256 match a USB download of the same FlashFS contents.
-- No payload bytes, configuration text, local paths, or device identifiers enter logs.
-- Automatic fallback is bounded, observable, cancellation-safe, and cannot duplicate or skip source bytes.
-- The selected strategy completes representative small and large imports on macOS and iOS/iPadOS without checksum errors, stalls, or premature cleanup.
-- Throughput is reported with median and low-percentile results across repeated runs, not one favorable sample.
-- The assistant shows legible progress below one percent and a useful transferred-byte/rate detail.
-
-- When an approved real motor anomaly/desync log is available, anonymize it (remove craft/pilot/GPS and unrelated headers), retain required motor/eRPM frames, document expected motor/time intervals, and add it as a public end-to-end regression fixture.
-
-- Consider an optimized internal or persisted log representation after profiling parsing, seeking, memory use, and app startup behavior.
-- Improve Airframe package autosave after profiling FileWrapper replacement costs for large main and reference logs; consider coordinated incremental package writes or native document subclasses if unchanged log payloads are repeatedly copied or uploaded.
-- Investigate an upstream Betaflight firmware patch that enters USB MSC from a local button gesture, e.g. triple-press on a configured button while disarmed and storage-ready, reusing `systemResetToMsc(...)`; scope depends on target button availability and upstream UX/safety acceptance.
-- Give the Flight Controller Import Assistant actionable connection failures when the cause is known. Preserve typed transport and handshake errors through the runtime instead of collapsing them into one generic failure. At minimum distinguish a USB serial port held by another application, permission denial, device removal, open/configuration failure, MSP timeout or incompatible FC, BLE connection failure, missing service/characteristics, and notification setup failure. Keep an honest generic fallback for unknown causes; never claim that another app owns a port unless the OS error supports it.
-- Verify and finish the Mass Storage import on iOS/iPadOS. The feature is complete and hardware-verified on macOS only (steps 1-6, 8); the iOS path compiles and is wired but has never run on a device. Known gaps, in risk order:
-  - **Deletions may not reach the card.** `ejectMassStorageVolumeIfNeeded` is inside `#if os(macOS)`, so on iOS nothing is unmounted after deleting `LOG*.BFL` and `FREESPAC.E`. If iOS does not flush before the user unplugs, Betaflight will not reclaim the space on the next boot, and the user gets no signal that it failed. Decide whether iOS can flush/eject an external volume at all (`FileManager.unmountVolume` availability, coordinated file access) or whether the SD delete option must be disabled or accompanied by an "eject in Files first" instruction there.
-  - **No drive pre-selection or naming.** `MassStorageVolumeLocator.detect()` reads `mountedVolumeURLs`, which is macOS-oriented; on iOS external volumes surface through the Files provider, so detection likely returns nil and the user sees the generic "Pick the drive that just appeared" text. `NSOpenPanel.directoryURL` pre-navigation is macOS-only, so `.fileImporter` opens wherever it last was. Check whether the volume can be named or pre-selected on iOS.
-  - **Guided flash replug is untested.** Reconnect goes through BLE discovery (no USB serial on iOS) and matches the returning board by identity. Whether a controller re-advertises quickly enough after a power cycle, and whether the 120 s timeout fits, is unknown.
-  - **Layout unverified.** The two import-method cards sit in a fixed `HStack` with `minimumWidth: 140` (≈294 pt for the pair), which should fit every current iPhone, but the iOS `ActionCard` variant is a centred VStack and has not been seen at that width.
-  - Interactive CLI configuration dump over BLE stays blocked by design (`configurationUnavailable`); mass storage on older firmware over BLE therefore cannot include the configuration. Confirm this is acceptable or find another acquisition path.
-- Investigate why SpeedyBee Adapter 3 rebursts lose packets that initial bursts do not. Interface-level captures (`/tmp/airframe_run2.pcap` method: `tcpdump -i en1 host 192.168.1.1`, no port filter because every 2048-byte datagram arrives as two IP fragments and a `udp port` BPF filter drops the second) show restreams missing clusters of 3-5 consecutive seqs at partially repeating positions with no timing gap around them, while the initial burst of the same RAM-buffered file arrives complete. Disproven: WiFi power save (an uplink keepalive every 300 ms changed nothing and was removed), receiver-side overflow (SO_RCVBUF verified 8 MiB, packets already missing at the interface). Next step: a monitor-mode capture (Wireless Diagnostics Sniffer with the explicit channel) of a reburst to see whether the adapter transmits the missing packets at all. Practical impact is tail latency only; reburst-with-dedupe converges.
-- Give the Wi-Fi import a "connecting to the adapter" progress state between the join and the first download progress. Session establishment takes 20 s or more (adapter-side; the official app shows the same delay), and during that time the assistant still shows the join instruction, which reads like a hang.
-- Investigate the SpeedyBee F7 V3 Wi-Fi/blackbox behaviour separately. During Step 5 assistant testing this older but popular board misbehaved: connected over Bluetooth on a powerbank with an SD card, the assistant offered only the direct MSP method, which is wrong twice over (Direct is flash-only, and the board has built-in Wi-Fi that was not offered). The official SpeedyBee app also stalls for a long time on its download screen for this board. Hypotheses: the board misreports its blackbox device (so the assistant thinks flash), and/or its Wi-Fi uses a different or older protocol than the Adapter 3's ABF3/ABF4 control channel. Capture the board's `MSP_BLACKBOX_CONFIG`, its advertised BLE services/characteristics, and a WiFi capture of the SpeedyBee app's download, then decide whether the Wi-Fi download protocol needs a board-specific variant. Do not special-case it before this is understood.
-- The Mass Storage method is offered over Bluetooth whenever a cable could plausibly be attached, but there is no signal to detect whether a USB cable is actually connected (the "powered by a powerbank" case), so it can appear yet be unusable. If a reliable signal is found (for example the FC also appearing as a USB serial device on macOS, or a host-side USB enumeration on iOS), tie Mass Storage availability to it instead of the current assume-cabled heuristic.
-- Design bookmarks for important log positions before adding persistence. Define behavior, typed data, source/segment identity, editing, and navigation first; do not reserve speculative fields in the Airframe document format.
-- Investigate whether `blackbox-tools` can provide reliable golden outputs for Swift parser tests.
-- Investigate fixture sources for representative Betaflight logs across firmware versions, GPS usage, multiple flights, and corrupted/truncated logs.
-- Evaluate whether `jcodemunch` indexing of `blackbox-log-viewer/` and `betaflight/` improves investigation speed.
-- Add a macOS Quick Look extension that shows the most important summary data for a Blackbox log without opening the full app.
-- Build a native chart prototype that consumes `ReaderViewportResult` directly.
-- Consider optional min/max envelopes for scan-overview samples if profiling shows stride sampling hides important spikes. Also reconsider overview retention only if its per-log memory cost becomes material.
-- Timeline metric switcher (max RC deflection / motor differential styles) as alternative Y signals.
-- Optional per-chunk min/max pre-aggregation per series for Graph intermediate zoom levels, only if profiling shows on-the-fly decimation of cached chunks is too slow (2026-07-13: deliberately deferred; overview covers wide zoom, chunk cache covers detail zoom).
-- Table view consumer: select the row nearest to the shared current-position time; Graph view consumer: center the traces on it.
-- Timeline hover/drag readout showing the position time and a scrub preview.
-- Add native chart interaction: pan, zoom, scrub cursor, legends, value inspection, and series visibility.
-- Expand compatibility coverage across more Betaflight versions and representative real logs.
-- Validate parser output against `blackbox_decode` / `blackbox-tools` golden data.
-- Add an optional coverage-guided fuzzing setup for parser/reader security, likely starting with a libFuzzer harness plus sanitizers, separate from normal `swift test`.
-- Add derived fields such as PID sums, setpoint/RC command presentation, motor aggregates, GPS cartesian coordinates, distance, azimuth, trajectory tilt, and attitude estimates.
-- Add a CLI command that converts GPS data from Blackbox logs into an exportable GPX file.
-- Add app support for exporting GPS data from loaded logs as GPX files.
-- Add units and presentation metadata for raw and derived fields, including scaling, labels, display precision, and axis hints.
-- Add field grouping and picker metadata for common tuning workflows without copying upstream graph configuration architecture.
-- Add workspace or graph preset support after the native chart model is proven.
-- Presets: the current preset UI (sidebar `PresetList`, `PresetControls`, `PresetManager` sheet) is hidden as of 2026-07-23. The user was not happy with the overall UX. Redesign later. Code remains in place under `DocumentHome/Sidebar.swift` (`PresetList` struct) and `DocumentHome/Content/Presets/` so it can be re-enabled after the redesign.
-- Let future named workspaces/presets own reusable document field-selection ID sets.
-- Consider a future Start Location row action that switches to Map and focuses that coordinate.
-- Future Map ideas remain out of current scope: GPX export, follow camera, route coloring, geocoding/search, terrain/3D, and richer event-detail UI beyond the compact annotation popover.
-  - Decide whether the route belongs in a derived package cache or the Reader index before reserving persisted fields.
-- Spectrum follow-ups (base implemented 2026-07-15 with Frequency, Freq vs Throttle, Freq vs RPM; the user wants the deferred views later):
-  - Power Spectral Density curve view: Welch method, default 512-sample segments, 75% overlap, Hanning, dB scale with a -70 dB floor, plus a segment-length control in the inspector.
-  - PSD vs Throttle and PSD vs RPM heatmaps with minPSD/maxPSD/lowLevelPSD clamping (upstream defaults -40/+10 dB, low-level filter).
-  - PID Error vs Setpoint view (average absolute axisError per setpoint value, per detected axis).
-  - Spectrum filter overlays: LPF/notch cutoff lines and the dynamic-LPF expo curve from header semantic values; the `overlays:` layer slot in `SpectrumSurfaceCanvas` and the `SpectrumOverlay` cases already exist. (RPM notch harmonic distribution curves implemented 2026-07-17; see MEMORY.)
-  - RPM notch curve shape validated against PTB Pro on btfl_007 (2026-07-17): near-identical. User chose the PTB-style raw distribution; the min_hz clamp was removed from `AnalysisRPMNotch.curve` the same day (loop-rate ceiling clamp retained).
-  - RPM notch overlays extended to both heatmap modes (2026-07-17): locus lines/curves; validate the throttle-locus mean-per-bin shape against PTB Pro on the Q700 log; consider median if outliers skew, and per-bin sample-count minimum if sparse bins look noisy.
-  - Spectrum CSV import/export of frequency/PSD curves like upstream Exp/Imp.
-  - Exact upstream `rcCommands[3]` throttle handling is already matched (minthrottle/maxthrottle mapping); revisit only if upstream changes.
-- Add video sync and video export support. Reuse Graph playback's shared current-position master timeline, monotonic anchor semantics, and global rate; the video player should synchronize to that transport rather than own an independent UI timer.
-- Add large-log performance work if profiling shows slow startup, seeking, memory pressure, or repeated viewport queries.
-- Harden Graph/Timeline gap rendering against genuinely pathological damaged logs: coalesce visual gap spans, replace per-point `gaps.contains` segmentation with a sorted two-pointer pass, and apply the Graph gap-chip cap before building all visible chip models. The 2026-07-23 false-gap cadence fix removes the current real-log trigger; this remains defense in depth.
-- Add `airframe frames` to dump selected decoded frames by marker, time range, and limit for low-level debugging.
-- Add `airframe summary` as a compact one-line-per-log command for shell pipelines.
-- Add `airframe stats` for simple min/max/average/count over selected fields and time windows.
-- Add `airframe derived` for `BlackboxAnalysis` series such as motor aggregates, PID sums, and debug descriptors.
-- Add `airframe dump-config` to print Reader and CLI budget/default configuration.
-- Add value predicates such as `--where amperageLatest>20` after the field/time filter MVP is stable.
-- Add aggregate query filters for threshold and window-based analysis.
-- Upstream-style flight-mode flag diffs in event chips ("ANGLE ON|USER1 OFF"): plumb the firmware CLI mode names from the header config into the graph marker captions (CaptionSet.cliEventSummary already accepts them).
-- Craft section follow-ups (base implemented 2026-07-20: collapsible Graph inspector section, pseudo-3D Canvas craft, rotor ring gauges, complementary-filter attitude in `BlackboxAnalysis/Attitude/`):
-  - Yaw readout as a number or compass rose next to the craft (yaw is already computed, deliberately not rotating the model).
-  - Validate automatic mixer-template inference against representative real bicopter, tricopter, Y4, V-tail, A-tail, Hex Plus/H, Y6, X8 Plus, and flat-octo logs. LOG00027 is the local X8 starting point.
-  - Attitude as graphable derived series (`AnalysisDerivedSeriesKind.attitude*` are still catalog-gated stubs); would need the timeline exposed through the series catalog with proper presentation metadata.
-  - Persist the attitude timeline across window/document reopen if the one-time pass on very long logs annoys (currently per-view-state cache, recomputed per window).
-- Step Response follow-ups (base implemented 2026-07-18: PTB-style Wiener deconvolution in `BlackboxAnalysis/StepResponse`, stacked Roll/Pitch/Yaw view mode with cmd-5, sidebar trace list with stable colors/toggles/hover/PID tune, session-only reference logs):
-  - Bookmark-based reference-log restore across relaunch (local-only security-scoped bookmarks; must NOT go into the iCloud-mirrored document-state entry).
-  - Synthesize setpoint from `rcCommand` + rates for pre-BF-4 logs that lack `setpoint[]` fields.
-  - High/low-rate split traces as separate legend entries (calculator already flags high-rate windows and supports rate-class filtering).
-  - Hook the step response workspace/compute caches into the memory-pressure path (currently bounded LRUs only: 12 workspaces, 72 axis results per surface, sized for the main log plus `ReferenceLogStore.maximumReferenceLogs` = 8 references across 3 axes).
-  - Optional PTB regression harness: feed the Damping `.BFL` set through `AnalysisStepResponseCalculator` and pin peak/latency; the 2026-07-18 manual comparison matched PTB Pro curve peaks within a few percent (050/070/090 roll: ours 1.294/1.196/1.095 vs PTB curves ~1.25/~1.17/~1.08, ordering identical). Our QC accepts fewer windows than PTB (n lower); PTB's latency definition is a configurable dropdown and not directly comparable to our fixed time-to-50%-of-steady-state.
-  - Hover crosshair with time/value readout in the step response panes (spectrum-style pointer tracking was deferred in v1).
-
-- Motor-poles mismatch detection: correlate the dominant spectral ridge in Frequency-vs-RPM with the eRPM-derived motor frequency; a stable ratio clearly off 1.0 (e.g. 12/14 = 0.857) indicates a wrong `motor_poles` setting at log time. Surface a hint in the Spectrum view or log quality classification. Real-world case: Flip btfl_007.bbl logged with motor_poles 14 on 12-pole motors (2026-07-29).
-
-### Flight map path lags during playback — migrate the map to an MKMapView representable
-
-Status 2026-07-31: diagnosed, deliberately not fixed yet. The evaluation is complete; when this becomes active, plan the MKMapView implementation directly without re-investigating.
-
-Symptom: during playback the blue flown-path `MapPolyline` in `DocumentHomeView.FlightMap.Surface` (`Airframe/App/Airframe/App/DocumentHome/Content/Map/MapContainer.swift`) appears many seconds late, sometimes only when playback is paused. Annotations (position marker, home, events) track playback smoothly the whole time.
-
-Verified findings (do not re-derive):
-
-- `LogPlaybackController` ticks every 16 ms and writes `DocumentStateStore.logPositions` (`@Observable`); `Surface.body` re-evaluates ~20x/s during playback, the `@MapContentBuilder` closure runs on every body pass, and the derived point index advances continuously (~10 GPS points/s). Confirmed with temporary os_log instrumentation (category `Claude-DEBUG`, since removed): `bodyEvals` == `contentEvals` every second, point index and chunk counts always fresh while the rendered line stood still. The app side is not the bottleneck.
-- `MapPolyline` with a stable structural identity does NOT pick up changed coordinates: the rendered overlay stays frozen until something else forces a rebuild (pausing playback did). This is why the original code wraps the polyline in `ForEach([currentPointIndex], id: \.self)` — the per-tick identity change is a redraw workaround.
-- Identity churn makes MapKit tear down and re-add the overlay. Neither the original full-path-per-tick rebuild nor a chunked variant (static completed 64-point chunk polylines with stable identity plus one small identity-churned tail polyline) rendered in time; both lag many seconds. Conclusion: MapKit's SwiftUI polyline commit/rasterization pipeline cannot keep up with a continuous overlay update stream, regardless of update size. Not fixable within SwiftUI `Map`.
-- Decimation is not the issue: the path is already capped at 2,048 rendered points via `Surface.renderedRoutePointIndices` (event indices preserved); keep this logic.
-
-Rejected alternatives:
-
-- Any further variant inside SwiftUI `Map` (chunking, throttling, equatable isolation): the pipeline itself defers commits; throttling to 1-2/s was estimated to only bound, not remove, the lag and makes the path tip jump.
-- Canvas overlay above the `Map` with `MapReader`/`MapProxy` projection (the chart-cursor technique): rejected by the user because the path would draw above the event/home annotations, which is not acceptable. The path must render below annotations.
-
-Accepted future fix: replace the SwiftUI `Map` in `FlightMap.Surface` with an `MKMapView` behind `NSViewRepresentable`/`UIViewRepresentable`.
-
-Implementation notes for the future plan:
-
-- Keep `Container`/`ProfileRegion` and the route loading untouched; only `Surface` changes. Keep `renderedRoutePointIndices` decimation and the exact-current-point tail behavior of `coordinates(through:)`.
-- Path updates become incremental in the coordinator: keep one `MKPolyline` for the completed prefix (replace only when the rendered prefix grows/shrinks, or append fixed-size chunk polylines) plus a tiny tail polyline to the exact current point; update overlays directly instead of diffing view content. `MKPolylineRenderer` with the current style (blue, lineWidth 4, round cap/join). Overlay level below annotations restores the correct z-order by construction.
-- Re-implement: home annotation (red house button), event annotations (orange exclamation buttons), position marker (`PositionMarker`/`DirectionCone` — reusable via `NSHostingView`/`UIHostingView` in an `MKAnnotationView`), the `AnnotationInfo` popovers (currently SwiftUI `.popover` on annotation content; needs a presentation strategy per platform), initial framing (`frameCompleteRouteOnce` → `setVisibleMapRect`), map style switching (standard/imagery), and the `Settings` toggles (`showsHomePoint`, `showsEvents`, `showsHeading`, `mapType`).
-- Two platforms: macOS (`NSViewRepresentable`) and iOS/iPadOS (`UIViewRepresentable`); consider one shared coordinator with small platform shims.
-- Optional follow-up enabled by the renderer control: speed/altitude-colored route (see "Future Map ideas" above).
-- Accessibility: preserve `accessibilityLabel`s currently set on the map and annotation buttons.
-
-Verification for the future implementation: play a GPS log (Barney_2026-07-04, Log 2) at 1x and max rate — the path tip must track the marker with no visible lag; scrub backwards — the path must shorten immediately; annotations, popovers, framing, and satellite mode must behave as before on macOS and iOS.
-
-- SwiftUI popup-menu rebuild storm during document load: while a document loads, the content-mode popup (Overview/Table/Graph/Spectrum/Step Response/Map) is rebuilt roughly 180 times per second for about 10 seconds, measured 2026-07-31 via `NSMenu.didAddItemNotification` counts. It is independent of `LogViewCommandBroker.revision` (the revision stayed constant across 1554 events). It saturates the main thread and delayed unrelated main-queue work by up to 182 ms. Worth tracking down; unclear which view re-render drives it.
+- Design persistent bookmarks for important log positions before reserving document fields.
+- Add upstream-style flight-mode flag diffs to event chips using firmware-specific mode names.
+- Add a Start Location action that opens Map and focuses the coordinate.
+- Add further raw/derived series, units, grouping, and picker metadata only through the established Series Presentation Rule.

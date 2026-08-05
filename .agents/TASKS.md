@@ -1,421 +1,60 @@
 # Active Tasks
 
-Only approved near-term work and unresolved items belong here. Completed work belongs in Git; unapproved ideas belong in `BACKLOG.md`.
+Only approved near-term work and unresolved acceptance gates belong here. Completed work belongs in Git and the current architecture; unapproved ideas belong in [BACKLOG.md](BACKLOG.md).
 
-## Implemented, Live Acceptance Pending: Active Analysis Crosshair Performance
+## Live Acceptance Pending
 
-### Think Before Coding
+### Analysis Crosshair Performance
 
-- The four active crosshair consumers shared high-frequency pointer state with expensive static drawing: Frequency Response Response/Spectrogram and Spectrum Frequency/Frequency-vs-Throttle-or-RPM. Graph, Step Response, and the preview-only legacy Spectrum canvas remain intentionally outside this change.
+- Verify with a usable CHIRP document that rapid pointer motion redraws only the crosshair layer in Frequency Response Response/Spectrogram and Spectrum Frequency/heatmap modes.
+- During a five-second pointer profile, static FFT traces, heatmaps, grids, labels, and response paths must remain flat after initial layout.
+- Recheck resize, zoom, snapping, guide/filter highlights, and pointer exit after profiling.
 
-### Simplicity First
+### Inspector Scroll and Hover Stability
 
-- Pointer state now belongs to interaction leaf views. Static response paths, FFT traces, heatmap images, grids, and labels no longer read it; guides and filters remain separate discrete redraw layers where required.
+- On macOS, confirm Graph, Table, Spectrum, and Step Response inspectors scroll without visible stutter.
+- Verify checkbox hit testing and the fixed 500 ms hover-highlight activation.
+- Pointer exit, explicit clear, and tap toggles must remain immediate.
 
-### Surgical Changes
+### Graph Cache and Playback
 
-- Added source-compatible public AirframeUI spectrum/heatmap crosshair overlays, retained the old chip overlay and canvas parameters, and passed `nil` from both active app canvases. Frequency Response now has dedicated static, guide, and crosshair canvases. Response-guide exit cancels pending activation immediately while retaining the shared 500 ms activation delay.
+- Repeat complete playback followed by broad reverse/random scrubbing on the established large-log fixture.
+- Prepared coverage must avoid raw decode for covered ranges; the overview must remain visible until covering detail is ready.
+- Confirm the Timeline coverage strip reports active, prepared, and render-ready ranges under `LogContext.cacheLogID`.
+- Profile persistent prepared-series restore/encode only if it still causes visible latency or material transient memory amplification. Do not redesign the cache without that evidence.
 
-### Goal-Driven Execution
+### Regular-File Airframe Documents
 
-- AirframeUI passes 148 tests in 17 suites, with 13 spectrum crosshair tests covering zoom windows, pane boundaries, value projection, repeated semantic horizontal levels, snapping, and out-of-plot rejection. BlackboxAnalysis passes 214 tests; app hover tests pass 11/11; Frequency Response state/geometry tests pass 25/25 after one timing-only retry; macOS and generic iOS Simulator Release builds succeed. Live pointer/profile acceptance still requires a usable CHIRP document, which is not present in the checkout.
+Automated container and lifecycle work is complete. Remaining acceptance is environmental:
 
-## Implemented, Live Acceptance Pending: Inspector Scroll and Hover Stability
-
-### Think Before Coding
-
-- Canvas highlight activation is delayed centrally in `GraphHighlightState`, `SpectrumHighlightState`, and `StepResponseHighlightState`; pointer exit and explicit clearing remain immediate so highlights cannot linger.
-
-### Simplicity First
-
-- The internal fixed policy is 500 ms, making highlight an intentional dwell interaction. Repeated active events for the same target do not restart the delay; selecting another target cancels the pending activation. Tap toggles remain immediate.
-
-### Surgical Changes
-
-- Vertical scroll indicators are hidden only on the Graph, Table, Spectrum, and Step Response inspector Forms. Inactive Spectrum filters/groups, hidden Step/Frequency traces and axes, and hidden response/spectrogram guides do not react to hover. Popovers and unrelated hover-sensitive UI chrome are unchanged.
-
-### Goal-Driven Execution
-
-- Eight focused tests and fresh macOS plus generic iOS Simulator Beta builds pass. Live macOS confirmation of checkbox hit testing and stutter-free inspector scrolling remains the acceptance gate.
-
-## Implemented and Live-Accepted: Graph Playback and Scrubbing Performance
-
-- Playback stutter analysis (2026-08-04) located the cost on the per-tick main-thread path, not in data or caches: every ~16 ms tick invalidated the complete `Surface.body` (legend, overlays, gestures, marker concat), each Canvas draw copied the visible point slice into fresh arrays and re-sorted gaps per series, and the refinement glow double-stroked every series at animation rate on top of playback ticks.
-- Fixes applied: `GraphSurfaceCanvas.visiblePoints` returns an `ArraySlice` (no per-frame copy); `pointSegments` takes the slice plus pre-sorted gaps (sorted once per draw) and returns index ranges instead of copied point arrays; the refinement glow is disabled while `LogPlaybackController.isPlaying` via a new `isPlaying` parameter on `GraphLineRefinementEffectPolicy`; a new `DocumentHomeView.Graph.CursorWindowLayer` is the only view reading the cursor position, so playback ticks re-evaluate just the scrolling plot layer (canvas plus window-anchored chips) while the outer `Surface` body stays quiet; per-tick prepared-cache protection hops are skipped during playback and published once on pause.
-- Not applied (needs trace evidence first): frame-aligned ticking to replace `Task.sleep(16 ms)` (clock beating vs. vsync), and cached/transformed stroke paths.
-- Temporary `OSSignposter` instrumentation was used during diagnosis and removed after the final captures.
-- Known edge accepted: cursor changes while no model is loaded (spinner state) no longer recenter the load request per tick; the next change after the plot mounts does.
-- Verification: 142 AirframeUI package tests, 637 app tests, macOS Beta build green. Live M5 playback acceptance (4 motors + 3 gyro) and an Instruments hitch trace remain. `GraphLineRefinementEffectPolicyTests.swift` existed on disk but was never a member of the Xcode test target; it is now added and passing (14 tests).
-- Follow-up (2026-08-05): the "Building series table" bursts during scrubbing/playback came from the inspector value readouts (`GraphSetupEditor.loadReadout`, `GraphCraftSection.loadMotorReadout`), which decoded ±50 ms around the cursor from the raw log per throttled query and used no cache. New `GraphPreparedSeriesCache.readoutValues(forSelectorRawValues:logID:sourceHash:cursorTime:)` resolves the values from resident prepared series (superset-shape match, finest windowMicros wins, last-sample-at-or-before-cursor semantics matching `GraphSetupValueReadout.nearestRow`); both readouts try it first and fall back to the exact decode path on any miss. Values are min/max-bucket samples (~2 pts/pixel), consistent with the drawn trace. 641 app tests green including 4 new cache readout tests.
-- Live Time Profiler follow-up (2026-08-05, 20 s Beta attach, PID 70432): 12,388 of 14,156 sampled CPU milliseconds were on the main thread. SwiftUI/AttributeGraph transaction work dominated (`AG::Graph::UpdateStack::update` in 9,483 main-thread samples; `GraphHost.flushTransactions` in 7,534), with layout/measurement in roughly 3,600 samples and Core Animation transaction commits in roughly 4,680. The Canvas was not the main cost (`CanvasDisplayList.updateValue` 237 samples; `GraphSurfaceCanvas.drawSeries` 89). The capture also contained concurrent detail loading (`Graph.loadPoints` 742 samples) and late prepared-series JSON encoding (807 samples), so a clean warm acceptance remains useful, but the primary bottleneck is UI graph/layout invalidation rather than point calculation or stroke construction. `DocumentHomeView.Sidebar`/automatic-tag/config-link work appeared repeatedly in playback stacks, consistent with broader-than-intended document-tree reevaluation. Diagnose the invalidation source with the SwiftUI instrument or `_logChanges()` and isolate static sidebar/navigation/menu content from the per-tick observable cursor before further Canvas optimization.
-- Controlled follow-up (2026-08-05, fresh instrumented Beta process): idle held 0.0-0.2% CPU. An 18 s warm playback trace contained no detail loads or cache writes, yet 10,525 of 11,581 sampled CPU milliseconds were on the main thread; AttributeGraph/SwiftUI transactions, whole-window layout, and Core Animation commit dominated, while `GraphSurfaceCanvas.drawSeries` was only 89 samples. Cursor updates also rebuilt/revisited `DocumentHomeView`, `LogDataView`, Sidebar rows/context menus, Timeline, toolbar, Graph inspector/setup, and Craft; the intended `CursorWindowLayer` isolation therefore does not isolate the complete cursor-dependent UI. `LogPlaybackControls` receives a new timestamp string every tick and rebuilds a layout containing the native speed `Slider`; profiler stacks repeatedly enter `NSSlider.updateCell`, layout measurement, and preference propagation even though playback speed is unchanged. Split the dynamic timestamp from layout-stable playback controls and isolate other cursor consumers before further Canvas work.
-- The separate 18 s aggressive-scrub trace had two independent costs: the same main-thread layout/commit storm (`CA::Transaction::commit` 4,123 samples, window layout 3,668, `drawSeries` only 40) plus real background work (`Graph.loadPoints` 904 samples / `viewportSeries` 854) and prepared-series persistence (`GraphPreparedSeries` encoding and disk store 1,140 samples). Scrubbing is not considered playback by the current persistence suspension, so it can serialize a large prepared bundle while interaction and detail decoding are active. Extend persistence suspension/coalescing to direct Graph interaction and resume only after the idle refinement boundary. The observed `loadPoints` calls also prove that transiently missing lines during broad scrubs are not purely a Canvas/UI artifact: the requested detail was genuinely absent from the usable resident coverage for those positions despite the preceding playback. Audit prepared/render coverage retention and the display fallback transition alongside the UI isolation fix.
-- Plan audit (2026-08-05): `Graph.Surface.CursorWindowLayer` currently publishes its continuously moving exact visible range through `DocumentStateStore.setGraphVisibleRange` on every cursor tick. `LogDataView.commandState` then reads both the exact cursor and that published range for focused command enablement. Together with the timestamp-bearing playback-controls input, these paths explain why cursor motion invalidates UI well beyond the Canvas. The proposed cadence plan in `PLAN.md` keeps the Graph projection/load/fallback exact, publishes its external visible range at a bounded presentation cadence with forced exact boundary updates, and gives secondary motion and textual/status consumers separate 30 Hz and 10 Hz snapshots.
-- Implemented cadence split (2026-08-05): the exact cursor remains authoritative; Timeline/Craft/externally published Graph viewport update at no more than about 30 Hz, while timestamp, inspector readouts, status, accessibility summaries, and command capability use 10 Hz. Static transport structure and the native speed slider no longer receive a changing timestamp input.
-- A fresh final profile uncovered and removed a second dominant path: every package-backed reference cursor write previously called `ReferenceLogStore.notifyPackageChange`, `replaceLogSources`, and SHA-256 over every source. Cursor package publication now coalesces after 750 ms quiet or flushes explicitly at persistence boundaries; reference state changes update metadata only, while add/remove retains the structural path.
-- Final live evidence: playback moved from 16,700/14,373 total/main sampled CPU ms to 12,936/11,322 while delivering far more Graph drawing work; final covered aggressive scrub recorded no SHA-256, source replacement, Graph persistence, `Graph.loadPoints`, or `viewportSeries`. The user reports the interaction feels “very, very much better” and close to perfect.
-- The first Play-button readiness gate was still too early because decoded context readiness preceded `Graph.Surface` render readiness. Graph now publishes an owner-scoped ready state only when its local load state contains a render model for the selected log. The toolbar, focused commands, and controller-level `play()` guard all consume the same state; context/log changes and surface disappearance revoke it without allowing a stale surface to clear a replacement. The complete controls capsule, including speed slider, stays disabled with secondary foreground styling, no playback accent, and 50% opacity until both context and active Graph surface are ready.
-- Automated closure: the complete post-fix app suite passed (652 XCTest plus 30 Swift Testing tests), AirframeUI 151/151, 11 focused playback-controller tests cover the final readiness gate and surface-owner race, and fresh macOS/iOS Simulator Beta builds succeeded. Remaining potential work is persistent Graph bundle restore/encode memory amplification and deeper AppKit whole-window layout reduction; neither blocks this accepted pass.
-
-## Implemented: Frequency Response, Playback, and Log-Switch UI Corrections
-
-- Frequency Response guide rows now keep their visibility controls at the inspector's trailing edge, matching the axis rows even when a guide has Roll/Pitch/Yaw detail lines.
-- Response Gain Crossover/Bandwidth and Spectrum filter/max-noise chips use a 28-point top inset, leaving the top crosshair-frequency chip unobstructed with only a small gap. The earlier Response-only 28-point offset was replaced, moving those chips 20 points back up. Explicitly on-line RPM-notch chips are unaffected.
-- A complete crosshair-canvas audit found no other chip collision: Frequency Response Spectrogram has guide lines but no guide chips, and Graph has marker chips but no top crosshair chip.
-- The Graph/Map playback control draws the active background across the complete leading 30-by-20-point segment through its divider.
-- `LogDataView` removes the redundant focus write from its tap gesture and reclaims focus when `LogContext.stateKey` changes, so Sidebar log selection should retain keyboard-command routing without recreating view state.
-- Automated verification passed all 140 AirframeUI tests and complete macOS plus generic iOS Simulator Beta builds. Live visual and repeated Sidebar-shortcut acceptance remains.
-
-## Active Acceptance: Graph Interactive Cache Throughput
-
-- The macOS prepared-series RAM tier budgets 384 MB (192 MB under pressure), but the two cache-enabled live closes on 2026-08-04 released only 7.2 MB / 16 entries and 10.2 MB / 25 entries. Capacity is not the current limit; the cache is underfilled.
-- One detail model still covers three visible windows, but idle prewarm now fills a stable directional frontier toward the log edge and then the opposite side with exactly two concurrent decode workers, stopping at the actual prepared-cache byte budget. The near worker prepares one normal render-ready window; the utility worker merges up to four farther overlapping windows into one compact chunk with a duration-proportional point budget. Matching render updates no longer restart the same pass.
-- The nearest ordinary frontier ranges receive ready `GraphRenderModel` entries; merged background chunks remain compact `Int`/`Float` prepared series. A background hit is binary-sliced back to the ordinary request range before render-model construction, avoiding a permanently oversized playback model.
-- Graph viewport loads bypass the existing 192 MB decoded `MainFrameChunkCache` used by Table. Every overlapping Graph miss resumes the Reader stream, decodes the complete widened time range into frames/analysis rows, and only then min/max buckets it, repeating work across overlapping windows.
-- Canvas now binary-slices each sorted series to the visible interval plus one continuity point on either side, and segments sorted gaps in one forward pass. Playback drawing cost therefore follows visible geometry rather than the complete resident model.
-- Frontier persistence is suspended with a scoped token while tiles are added, then resumed as one debounced/coalesced write. Cache shutdown is a permanent barrier against late stores and suspension acquisition.
-- Verification before the display-policy correction was green: 134 AirframeUI package tests, 17 focused app cache tests, macOS Beta build, and generic iOS Simulator Beta build. Live scrub/playback acceptance remains; decoded chunk/tile reuse is deferred until measurement proves it is still necessary.
-- A first live acceptance still fell back to coarse lines after roughly one second of playback on some passes. The frontier therefore moved from serial decode to fixed two-way parallel batches on 2026-08-04. This uses one additional CPU core without unbounded task fan-out; the nearest tile has user-initiated priority, the second stays utility priority, and startup now yields only 20 ms instead of waiting for the 180 ms gesture debounce. Completed results publish immediately, cancellation remains structured, and reaching the RAM budget can waste at most the other already-running decode. Focused app tests and macOS/iOS Beta builds are green; another live playback acceptance is required.
-- A subsequent acceptance still showed sudden coarse lines in both scrubbing and playback. Code inspection identified one display-policy fault in addition to cache timing: wide-window scrubbing ignored covering prepared detail whenever its nominal tier was overview. Prepared covering hits are now accepted regardless of interaction tier. Later coverage-strip acceptance exposed a second display fault: a prepared hit that covered only the viewport was converted into a render model and cached as if it covered the complete wider request. Playback could therefore keep a model active after its real points ended and briefly draw no line. Render ranges now use the request/prepared-entry intersection, with focused policy coverage. An experiment that retained partially covering detail produced increasingly empty plots during playback and was reverted; overview again fills any viewport coverage gap.
-- For diagnosis and user feedback, Graph mode now adds a separate three-point bottom strip to the expanded Timeline. It uses solid, dark colors: dark gray for no detail state, muted olive for active loading/prewarm work, medium-dark green for prepared-series coverage, and dark green for render-ready coverage. Displayed/visible detail has no extra strip color because the Timeline already marks the active viewport. The range-only observable is document-scoped, updates on restore/store/trim/shutdown, and clears terminally at close. Initial live acceptance showed only the baseline although the running process contained active/prepared/render-ready coverage: Timeline queried the raw model ID while the caches publish under `LogContext.cacheLogID`. The join now uses the cache ID. AirframeUI passes 137 tests and the macOS Beta app builds; live acceptance should confirm visible transitions and use the strip to identify which transition precedes coarse output.
-- A full-playback screenshot showed prepared coverage across almost the complete log but fragmented render-ready coverage. This was not another decode gap: the render-model cache imposed a fixed 24-entry LRU per shape, far below the number of small windows needed at the tested zoom. It now uses approximate retained-byte budgets (macOS 192 MB normal / 64 MB under pressure; iOS 64 MB / 24 MB) and one global LRU. Focused tests cover retention beyond 24 small windows and oldest-first eviction. The same screenshot exposed Timeline In/Out lines reading a raw segment-index key rather than `LogContext.stateKey`; the Timeline now joins the same stable state identity as playback and the toolbar. AirframeUI's 139 tests and macOS/iOS Simulator Beta builds pass; live acceptance remains required. The app-hosted cache tests are source-complete but cannot execute under the current intentionally disabled test-plan target.
-
-## Completed: Repeated Document-Close Memory Retention
-
-- Live inspection on 2026-08-04 with no document window open found a 1.1 GB physical footprint and five complete retained `DocumentView`/`DocumentHomeView` graphs. Their dominant live storage was about 342 MB of Foundation `Data`, 334 MB of `[UInt8]`, and 163 MB of `[Int]`; conventional `leaks` reported zero because all allocations remained reachable.
-- `leaks --trace` identified the global `LogViewCommandBroker.shared.entries` dictionary as a process root with exactly five entries. Each entry retained action closures leading back into the matching SwiftUI document state, reference logs, decoded logs, and source buffers.
-- A separate fresh run reproduced the same signature after four cycles: exactly four broker entries, four `DocumentHomeView` graphs, 48 `AirframeDocumentOpenModel` instances, about 262 MB of `[UInt8]`, and about 130 MB of `[Int]` remained reachable after all document windows were closed.
-- The broker now establishes a weak-identity close barrier at `NSWindow.willClose`, and all five registration setters reject delayed SwiftUI writes for that live window. Regression tests prove that the entry stays absent, every captured lifetime token releases, the barrier does not retain the window, and popup-menu notifications remain filtered.
-- The persistent disk cache is not the primary leak root. Its additional per-document adapters and cached values increase the size of each retained view graph, making the pre-existing lifecycle defect more visible.
-- A third fresh run proved two independent residual causes after the broker was empty: three closed native windows still retained three complete SwiftUI graphs (36 OpenModels and about 412 MB of raw `Data`/`[UInt8]` storage), and `ProcessingActivityCounter.compute` detached analysis workers without propagating caller cancellation. Motor-anomaly, motor-poles, Reader range projection, and initial document scanning were synchronous and non-cooperative.
-- macOS document windows now sever their hosting root synchronously in `NSWindow.close`, before asynchronous `NSDocument` persistence can outlive the visible window. The close task strongly retains its document owner until persistence and final teardown complete. `ProcessingActivityCounter` owns and cancels its worker handles, caller cancellation reaches detached work, Reader/health loops check cancellation, and shutdown clears the previously omitted analysis-workspace and timeline stores.
-- Automated verification passed all AirframeUI, BlackboxReader, and BlackboxAnalysis package tests, 10 focused macOS lifecycle/cancellation tests, the real `window.performClose()` regression, and the signed macOS `Airframe Beta` build.
-- Fresh-build live acceptance passed on 2026-08-04 after repeated large-document open/analyse/close cycles. With no document open, CPU was idle, physical footprint settled from the 1.0 GB peak to 145.6 MB, `leaks` reported 0 leaks, and `heap` found zero live `AirframeDocumentOpenModel`, `AirframeWorkspaceController`, `AirframeDocumentHostingController`, `AnalysisWorkspaceStore`, `ProcessingActivityCounter`, `GraphModelCache`, `SpectrumResultCache`, and timeline model-store instances. The roughly 1.3 GB RSS shown by `ps` was dominated by allocator-reserved empty `MALLOC_SMALL`/`MALLOC_LARGE` regions rather than live document data.
-- A second live acceptance with persistent caching enabled also passed after several cycles across many cache-producing views. The idle physical footprint was 220.9 MB after a 1.0 GB peak, with no live platform document, document open model, document workspace/hosting controller, Graph prepared-series cache, or Spectrum cache. Graph shutdown logged zero pending writes and no cache writes followed close. The process-global disk store correctly remained alive with 91 entries / 40,859,018 cataloged bytes (42 MB on disk); its only Step Response state was the static SwiftUI environment default, not a document root. `leaks` found only two unrooted `CFData` allocations totaling 112 bytes, unrelated in scale and reachability to the document-retention regression.
-
-## Reopened: Persistent Cache Graph Playback and Lifetime Regression
-
-- Graph prepared-series persistence now debounces for 750 ms and coalesces repeated stores to one latest write per shape. Playback suspends those writes completely and resume schedules only the newest dirty state.
-- Closing a document cancels pending Graph persistence, Table decode/prefetch, and Step/Frequency tasks, then explicitly clears Graph, Table, Spectrum, Map, and Step/Frequency RAM caches.
-- The native close path no longer reopens an unchanged Airframe container or unconditionally prepares a full-file compaction. Existing mutation-driven compaction candidates still publish before writer ownership is released; focused store and platform-persistence regression tests cover both paths.
-- Focused tests prove rapid-store coalescing, playback deferral/resume, and Graph shutdown release. Fifteen store tests, 53 focused app tests, and complete macOS plus generic iOS Simulator builds passed on 2026-08-03.
-- Repeated document-close growth had a second concrete cause: the global macOS command broker retained the Save As closure when SwiftUI lost the window reference before `onDisappear`. Synchronous removal at `NSWindow.willClose` and its original lifetime regression test did not cover late SwiftUI re-registration; live inspection on 2026-08-04 proved five broker entries had returned after five closes.
-- Native close now also severs every heavyweight state root even if the platform retains its closed document object: hosted view controller, decoded OpenModel state/history, reference bytes, workspace document, persistence actor, and platform snapshot. Lifecycle logs report the released source-byte count. The stale `Step Response` title test now expects `System Response`.
-- Live `heap`/`leaks --traceTree` inspection with no document open found four closed `NSWindow -> NSHostingView -> ReferenceLogStore` roots retaining 44 decoded-log maps and roughly 548 MB of raw byte storage. Native close now empties and fully detaches the hosting root; a lifecycle test proves the hosting controller/view deallocate while the document wrapper remains alive. Persisted selected-log restoration now runs before the first-log fallback.
-- Selected-log edits now remain separate from the last published package snapshot until export, so the workspace receives a genuine revision. Tests cover publication, disk flush/reopen, and initial preference for the stored non-first log.
-
-## Completed: Persistent Derived-Data Cache
-
-- Add the `AirframeCache` OS-directory store with per-dataset versions, binary integrity envelopes, a SQLite LRU catalog, background writes, usage metrics, clearing, and a device-local 0...10 GB quota.
-- Add Settings controls in exact decimal 100 MB units, current usage, and Clear Cache. Fresh defaults: iOS/iPadOS 2 GB; macOS 5 GB. Never query storage capacity or adapt a valid stored choice.
-- Warm package-backed Reader scans and expensive stable semantic datasets from disk before recomputation. Persistent coverage includes Overview, Health, automatic tags, Table chunks, prepared Graph series, Craft timeline/CG, Spectrum results/filter delay, Step Response, and Frequency Response. Map/Timeline projections remain RAM-only because the persisted Reader scan makes them cheap to rebuild; raw and session-only logs remain memory-only.
-- Verification passed on 2026-08-03: 15 AirframeCache tests, 214 BlackboxAnalysis tests, 233 BlackboxReader tests, 81 focused app tests, and complete macOS plus generic iOS Simulator builds.
-- Live repeated-view acceptance with the cache enabled passed on 2026-08-04: 91 entries / 40,859,018 cataloged bytes were persisted, Graph close reported zero queued writes, post-close logs contained no further writes, and no document-owned cache or source payload remained live.
-- Cache-store coverage now includes 15 isolated Swift Testing cases for versioning, corruption, LRU, zero quota, reopen persistence, replacement, quota changes, clearing, oversize rejection, OS purging, metrics streams, concurrent writes, diagnostics, and generic typed payloads. Focused app tests cover persistent Graph, Spectrum, and Step Response restoration.
-
-## Completed: Firmware Quaternion Craft Attitude
-
-- Craft and shared attitude timelines now prefer logged Betaflight `imuQuaternion[0...2]`, reconstruct positive `w`, and use the firmware-fused orientation without integrating gyro rates.
-- Added explicit source provenance and retained gyro+accelerometer, gyro-only, and unavailable fallbacks. A declared but unusable quaternion retries through gyro decoding.
-- Added signed synthetic fixtures and quaternion math/source tests; all 214 `BlackboxAnalysis` tests and full macOS plus generic iOS Simulator builds pass.
-
-## Completed: Craft Attitude Loading Label
-
-- During quick loading, the expanded Craft preview replaces its flight-mode chip with plain secondary text for the attitude, gyro-plus-accelerometer, or gyro read operation selected from the log fields; the unchanged flight-mode chip returns when quick data is usable.
-- Removed the duplicated manual layout chevron, retained the native menu indicator, and added fixed-height clearance between the controls and craft rendering.
-- Added localized captions and verified the caption package plus app builds.
-
-## Completed: Craft Preview Integrated Loading Indicator
-
-- Replaced the expanded Craft section's shifting layout, attitude, and CG captions with in-craft quick-load feedback: direction-aware quarter-ring propeller arcs at 360 degrees per second and a pulsing centered CG marker.
-- The loader ends at the first usable quick timeline, respects Reduce Motion, and yields to the existing motor gauges plus reliable final CG marker without changing full-log analysis or persistence.
-- Replaced the top-right layout icon with the current layout name and dropdown chevron while retaining the collapsed layout row.
-- Added deterministic rendering tests and loading/loaded previews; all 127 `AirframeUI` tests and full macOS plus generic iOS Simulator builds pass.
-
-## Completed: Per-Log PID Tune Settings
-
-- Add a Tune Score companion popover that identifies the selected flight's recorded P/I/D/F and other materially tune-relevant controller settings.
-- Reuse it for every Step Response trace with a row button immediately left of the visibility checkbox; document and reference traces must resolve their own headers independently.
-- Build the model exclusively from that segment's `DecodedLogHeaderInfo`; imported document configurations and neighboring segments are forbidden as inputs.
-- Keep filter settings in Spectrum and verify Betaflight 2026.6 aliases/headers before implementation.
-- Completed with one `ReaderPIDTuneSettings` model sourced exclusively from each segment header, one shared PID Settings popover, a far-right Tune Score header action, and per-trace Step Response actions immediately left of visibility. Modern Betaflight 2026.6 scalar gains and legacy PID/FF lists are covered; imported configurations are not accepted by the model API.
-- The popover now mirrors Betaflight's version-specific ordering and labels, renders Configurator enum/scaled values, corrects the historical pre-API-1.47 D/D Max label layout, includes recorded Angle/Horizon and motor/controller groups, and omits every setting not present in that exact log.
-
-## Completed: CHIRP Frequency Response
-
-Public Airframe commit: `44f0a7e`.
-
-- The existing internal Step Response mode is presented as System Response and automatically opens Frequency Response for analyzable CHIRP logs; users can persist either analysis per log.
-- Reader scan evidence distinguishes legacy Betaflight 2025.12 phase-only CHIRP data from the complete 2026.6 axis/frequency/excitation payload. Both generations can produce the automatic `Chirp` tag and `Chirp | Available` Overview row when the CHIRP flight mode and required control signals are present.
-- Incorrect test logging appears in Checks as `CHIRP | Missing Debug Mode` or `CHIRP | Missing Log Data` with explanatory tooltips.
-- Frequency Response uses a 50%-overlapped Hann-windowed Welch transfer estimate from logged setpoint to gyro. Magnitude, phase, and coherence are vertically stacked inside Roll, Pitch, and Yaw blocks.
-- The real Betaflight 2025.12 `Stock` log from `Tuning.airframe` resolves as legacy CHIRP with one run per axis and reliable coherence bins. BlackboxReader tests, 194 BlackboxAnalysis tests, focused app state tests, and the macOS app build pass.
-- Follow-up validation found that persisted automatic-tag algorithm version 1 hid newly recognized legacy CHIRP tags and that sequential per-sweep decoding made Frequency Response appear stuck for roughly 40 seconds on an 89-second real log. Automatic-tag algorithm version 2 now invalidates those stale entries; independent CHIRP ranges decode concurrently and the loading state names the active analysis.
-- A live process sample then exposed repeated SwiftUI surface tasks: view replacement cancelled an awaiting task, but synchronous Reader work continued while the replacement started another three-stream analysis. Frequency Response computation is now coalesced and retained in the existing per-window Step Response results state, keyed per log. A regression test verifies that concurrent requests execute the expensive operation exactly once.
-- Frequency Response is now gated by complete per-log CHIRP availability, so stale persisted selections cannot activate it for a non-CHIRP log. The macOS segmented control and analysis surface use local stable state and defer log-driven mode changes past the current AppKit event, avoiding split-view hierarchy replacement during `mouseDown`; focused state tests and a clean macOS build pass, and `Tuning.airframe` opens on non-CHIRP Log 2 with Step Response selected and CHIRP tags visible on the applicable logs.
-- The Frequency Response spinner still restarted during the document-load SwiftUI rebuild storm because completion was delivered into surface-local `@State`; a replaced surface abandoned that delivery even though the shared computation continued. Loading state, retained load task, and completion are now window-scoped in `StepResponseResultsState`, while the surface only observes that durable state. A lifecycle regression test verifies repeated surface appearances start one load and receive one retained result.
-- The Step Response / Frequency Response selector now follows the existing inspector convention: a `View` section containing a menu-style `Analysis` picker, rather than a segmented control. Frequency Response remains disabled when the selected log lacks usable CHIRP data.
-- Frequency Response now follows the Spectrum UI model: four stacked Magnitude, Phase, Sensitivity, and derived Step Response graphs each overlay Roll, Pitch, and Yaw with the shared series colors. The three frequency graphs share one bottom frequency axis and one crosshair spanning their combined height; Step Response retains its independent time axis and crosshair. The canvas is flush with the content surface. The inspector lists the three axes only after loaded data exists, using the established selectable-series row style; it persists visibility, keeps at least one axis visible, and highlights matching curves on hover. Each row summarizes bandwidth, resonant peak, phase margin, and mean coherence; unreliable bins are visually de-emphasized. The logarithmic frequency range adapts to the useful data and the canvas provides reference lines and pointer readout. Verified visually against a CHIRP log in `Tuning.airframe`; the full 194-test BlackboxAnalysis suite, five focused app tests, and macOS app builds pass.
-- Frequency Response loading uses the shared delayed/minimum-duration canvas processing stage with the same spinner, accessibility, and Reduce Motion behavior as the other analysis modes. Its mode-specific presentation is a bouncing `bird` SF Symbol and the localized caption “Tuning in to the chirp — this may take a moment.”
-- Frequency Response offers a persisted document-level `View` picker ordered `Spectrogram`, then `Response`; changing the selected log never changes that view. The Spectrogram calculation and presentation geometry match Betaflight Configurator master: gyro output, 256-sample Hann-windowed STFT, 75% overlap (64-sample hop), `10*log10(re²+im²)`, time on X, frequency on Y, per-axis visible min/max normalization, and no bitmap softening. The frequency ceiling is `min(Nyquist, max(500 Hz, configured end frequency))`, preserving Betaflight's useful baseline while showing the complete configured fundamental sweep whenever the sampled data permits it. Airframe deliberately retains its red-to-white heatmap ramp with cubic display-only intensity compression and light draw-time interpolation, three flush panes, one shared time axis/crosshair, and linear-power averaging before dB conversion when an axis has multiple runs. The shared timeline spans the longest axis so an early-ending sweep remains visible as missing tail data. A synthetic ascending chirp test verifies the expected rising ridge and exact Betaflight window/bin geometry.
-- Modern CHIRP debug scans retain the maximum instantaneous frequency per axis. `AnalysisChirpStatus` classifies a log as incomplete when all three axes do not reach at least 98% of the configured end frequency; legacy logs fall back to requiring three flight-mode intervals of at least 98% of `chirp_time_seconds`. Incomplete CHIRP remains analyzable and keeps its Chirp tag, while the Overview Checks card shows `CHIRP — Incomplete` with corrective detail.
-- Spectrogram-only Guides are document-persisted and listed in their own inspector section with visibility toggles, guide-matched colors, and hover highlighting. Expected Sweep plus configured Start and End Frequency are visible by default; 2nd and 3rd Harmonic are available but hidden by default. Curves use the configured exponential CHIRP trajectory, harmonics are integer multiples, and the shared time domain extends to the configured sweep duration so incomplete recordings leave an explicit empty tail beneath the expected guide. A guide outside the Nyquist-limited visible range remains listed but disabled and visually inactive; its persisted preference is retained for other logs. Harmonic guides do not expand the frequency range.
-- Response-only Guides use the same document-persisted inspector interaction, guide-matched colors, and hover highlighting. The closed-loop 0 dB, phase −180°, and normalized step 1.0 references are always-visible graph scale references rather than user-toggleable guides. The sensitivity +6 dB (`|S| = 2`) limit remains toggleable. Derived guides show bandwidth and resonant-peak position from reliable closed-loop data plus gain crossover and phase margin from the reconstructed open-loop response `L = T / (1 - T)`; unavailable derived guides remain disabled. Gain Crossover, Bandwidth, and Resonant Peak use the established sidebar grid with R/P/Y in the color-circle column and one aligned value row per axis. Bandwidth and crossover span the three frequency panes and carry one R/P/Y frequency chip per visible axis. These reuse the shared collision-aware `ChartMarkerChips` layout and exact chip-bound hover behavior from Spectrum, including a 2 pt transition tolerance; resonant peaks remain points in Magnitude to avoid implying an unrelated phase or sensitivity threshold.
-- Frequency Response Tune Score algorithm version 1 evaluates Stability Margin, Robustness, Damping, and Tracking Fidelity on a 1–10 scale. Each component combines 60% of its weakest axis with 40% of the three-axis mean; the overall score uses a 30/30/25/15 weighted geometric mean and critical phase/sensitivity/resonance caps. All three axes are required. Confidence is independent and derives from coherent coverage, sweep completion, run count, and modern/legacy CHIRP evidence. The Response inspector shows a circular score, rating, Confidence, component rows, exact per-axis facts and formulas in native info popovers, plus an explicit localized No Score state. The UI states that the score evaluates only this PID tune in this log and cannot establish optimality.
-
-## Completed: About Airframe
-
-- The compact shared About screen reuses the Home screen's visual language and shows the app icon, exact bundle version/build, prominent slogan, product description, current `danielkbx` identity, feedback, Discord, and privacy. Its macOS window adopts the SwiftUI content's natural height without scrolling; iOS retains adaptive scrolling.
-- macOS replaces the standard App Info command with one custom About window. iOS and iPadOS expose Settings and About through the existing gear menu.
-- Feedback opens a concise prepared localized email containing version, platform, OS, device model, and architecture. Discord opens `https://discord.gg/rZkmzRE93`.
-- Home now uses `Every flight tells a story.` while `A Blackbox Log Analyzer` remains the factual product subtitle.
-- Privacy opens an in-app explanation covering the absence of tracking and telemetry, local file processing, and the restricted handling of user-submitted feedback.
-- Home and About render the app icon through the shared `AirframeAppIcon` view so brand presentation can be changed in one place.
-- The shared `Airframe Beta` scheme archives the release-optimized `Beta` configuration with `AIRFRAME_BETA`; the shared icon shows its BETA badge only for Debug and Beta builds, never for the normal production Release configuration.
-- Four focused About tests and all 29 caption-package tests pass. macOS and generic iOS Simulator Release builds succeed.
-
-## Completed: Synchronized What's New Seen State
-
-- `AirframeWhatsNewSeenStore` mirrors one schema-versioned release marker through local defaults and iCloud KVS without storing timestamps, device data, or document information.
-- Reconciliation is monotonic by catalog order with SemVer fallback, so a stale device cannot overwrite newer progress. Invalid records are discarded locally and never propagated.
-- Startup presentation gets a bounded two-second iCloud grace period without blocking the app; an external cloud notification ends the grace early. First installs suppress What's New, unmarked releases do not trigger it, and marked releases aggregate the complete skipped range.
-- A shared What's New view and the `release/0.1.0` catalog entry are connected to macOS and iOS startup. Manual presentation remains available from About and, on macOS, from the Help menu without changing the seen marker.
-- Twelve focused macOS app tests and all 29 caption tests pass. macOS and generic iOS Simulator builds succeed.
-
-## Completed: Automatic Sidebar Log Tags
-
-- Airframe-document log rows now show a fixed-height pill lane instead of the original filename. Versioned per-segment analysis tags are `Issues`, `Failsafe`, `Chirp`, and `GPS`; the live `Config` tag marks a valid configuration link from the same Flight Controller import snapshot and excludes older fallbacks. Background derivation reuses Reader scan facts and health reports, cache failures remain nonfatal, and empty lanes preserve row height.
-- Verified with BlackboxReader, BlackboxAnalysis, and AirframeCaptions package tests; focused macOS app cache tests; and full macOS plus generic iOS Simulator app builds.
-
-## Completed: Spectrum Filter Settings
-
-- Add a native Filter Settings popover to the Spectrum inspector for logs that identify as Betaflight 4.5 or newer.
-- Group and label the recorded filter values using Betaflight Configurator concepts while keeping Airframe's native inspector presentation.
-- Show one effective value per setting: prefer the log, use Config only for missing log values, and explain differences or Config fallback through row warning tooltips.
-- Resolve the selected PID profile from `dump all` restoration markers so D-Term settings compare against the active profile.
-- Focused app, BlackboxReader, FlightController, and caption tests passed; macOS Release and generic iOS Simulator Release builds succeeded on 2026-08-01.
-
-## Completed: Spectrum Tuning Guides and Knowledge Base
-
-- Added a thematic `.agents/knowledge/` Knowledge Base with evidence grades, source registers, uncertainties, and a dedicated Spectrum tuning guide synthesis.
-- Added a localized Spectrum `Guide Profile` picker for Off, 2–2.5-inch/Whoop, 3–3.5-inch, 4-inch, 5-inch Freestyle, 6–7-inch Long Range, and Other/Unknown.
-- Sized profiles show explicitly heuristic frequency regions and separate Gyro/D-Term dB comparison references. Available eRPM data produces a distinct measured motor-frequency layer; compatible traces show neutral P90 measurements without pass/fail judgments.
-- Guide defaults are document-wide with per-log overrides and package persistence. Automatic resonance detection remains deferred until representative logs validate a conservative algorithm.
-
-## Active: Regular-File Airframe Container
-
-- Public-repository branch: `feature/airframe-container`; no commits or pushes without explicit approval.
-- Container implementation committed in the public repository as `02477f1` (`Introduce regular-file Airframe containers`); it has not been pushed.
-- Characterization fixtures freeze legacy v1/v2 semantics and zero-write read-only opening.
-- A retained 1,001,472-byte real Betaflight legacy package fixture verifies byte-preserving read-only opening and first-mutation migration end to end.
-- Automatic in-place legacy migration and dual-UTI opening have been removed. The normal document path registers and accepts only regular-file `.airframe` containers.
-- The temporary File-menu command `Convert Legacy File…` selects a source package, asks for a destination through `NSSavePanel`, converts off the main actor, validates, preserves opaque files, and opens the result. Choosing the same URL atomically replaces the package only after validation; failure immediately before publication is regression-tested to preserve the source byte-for-byte.
-- `Packages/AirframeContainer` provides physical format v1 primitives, streaming writer/reader, recovery, transactions, logical deletion, APFS-aware compaction, raw export, privacy-safe logging, and 45 passing tests.
-- App integration includes a deterministic manifest, opaque-file retention, video-ready range reads, a revision-aware persistence actor, FC append durability, new-document conversion, close-time compaction, and explicit one-shot legacy conversion.
-- Raw-log conversion finalization now replaces SwiftUI's package-shaped picker placeholder with a validated regular container through a same-volume coordinated replacement; the completed user-visible result is never the legacy package format.
-- Raw-log and FC `Transferable` exports carry an explicit, non-empty suggested filename; regression coverage includes the folder-import save flow's user-facing `Kayoumini.airframe` name and empty-name fallbacks.
-- macOS raw-log conversion uses a native Save panel that hides but retains the required `.airframe` suffix and disallows other file types. No export path repairs an extensionless result by writing to an unauthorized sibling URL.
-- All macOS Save panels now share the same extension-enforcing factory, and preset/raw-log FileDocument exports receive extension-complete default names. Guard tests prevent unconfigured native Save panels from being added.
-- FC creation now stages outside the sandboxed destination, validates before publication, and atomically publishes/replaces the exact Save-panel URL. Failures log their NSError domain/code and show the underlying localized reason while retaining imported data.
-- Completed exhaustive I/O audit; permanent matrix is `DOCUMENT_IO_MATRIX.md`. BLOCK/HIGH remediations cover iOS close/replacement durability, Duplicate overwrite semantics, folder-scope lifetime, open regular-file validation, accurate legacy in-place wording, sandbox-safe package raw export, and artifact-level APF/BBL/BFL tests.
-- Remaining release-only/manual evidence is tracked explicitly in the matrix: actual macOS/iOS picker/exporter UI and iCloud/third-party provider behavior cannot be proven by ordinary `/tmp` tests.
-- The "legacy only in converter" isolation is implemented: generic directory/FileWrapper document APIs and native package write hooks are removed, normal Duplicate accepts regular containers only, raw-log and iOS FC exports use validated regular-container transfers, and a source guard confines legacy symbols to `LegacyAirframeConverter` plus dedicated compatibility tests.
-- Validation after simplification: AirframeContainer 45/45; full macOS app suite 520/520 plus Swift Testing 2/2 and package-hosted tests 4/5 with one expected skip; macOS Release and generic iOS Simulator Release builds succeeded.
-- Final automated gate on 2026-07-30: BlackboxCore 96 tests, BlackboxReader 224 tests, BlackboxAnalysis 178 tests, complete macOS app suite 521 tests, four UI smoke tests, macOS Release build, and generic iOS Simulator Release build all passed.
-- Manual environment acceptance remains for real iCloud Drive/security-scoped providers, cross-volume fallback, large real-world document performance, and Instruments profiling because no representative `.airframe` corpus or configured external provider was available locally.
-
-## Completed: Missing Graph Fields and Timeline Data Fallbacks
-
-- Graph inspector rows now remain visible and disabled when their configured series is absent from the selected log; only a genuinely empty stored section shows the empty-state action.
-- Shared view state implemented: switching logs retains all presentation settings, while Timeline Range, Current Position, and transient Graph viewport remain per log. Map no longer falls back to Overview when GPS data is unavailable. Legacy appearance uses the last selected segment as migration source while old per-segment ranges remain independent.
-- Document-window caches now retain Graph, Table decode/projection, Spectrum, Step Response, and Map results across mode/log switches with log-aware keys, large platform budgets, and inactive-first memory-pressure trimming.
-- Spectrum compute results and prepared Map routes now survive log switches in document-scoped caches; Spectrum memory-pressure trimming protects the active log.
-- The shared Table/Graph timeline now resolves Motor Average %, mean Motor RPM, Setpoint Throttle, RC Command Throttle, then an empty time track, and stays scrub-capable for every usable main-frame time range.
-- Fallback and unavailable states use localized info-symbol help plus accessibility text.
-- Focused macOS app tests cover the field-row projection, every fallback source, RPM aggregation, and the sample-free loaded timeline.
-
-## Completed: Map Picker Order and Document Title Stability
-
-- Move Map to the rightmost position in the segmented mode picker, menu, and shortcut order: Spectrum is `⌘4`, Step Response is `⌘5`, and Map is `⌘6`.
-- Keep macOS document windows titled with the opened document filename/source name instead of the selected log mode.
-- Hide the Overview GPS card and disable/reject the Map segment and command when the current log has no usable GPS route.
-- Focused `LogViewSelectionTests` passed on 2026-07-30.
-
-## Completed: Shared Graph Event Chips in Map
-
-- Extract the existing single Graph Event chip as reusable AirframeUI presentation.
-- Share Event-to-chip content projection between Graph and Map.
-- Replace Map's plain semantic detail line with the exact Graph chip.
-- Generic Events retain only their title and metadata so the chip does not duplicate the title.
-- AirframeUI's 118 tests, AirframeCaptions' 29 tests, and 16 focused app tests passed; complete macOS Release and iOS Simulator builds passed on 2026-07-30.
-
-## Completed: GPS Map Event Context
-
-- Flight Mode popovers identify which firmware-specific modes turned On or Off.
-- Inflight Adjustment popovers identify the adjusted function and scaled value.
-- Reuse centralized Event captions so Map, Table, and Graph terminology cannot drift.
-- Fourteen focused app tests and 31 caption tests passed; complete macOS Release and iOS Simulator builds passed on 2026-07-29.
-
-## Completed: GPS Map Annotation Information
-
-- Add anchored native information popovers for Home and progressively revealed Events.
-- Show coordinates plus available time/altitude without persistent labels, geocoding, or a detail sheet.
-- Bound only the rendered route geometry while retaining exact current-position/event semantics.
-- Route rendering is capped at 2,048 points while preserving endpoints and Event positions.
-- Fourteen focused app tests and 29 caption tests passed; complete macOS Release and iOS Simulator builds passed on 2026-07-29.
-
-## Completed: GPS Map Visual Refinement
-
-- Anchor the heading cone exactly at the current-position dot and make it widen in the direction of travel.
-- Force prompt MapKit route-prefix/position updates at recorded GPS-point boundaries without resetting user camera state.
-- Remove visible annotation titles while retaining localized accessibility labels.
-- Show every prepared event in the altitude timeline, independent of Current Position.
-- Label the altitude timeline's horizontal grid lines.
-- Follow-up refinement keeps the position/heading annotation identity stable to prevent blinking and omits negative grid values when all recorded relative altitudes are nonnegative.
-- Focused app tests passed; complete macOS Release and iOS Simulator builds passed on 2026-07-29.
-
-## Completed: GPS Overview and Native Flight Map
-
-- Reader retains a bounded, time-associated GPS route plus first valid Home during the existing scan.
-- Analysis exposes an immutable route, Home-relative altitude, normalized heading, event-to-route association, and binary-search cursor helpers.
-- Overview presentation splits GPS metrics into a GPS card without changing the cached flight snapshot; the app hides that GPS card when the selected log has no usable GPS route.
-- App integration adds `.map`, route availability/fallback, full-flight playback, per-segment settings, native MapKit rendering, progressive events, and altitude profile.
-- Progressive Map annotations and profile event lines are pure functions of the shared current position, so backward scrubbing hides future events deterministically.
-- BlackboxReader, BlackboxAnalysis, and AirframeCaptions package suites passed; focused app tests passed; complete macOS and iOS Simulator Release builds passed on 2026-07-29.
-- Automated verification excludes network-delivered map tiles; final native-map appearance still benefits from an interactive smoke check with a representative GPS log.
-
-## Completed: Semantic Flight Controller Status
-
-- Framed CLI capture prefers structured `env` and falls back to tolerant `status`; legacy interactive firmware is skipped to avoid a disruptive reboot.
-- Processor/clock, detected sensors, storage, and configuration state persist semantically with the import event; raw and volatile runtime values are not stored.
-- The Import Assistant presents only the processor from semantic status, while Overview uses associated status for MCU and sensor model precedence.
-- Direct, Wi-Fi, and Mass Storage payloads retain the same captured snapshot.
-- No document-format bump; older documents decode without status.
-- Post-import validation fixed an existential-dispatch regression that caused the first implementation to return `nil`; the explicit capture bridge is covered by the runtime integration test.
-- Presentation feedback completed: Overview removes PID Profile, GPS Provider, and Motor RPM, selects one nonzero idle value, shows Maximum Altitude, and title-aligns the visible `More…` button.
-
-## Completed: Overview Dashboard
-
-- Reusable equal-width cards and technical key/value rows support optional card and row actions.
-- Log File, Flight Controller, Blackbox, Configuration, Flight, and full-width Notes content are implemented.
-- Blackbox settings, deterministic Recorded Data classification, searchable detail, and unknown-field retention are implemented.
-- Versioned Overview snapshots persist in Airframe packages and are reused on open and raw-log conversion.
-- The conversion sheet explains the retained analyzed-log-details benefit.
-- Refinement completed: compact copy, Log Gaps placement, optional-row omission, equal row heights, sensor/MCU metadata, useful idle/PID configuration, and first/last-sample VBat.
-- Final compact-card feedback completed: Flight omits Disarms; reusable headers center icon/title/action; persisted debug mode uses firmware-specific semantic names instead of raw numbers.
-- Debug-mode catalog correction completed: explicit integer catalogs cover 4.3 best-effort, verified 4.4.3, 4.5.5, legacy 4.6 commit `0ca4fe879`, 2025.12.5, and final 2026.6.1, with the newest catalog as the missing/future-version fallback. Full Reader tests, focused cache tests, the macOS build, and the supplied `debug_mode_chirp.bbl` confirm `2025.12.5` raw `97` as `CHIRP`. Obtain a representative real 2026.6.1 log to supplement the source-backed header and catalog tests.
-- Dashboard reorganization completed: Hardware and Power are separate cards; Flight owns GPS speed/distance metrics; Recovered Gaps is hidden and Log Gaps is presented as Gaps.
-- Configuration semantics completed: protocol IDs display names, Dynamic Idle uses physical RPM, and Hardware/Configuration expose Gyro Sample Rate/PID Loop Rate.
-- Swift package tests, focused cache tests, and complete iOS/macOS builds passed on 2026-07-28.
+- Real iCloud Drive and third-party document-provider open/save/duplicate/export.
+- Cross-volume replacement fallback.
+- Large real-world document performance and Instruments profiling.
+- Exact picker/exporter behavior listed as manual in [DOCUMENT_IO_MATRIX.md](DOCUMENT_IO_MATRIX.md).
 
 ## Maintenance
 
-- Keep `ReaderSeriesPresentation` and `AirframeCaptions` mappings synchronized when adding selectable field families or debug meanings. Add conversion and caption tests in the same change.
-- Move consumer-facing `ReaderInfoReportBuilder` labels out of `BlackboxReader` without creating a `BlackboxReader` → `AirframeCaptions` dependency cycle. Prefer a semantic report model consumed by `AirframeCaptions`.
+- Keep `ReaderSeriesPresentation` and `AirframeCaptions` mappings synchronized when adding selectable fields or debug meanings; add conversion and caption tests together.
+- Move consumer-facing `ReaderInfoReportBuilder` labels out of `BlackboxReader` through a semantic report model, without introducing a `BlackboxReader` to `AirframeCaptions` dependency.
 
-## Validation
+## Validation Inventory
 
-- Validate the Map timeline source picker and its blue/green/teal/purple source colors on the MAYA Betaflight 4.5.2 package on both macOS and iPadOS.
-- Validate Craft roll/pitch signs against the reference viewer on a representative real log.
-- Validate Craft motor gauge colors against Graph colors while scrubbing.
-- Expand automatic mixer-template checks beyond quad-X using representative bicopter, tricopter, Y4, V-tail, A-tail, Hex, Y6, X8, and octocopter logs.
-- Continue compatibility coverage across representative Betaflight versions, multi-log files, GPS logs, and damaged/truncated logs.
-
-## Flight Controller Import Assistant
-
-- Execute the approved commit sequence on `feature/flight-controller-import`, stopping after every commit for review.
-- Current review gate: the approved 12-commit implementation sequence is complete. Airframe `b3c8be7` is hardware-validated end to end on macOS and real iPadOS through SpeedyBee V2, including the Legacy-BLE log-only policy. Further BLE throughput optimization and continuous live discovery remain deferred in `BACKLOG.md`.
-- Commit 1: feature branches, pinned Configurator reference, and durable project context.
-- Commit 2: generic `MSP` package.
-- Commit 3: `FlightController` domain and discovery.
-- Commit 4: native assistant shell with mock discovery.
-- Commit 5: macOS USB serial connection and Betaflight handshake.
-- Commit 6: file-backed FlashFS download with progress, cancellation, retry, and cleanup.
-- Commit 7: CLI dump and safe `blackbox_*` settings workflow.
-- Commit 8: reusable `FlightControllerImportPayload` and temporary-directory ownership.
-- Commit 9: append-capable Airframe format version 2 and materializer.
-- Commit 10: new-document consumer from `StartView`.
-- Commit 11: CoreBluetooth transport.
-- Commit 12: BLE end-to-end integration on macOS and real iOS/iPadOS devices.
-
-## Mass Storage Mode (MSC) Import
-
-Approved plan: add a Mass Storage import method beside the existing Direct Mode. SD cards import only via MSC; onboard flash can use either. MSC activates via `MSP_SET_REBOOT` (code 68, mode 2), the link drops intentionally, the controller becomes a USB drive, the user picks the volume, logs are copied from `logs/LOG#####.BFL`, then materialized like Direct Mode. SD delete removes the log files plus `FREESPAC.E` (read-only bit cleared) so Betaflight reclaims space on the next power-up; flash delete over MSC is impossible (read-only volume) and uses a guided replug back to MSP. Implemented in verifiable steps.
-
-- Step 1 (done, needs hardware verify): `BetaflightClient.rebootToMassStorage()` (tolerates the intentional link drop), mode-dependent `steps` array with `ImportMode`, `availableImportModes`, mode picker on the content screen, and the `prepareMassStorage` activation screen. SD forces MSC; flash defaults to Direct. Direct Mode unchanged. Package + app tests green; macOS build green. Verify on a real FC: connect, choose Mass Storage, activate, confirm the FC appears as a USB drive in Finder/Files.
-  - Constraint learned from hardware: the interactive CLI config dump ends with `exit`, which reboots the controller, so it cannot directly precede the MSC reboot in one connection. Resolved by waiting for the fresh boot and reconnecting: `DefaultFlightControllerImportAssistantRuntime.reconnectAfterReboot(matching:timeout:)` (retries `makeTransport` + `connectAndIdentify` until the board identity matches, 30s timeout) runs after an interactive dump, then the MSC reboot fires on the reconnected client. New activation status `.reconnecting`. This helper is the reusable primitive for Step 5 (flash replug delete). Interactive dump over Bluetooth stays blocked (BLE reconnect-after-reboot is unreliable). Logging under category `flight-controller.import`.
-- Step 2 (done, hardware-verified import): `MassStorageVolumeImporter` (nonisolated scan + off-main copy; scans root and `logs/`, prefers individual per-flight files, skips the combined `<fw>_ALL.BBL`, ignores hidden/PADDING.TXT). The volume picker is NOT a separate step: once MSC is active the "Select Drive" button + status appear below the activation confirmation on the `prepareMassStorage` screen (`selectVolumeSection`). `.fileImporter([.folder])`, security-scoped, scope retained for the later delete step. `state.selectVolume(url)` scans, copies into the prepared temp dir, builds `FlightControllerImportPayload`, then reuses the existing Done/completion/materializer path. New files must be registered in `App/Airframe.xcodeproj` via the `xcodeproj` gem (the FlightControllerImport group uses explicit refs, not a synchronized folder). App tests green (7 importer tests).
-  - Bug fixed: files copied from a read-only FAT/exFAT/emfat volume carry the DOS read-only attribute as the immutable (uchg) flag, which `copyItem` propagates and which made `removeItem` fail with EPERM (the "temporary files could not be removed" dialog after save). `copyLogs` now clears `.immutable` and sets writable perms on each copy. Regression test `testCopiedLogsFromReadOnlyVolumeStayRemovable`.
-  - Volume naming/pre-selection: the onboard-flash MSC volume label is always `BETAFLT` (firmware `emfat_init(&emfat, "BETAFLT", …)`), but an SD card keeps its own FAT label, so the name is only reliable for flash. `MassStorageVolumeLocator.detect()` reads mounted-volume metadata (sandbox-permitted; contents still need selection) to find a `BETAFLT` volume; the state polls for it after activation (mount delay). When found, the instruction names the drive and, on macOS, `NSOpenPanel.directoryURL` pre-navigates to it (falls back to `/Volumes`). iOS keeps `.fileImporter` (no pre-navigation). App is sandboxed (`ENABLE_APP_SANDBOX = YES`).
-- Step 3 (done, hardware-verified): SD delete. `MassStorageDeletion.deleteSDCardLogs(logURLs:volumeRoot:)` removes the imported source files (captured as `importedVolumeLogURLs` at copy time) plus `FREESPAC.E` (matched case-insensitively; immutable/read-only cleared first; missing tolerated). Runs via `performMassStorageDeletionIfNeeded()` in the same `beforeOpen` closure as the erase path; guarded to `massStorage && sdCard && deletesLogsAfterImport`. Delete toggle enabled for SD MSC only (flash MSC volume is read-only). Tests: `MassStorageDeletionTests` (3) plus updated state gating.
-  - UX: the deletion runs off the main actor (`Task.detached`) so the assistant renders progress instead of freezing; the Done button reads "Save & Delete Logs"; the progress screen shows distinct "Deleting Logs From the Card" and "Ejecting the Drive" phases and stays open until both finish. Bug fixed here: synchronous deletion on the main actor froze the UI.
-  - Volume unmount: after delete (and after import-only), the state unmounts the volume with `FileManager.unmountVolume(at:options:[])` (macOS). Plain unmount, NOT `.allPartitionsAndEjectDisk`: a real SCSI eject makes Betaflight immediately re-present the mass storage device, causing macOS "not ejected properly" warnings. Plain unmount flushes the deletions (so the reclaim survives the power-cycle) and removes the volume without that side effect. Skipped when deletion failed (keeps the window open for retry). Security scope is re-acquired around the delete and released after unmount.
-- Config-save + MSC intermittent failure (root-caused, fixed): with configuration import enabled the drive sometimes did not appear. Firmware (`betaflight/src/main/msp/msp.c:2428-2438`): `MSP_SET_REBOOT` to MSC replies `[rebootMode, readiness]`; when `mscCheckFilesystemReady()` is false it replies `[2, 0]` and does NOT reboot. Right after a CLI dump the SD/filesystem is briefly busy, so the reboot is silently declined. `rebootToMassStorage()` previously ignored the reply. Now it parses the readiness byte and retries up to 4 times (400ms apart, link stays alive on not-ready); if it stays not ready it throws `BetaflightClient.Error.massStorageNotReady`. The state maps that to a `MassStorageActivationStatus.notReady` with a "Try Again" button (`retryMassStorageActivation()`). Tests: `rebootToMassStorageSucceedsWhenFilesystemReady`, `rebootToMassStorageThrowsWhenFilesystemStaysNotReady`.
-- Step 4 (done, needs hardware verify): connection-loss policy. `isConnectionLoss(_:)` classifies an error as a dropped established link (`BetaflightClient.Error.streamEnded/.streamFailed/.requestFailed(_, .disconnected)`, runtime `.notConnected`). When such an error escapes a runtime-driven operation (`prepareImport`, `prepareMassStorage`'s config dump), the state calls `abortToStart()`, which tears down connection/import/mass-storage state and returns the assistant to the `.prepare` page (stays open). The intentional MSC reboot drop never escapes (swallowed in `rebootToMassStorage`), and content-level failures (unsupported firmware, empty dataflash, `TestError`) still show their in-place errors. Volume-side failures during `selectVolume` are file errors, not link loss, so they keep the re-pick UI. Tests: `testConnectionLossDuringImportReturnsToFirstPage`, `testConnectionLossDuringMassStorageActivationReturnsToFirstPage`.
-  - Idle monitoring was missing at first (unplugging on the connect/content screen did nothing until the next operation). Fixed with `startConnectionMonitor()`: while `monitorsConnection` (step `.connect`/`.content`, reachable, not busy, not activating MSC) it polls `runtime.isConnectionAlive()` every 500ms and aborts to the first page on loss. This causes no bus traffic — the transport ends its byte stream on unplug, which moves `BetaflightClient.state` out of `.connected`; the new `FlightControllerImportClient.isConnectionAlive()` just reads it. Test: `testUnpluggingWhileIdleOnContentReturnsToFirstPage` (with `LinkDropRuntime`).
-  - Related bug: discovery is stopped when leaving the device step and `goBack()` never restarted it, so returning showed a stale device list (unplugged USB/BLE devices still listed). `goBack()` now clears `devices` and restarts discovery when returning to `.device`.
-- Step 5 (done, hardware-verified): flash delete via guided replug. `awaitDeviceReturnAndErase(timeout:didReconnect:)` reuses `reconnectAfterReboot` (matches the board against `lastConnectedIdentity`, which now survives the MSC reboot) and then erases over MSP. State drives `FlashReplugStatus` (`awaitingReplug` → `erasing` → `succeeded`/`failed`); the volume is unmounted before the prompt so nothing is pulled while mounted. Save is disabled for the whole completion (`isCompletingPayload`); Cancel stays enabled during both replug phases and only stops waiting (`skipFlashReplugWait`), never invalidating the written document.
-  - Two bugs found on hardware: (a) `willEraseAfterImport` was true for flash in MSC mode, so the direct MSP erase ran first, failed (the controller had left MSP), and its `runtime.disconnect()` cleared `lastConnectedRoute`, making the replug erase fail instantly with no prompt — it is now restricted to `importMode == .direct`; (b) copy progress was reported per file, so the bar stood still on large logs — `copyLogs` now streams 256 KB chunks and reports bytes (`VolumeSelectionStatus.copying(completedBytes:totalBytes:)`).
-- Open-document import parity (fixed, hardware-verified): `Sidebar.appendPayloadIntoOpenDocument` ran `beforeOpen()` in a detached `Task` and returned `true` immediately. The assistant then left its completing state, dismissed, and `.onDisappear`'s `cancel()` wiped `selectedVolumeURL`, `importedVolumeLogURLs` and the connection before the deferred work ran — so SD deletion, unmount and the guided replug all no-opped and no progress was shown. This also explains the earlier unexplained log line with `hasVolume=false device=nil logCount=0`. It now awaits `beforeOpen()` like the new-document path. Contract covered by `testCleanupRunsWhenTheConsumerAwaitsBeforeOpen`, `testCleanupIsSkippedWhenTheConsumerReturnsBeforeBeforeOpenRuns`, `testCancelIsRefusedWhileTheCompletionIsRunning`. Note: those tests cover the state contract, not the Sidebar call site itself, which is only verified by reading the code and (pending) on hardware.
-- Step 8 (done, visually verified): import method cards and removal of the Download Logs toggle.
-  - `StartActionCard`/`StartActionCardStyle` moved out of `StartView.swift` into the shared `App/Airframe/App/ActionCard.swift` as `ActionCard`/`ActionCardStyle`. New knobs, all defaulting to today's behaviour so the start screen is untouched: `ActionCardSelection` (`.notSelectable` / `.selectable(isSelected:)`, drawn as accent fill `0.18` + accent border `0.65`, no checkmark), `minimumWidth` (platform default 220/140), `textFit` (`.uniformHeight` reserves two lines so a row shares one height; `.fitsContent` keeps the title on one line and lets the description grow). `accessibilityIdentifier` is now a parameter; the three start-screen call sites pass their previous identifiers. New files need registering via the `xcodeproj` gem — only `../Packages` is a synchronized group.
-  - The assistant's `importMethodSection` renders two cards side by side in a plain `HStack`. `ViewThatFits` was tried first and always fell back to the stacked layout, because it measures each candidate's *ideal* width and the one-line ideal of the long description is far wider than the column. Equal card heights come from `maxHeight: .infinity` on the card's own content (`expandsToRowHeight`); applying it to the button from outside does nothing, since the style draws the background around the label.
-  - `ImportOptions.downloadsLogs` and `setDownloadsLogs` are gone. In Direct mode the flag was initialised to exactly `canDownloadLogs` and could only be turned off, which forced `savesConfiguration = false` and blocked `canGoNext` — it could not produce a config-only import, and the materializer rejects log-less payloads for new documents anyway. Every direct-mode use became `canDownloadLogs`; `prepareImport` now guards `usedBytes > 0` unconditionally. Caption `app.fcImport.content.logs` removed from code and catalog.
-- Step 6 (done): captions, microcopy, accessibility and previews.
-  - Catalog coverage: 53 `app.fcImport.*` keys were referenced in code but missing from `Localizable.xcstrings`, so they silently fell back to their in-code English defaults and were invisible to translation. Not only the new mass storage keys — `erase.*`, `blackboxDevice.*` and `deleteLogs.confirm.*` had been missing since earlier work. All added. New guardrail `CaptionCatalogCoverageTests` scans the caption sources for literal keys and fails with the exact missing key list; interpolated keys are skipped. Verified it fails when a key is removed, so it is not a false-confidence test.
-  - Stale copy fixed: the connect step showed "Log download and erase are only available … onboard flash" for SD cards, which stopped being true when mass storage import landed. The hint now keys off `availableImportModes.isEmpty` (`connectHint`) and reads "Set the flight controller's blackbox to onboard flash or an SD card to import logs. Current setting: %@." Both `optionsUnavailableNonFlash` variants and the dead `isBlackboxDeviceNonFlash` are gone.
-  - A failed guided replug now shows `flashReplugFailedDetail` ("… You can erase them in Direct mode.") instead of the generic erase-failure text. Three genuinely unused captions removed (`selectDeviceTitle`, `massStorageCopyingProgress`, `deletedFromCard[.detail]`). Title case corrected to Apple style ("Deleting Logs from the Card").
-  - Accessibility: the step capsules were fully hidden, leaving VoiceOver without progress context; the row now reports "Step X of Y" (`stepProgress`). Cards carry the `.isSelected` trait. Spinners keep their adjacent text as the spoken state.
-  - Previews added for the import method on flash and SD card, and for the activated mass storage screen (drives the mock runtime via `.task`). The delete/replug progress phases need a written payload and are not preview-reachable without adding test hooks.
-
-## SpeedyBee Adapter 3 Wi-Fi Import
-
-Approved plan: add a third bulk-transfer method beside Direct and Mass Storage. The SpeedyBee Adapter 3 brings up its own open Wi-Fi AP (triggered over BLE), and Airframe downloads the raw `.BBL` over UDP. Protocol is in `SPEEDYBEE_REVERSE_ENGINEERING.md`, reference client in `tools/speedybee_wifi_probe.py`. Confirmed decisions: build macOS + iOS together (iOS Wi-Fi join needs the HotspotConfiguration entitlement and a configured Developer Team); keep Direct as an iOS fallback; always show the method cards but stack them vertically full-width and equal-height with a short property blurb each; use a macOS `airframe fc-wifi` CLI subcommand as the hardware harness for the transport steps. `availableImportModes` becomes an ordered, capability-aware list (`supportsWiFiDownload` detected via BLE name `SBADAPTER3_*`, confirmed by DEVICE_INFO `ADPT03116`). Implemented in verifiable steps.
-
-- Step 1 (done): SpeedyBee protocol core in the FlightController package. Pure, transport-agnostic byte layer: control-channel protobuf codec + framing, WIFI_INFO/DEVICE_INFO blob parsers, LIST/STAT parse with the `^BTFL_\d+\.BBL$` filter, CRC-16/MODBUS, UDP reassembly (dedupe + truncate), and the shared typed `SpeedyBeeError` surface. 16 Swift Testing cases over the doc §13 vectors. Package tests and macOS app build green. No hardware needed. Airframe commit `aafc131`.
-- Step 2 (done, hardware-verified): `SpeedyBeeWiFiClient` (TCP 4279 control, TCP 4278 MSP prepare, UDP 4281 data) + hidden `airframe fc-wifi list`/`download` subcommand, assuming the Mac is already joined. Uses raw Darwin sockets for all three channels so the UDP `SO_RCVBUF` can be 8 MiB (Network framework cannot size it). Verified end to end on a Flywoo F405S AIO / Betaflight 4.5.2 (onboard flash): downloaded `BTFL_001.BBL`, 391168 bytes, 192 packets CRC-valid, valid header. Airframe commit `8c97432`.
-  - Key finding: the "prepare" command is `MSP_SET_REBOOT` (code 68) mode 2 (mass storage). Its `[rebootMode, readiness]` reply is optional. The PoC FC (SpeedyBee F435, BF 4.5.0) replied `[2,1]`; the Flywoo (BF 4.5.2) returns no reply yet still exposes the flash. Requiring the reply (the doc's original probe) produced a false `prepareTimeout`. The client now tolerates a missing reply, retries only while a present reply reports readiness 0 (then `massStorageNotReady`), and proves success by LIST populating. `SPEEDYBEE_REVERSE_ENGINEERING.md` §0/§5/§9/§12/§14.2 updated with this.
-  - Note: `Packages/AirframeCLI/BTFL_001.BBL` is a local hardware-test download, left untracked (not committed).
-- Step 3 (done, hardware-verified): BLE Wi-Fi activation over the ABF3/ABF4 control channel. `SpeedyBeeControlChannel` (actor) runs HELLO/SESSION/DEVICE_INFO/WIFI_INFO/WIFI_START over the internal `BluetoothAdapter`; `SpeedyBeeAdapter3WiFiImporter.activateWiFi()` owns its own `CoreBluetoothAdapter`, scans for the adapter, and returns SSID/MAC. A dedicated control `BluetoothProfile` (ABF0/ABF3/ABF4) is kept out of `known`/`candidates` so MSP resolution is unchanged. New `fc-wifi activate` CLI command. Verified on the Flywoo F405S: activate brings up the AP, and the full BLE-triggered path (activate → join → download) produced a valid `BTFL_001.BBL`. Airframe commit `25f2dd3`.
-  - Hardware fixes: (a) hold BLE ~0.75 s after WIFI_START so the fire-and-forget write flushes before disconnect, or the AP never appears; (b) the download must run as one session (prepare once, poll LIST to wait for flash enumeration before STAT/SELECT, never re-prepare per file), and control replies must be matched by opcode because the channel buffers stale STATUS/LIST frames (a leftover LIST blob was being parsed as a STAT size). Recorded in `SPEEDYBEE_REVERSE_ENGINEERING.md` §14.1/§14.2.
-  - Multi-file readiness: the client already supports it (`listLogs()` returns all `BTFL_NNN.BBL`; multiple `download(name:)` on one client share a single prepare). The download-all loop is Step 4; not yet hardware-tested since the test FC has one log.
-- Step 4 (done, hardware-verified single-log): Wi-Fi join handling + full single-session import. `WiFiNetworkJoining` protocol with `CoreWLANWiFiJoining` (macOS; needs Location auth so it throws from a plain CLI), `HotspotConfigurationWiFiJoining` (iOS, compiled only, wired in Step 6), and `ManualWiFiJoining` (prompt + poll TCP reachability of 192.168.1.1:4279). `SpeedyBeeAdapter3WiFiImporter.importAllLogs(into:joining:progress:)` activates over BLE, joins, downloads every log with ONE client (single prepare, so the FC reboots to mass storage once), writes files, restores the previous network, reports a typed `SpeedyBeeImportProgress`. Package links CoreWLAN (macOS) / NetworkExtension (iOS). New `fc-wifi import` CLI (manual join by default, `--auto-join` for CoreWLAN). Verified on the Flywoo F405S: `fc-wifi import` produced `BTFL_001.BBL` (391168 bytes) end to end. Airframe commit `09e06a9`.
-  - Still unexercised on hardware: the multi-file loop (test FC has one log). Code is single-prepare-safe for N files.
-- Step 5 (done, verified in app on macOS for the detectable cases): assistant UX. Added `ImportMode.wifi`; Wi-Fi reuses the existing `.import` step (automatic like Direct, `prepareWiFi()` mirrors `prepareImport()`); method cards are now a vertical full-width equal-height stack rendered from the ordered `availableImportModes`; captions + progress strings added; mock runtime advertises the three device classes and drives a canned Wi-Fi progress; import progress screen shows activating/joining/downloading/rejoining. Runtime `prepareWiFi` default throws `wifiUnsupported` (real wiring is Step 6). Capability model uses two orthogonal signals on the state: `wifiCapable` (device exposes the ABF3/ABF4 control channel, carried as `Controller.offersWiFiDownload`; the `SBADAPTER3` name always counts) and `isExternalWiFiAdapter` (BLE name `SBADAPTER3_*`, meaning no host USB path).
-  - Method availability matrix (canonical). Three independent rules: Direct offered iff blackbox is onboard flash (MSP cannot read SD); Mass Storage offered iff a host USB path is possible (i.e. NOT the external adapter; a cable over BT cannot be detected so it is offered whenever plausible); Wi-Fi offered iff the device is Wi-Fi-capable (ABF3/ABF4), only detectable over BLE. Ordering: USB puts Direct first; BLE puts Wi-Fi first (when present), then Mass Storage, then Direct last. Grid (star = default):
-
-    | Connection | Device / capability | Storage | Direct | Mass Storage | Wi-Fi |
-    |---|---|---|---|---|---|
-    | USB (macOS) | any FC | Flash | yes (default) | yes | - |
-    | USB (macOS) | any FC | SD | - | yes (default) | - |
-    | Bluetooth | plain FC (no Wi-Fi) | Flash | yes | yes (default) | - |
-    | Bluetooth | plain FC | SD | - | yes (default) | - |
-    | Bluetooth | external SpeedyBee adapter | Flash | yes | - | yes (default) |
-    | Bluetooth | external SpeedyBee adapter | SD | - | - | yes (default) |
-    | Bluetooth | built-in-Wi-Fi FC | Flash | yes | yes | yes (default) |
-    | Bluetooth | built-in-Wi-Fi FC | SD | - | yes | yes (default) |
-
-  - Caveat: Mass Storage over Bluetooth cannot detect whether a USB cable is actually attached, so it is offered but may be unusable (the "powered by a powerbank, no cable to host" case). No current signal distinguishes this.
-  - Hardware-verified by the user (macOS): adapter+SD = Wi-Fi only; adapter+flash = Wi-Fi+Direct; USB flash = Direct+MSC; BT plain FC = Direct+MSC (or MSC-first); BT+USB same FC = MSC; adapter with the same FC = Wi-Fi only. All correct.
-- Step 6 (done, hardware-verified in the app on macOS): runtime wiring + entitlements + end-to-end. `DefaultFlightControllerImportAssistantRuntime.prepareWiFi` tears down the BLE MSP link, runs `SpeedyBeeAdapter3WiFiImporter.importAllLogs` with `ManualWiFiJoining` (user joins the SSID, reachability poll unblocks), builds the payload from the downloaded files. Entitlements: macOS `com.apple.security.network.client` AND `network.server` (the UDP receive `bind()` is a server operation; without it EPERM), iOS `NSLocalNetworkUsageDescription` in Info.plist. Wi-Fi progress shows byte counts like the other methods (packets x 2044). Verified in the app: all 7 logs (8.4 MB) into a saved document.
-  - Transport hardening from this step's hardware debugging (all in `SpeedyBeeWiFiClient`, doc updated): STAT sizes are 2048-block-rounded, so the true packet count is a two-value window; completion = gap-free prefix >= minimum + SELECT completion ack (no more phantom-packet waits). Reburst only after the burst-finished ack (mid-burst re-SELECT wedges the adapter). Inter-file drains (3 s quiet when a leftover restream is possible, 0.3 s after a clean ack end, budget 60 s). Enumerate once per session. Opcode-matched control reads. Out-of-range seq guard. Progress throttled to 150 ms (per-packet callbacks drop packets). STATUS budget 45 s (session establishment takes 20 s+, official app too). Prepare retries only while readiness = 0.
-  - Adapter insight (via its display): it is a buffering relay; it reads logs from the FC over the wire into ~3.2 MB RAM and streams from RAM at WiFi speed; larger files drop to FC-read speed at that fixed offset (transfer glyph on the display). Deterministic slow tails on big logs are adapter-inherent.
-- Step 6b (done, hardware-verified on macOS): automatic Wi-Fi join. New `PlatformWiFiJoining` tries the platform-native join (CoreWLAN on macOS, `NEHotspotConfiguration` on iOS), then still waits for the adapter's control port to answer (association is not connectivity), and falls back to the manual prompt on any failure. `restore` runs only after an automatic join, because a manual join leaves the previous network's password unknown. `LocationAuthorization` requests When In Use authorization on the main actor (macOS 14+ gates CoreWLAN scanning behind Location Services); denial degrades to the manual path. Shared `WiFiReachability` helper. Entitlement `com.apple.security.personal-information.location` + `NSLocationWhenInUseUsageDescription`. New caption `wifi.manualJoin`; `wifi.joining` is now the automatic "Connecting to …" text, and `WiFiPreparationProgress` gained `awaitingManualJoin(ssid:)`.
-  - Step 6c (code complete, blocked on the developer portal): the iOS `NEHotspotConfiguration` path is implemented and selected automatically, but `com.apple.developer.networking.HotspotConfiguration` could NOT be added: the team provisioning profile for `com.kumkju.airframe` does not include the Hotspot capability, and the iOS build fails to provision with it. The entitlement was reverted. Enable the Hotspot Configuration capability for that App ID in the Apple Developer portal, regenerate the profile, then re-add the entitlement. Until then iOS uses the manual-join fallback, which works.
-    - Verified on a real iPhone: BLE Wi-Fi activation works on iOS (`SpeedyBee WiFi activation ssid=SBADAPTER3_C571 model=ADPT03116`), which had never been exercised on a device before. The join then fails as expected and falls back cleanly.
-    - Diagnostic signature of the missing entitlement, worth recognizing: `Failed to send a 9 message to nehelper: Connection invalid` and `NEHotspotConfigurationHelper failed to communicate to helper server`, surfaced by NetworkExtension as the unspecific `internal error`. It is an entitlement problem, not a runtime bug.
-    - Expectation for later: even with the entitlement iOS always shows its own confirmation dialog before joining, so one tap remains. In exchange `joinOnce` plus removing the configuration returns the device to the previous network by itself, which macOS cannot guarantee.
-  - Still open, deferred: ABF3/ABF4 capability detection at connect for built-in-Wi-Fi FCs (currently only the external adapter is recognized, by name), reburst packet-loss root cause, and a "connecting to the adapter" progress state (all in `BACKLOG.md`).
+- Map timeline source picker and source colors on the MAYA Betaflight 4.5.2 document on macOS and iPadOS.
+- Craft roll/pitch signs against the reference viewer on a representative real log.
+- Craft motor gauge colors against Graph colors while scrubbing.
+- Mixer-template inference beyond Quad X using representative bicopter, tricopter, Y4, V-tail, A-tail, Hex, Y6, X8, and octocopter logs.
+- Compatibility across representative Betaflight versions, multi-log files, GPS logs, and damaged/truncated logs.
+- One representative real Betaflight 2026.6.1 log to supplement source-backed compatibility tests.
 
 ## Product Decisions Needed
 
-- Decide whether a future transformed/persisted index is justified only after profiling package open, seek, memory, and autosave costs.
-- Decide the final project license before adding SPDX license identifiers.
+- Final project license before adding SPDX identifiers.
+- A transformed or persisted log index only after profiling package open, seek, memory, and autosave costs.
 
 ## Current Constraints
 
-- The reviewed Flight Controller Import Assistant and GPS Map implementations are approved; other product work remains planning-only unless separately requested.
+- New product work remains planning-only until the user selects a measure from [PLAN.md](PLAN.md) or a backlog item.
 - No new external dependency without explicit approval.
 - Raw Betaflight logs remain byte-identical and read-only.
-- Airframe document state belongs in package metadata; raw-log UI state remains external.
+- Airframe document state belongs in document metadata; raw-log UI state remains external.
 - Bookmarks are not part of document format version 1.

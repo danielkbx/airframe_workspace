@@ -34,22 +34,20 @@ Claim status is one of `verified`, `partially verified`, `heuristic`, `conflicti
 |---|---|---|
 | [PID Tuning Principles](PID_TUNING_PRINCIPLES.md) | PID-F signal flow, response interpretation, gain relationships, version caveats, and Airframe analysis relevance | 2026-08-05 |
 | [Spectrum Tuning Guides](SPECTRUM_TUNING_GUIDES.md) | Filter-delay and spectrum evidence, uncertainties, proposed setup profiles, and validation requirements | 2026-08-05 |
-| [Blackbox Format and Compatibility](BLACKBOX_FORMAT_AND_COMPATIBILITY.md) | Frame format, writer/viewer compatibility, headers, versions, and parser behavior | 2026-08-01 |
+| [Blackbox Format and Compatibility](BLACKBOX_FORMAT_AND_COMPATIBILITY.md) | Frame format, writer/viewer compatibility, headers, versions, and parser behavior | 2026-08-05 |
 | [Upstream Analysis Tools](UPSTREAM_ANALYSIS_TOOLS.md) | Blackbox Explorer, PIDtoolbox, related parsers, graph/spectrum algorithms | 2026-08-05 |
 | [Flight Controller Connectivity](FLIGHT_CONTROLLER_CONNECTIVITY.md) | MSP, serial, BLE, USB/iPadOS, FlashFS, and hardware validation | 2026-08-01 |
 | [Apple Platforms and CI](APPLE_PLATFORMS_AND_CI.md) | Apple framework feasibility and Xcode Cloud entitlement behavior | 2026-08-01 |
-| [Map and Graph Research](MAP_AND_GRAPH_RESEARCH.md) | Native flight-map and graph-layout findings | 2026-08-01 |
+| [Map and Graph Research](MAP_AND_GRAPH_RESEARCH.md) | Native flight-map behavior and limitations, route semantics, and graph-layout findings | 2026-08-05 |
 | [Licensing](LICENSING.md) | Upstream licensing facts and Airframe implications | 2026-08-01 |
 
 The specialized SpeedyBee reverse-engineering lab notebook remains at `../SPEEDYBEE_REVERSE_ENGINEERING.md`; connectivity research links to it instead of duplicating it.
-
-The [legacy research archive](LEGACY_RESEARCH_ARCHIVE.md) preserves the complete pre-migration research snapshot for auditability. It is historical, may be stale, and must not be used instead of the active thematic files.
 
 ## Maintenance Rules
 
 - Add unsettled observations to `../RESEARCH.md#research-inbox` first.
 - Move stable research into the appropriate topic in the same work round.
 - Give every consequential number a source or mark it Grade `D`.
-- Do not silently delete contradictory or obsolete evidence; retain it with status and context.
+- Do not silently delete contradictory or obsolete evidence that still affects current interpretation; retain it with status and context. Superseded document snapshots remain recoverable through Git and do not need a second in-tree archive.
 - Keep one detailed home for each fact and link from other project files.
 - Review web sources when their version or current behavior matters.

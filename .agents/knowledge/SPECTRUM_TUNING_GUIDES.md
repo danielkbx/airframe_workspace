@@ -78,84 +78,20 @@ The deck's blade-count weight examples, Dynamic Notch bounds, `90 Hz` useful-sig
 - Betaflight 4.5 commands, filter types, crossfade/dimming behavior, and slider workflows require version checks before application to later firmware.
 - Rosser's `90 Hz` useful-signal boundary and depicted quiet/motor zones describe his example plots, not universal physical regions.
 
-## Implemented Airframe Concept
+## Airframe Interpretation
 
-### Picker profiles
+- Static prop-size profiles are an implemented Grade `D` educational layer. They are not filter recommendations and do not produce pass/fail or safety verdicts.
+- Actual eRPM-derived harmonic occupancy, configured filter overlays, filter delay, and compatible per-signal measurements are stronger evidence than a selected profile.
+- The current profile UI renders only neutral motion/control context plus measured evidence; causal `Possible Resonance` and `Motor / Propeller Noise` regions are deliberately not shown.
+- Automatic resonance detection remains unimplemented until representative logs validate a conservative behavior-based detector.
+- Future Filter Review and Filter Score work is specified in [the active roadmap](../PLAN.md#measure-5-spectrum-filter-review). This topic supplies evidence and limitations; product interfaces and execution order do not live here.
 
-The Spectrum inspector uses a `Guide Profile` picker:
+## Validation Needs
 
-- `Off`
-- `2–2.5″ / Whoop`
-- `3–3.5″`
-- `4″`
-- `5″ Freestyle`
-- `6–7″ Long Range`
-- `Other / Unknown`
-
-`Other / Unknown` draws no prop-size assumptions. It may still show measured eRPM bands, configured filter guides, neutral noise-floor measurements, and possible resonance candidates.
-
-### Profile content
-
-Known-size profiles provide only a subtle purple `Craft Motion` area, a subtle blue `Control / Prop Wash` area, and gyro/D-term reference lines. Craft Motion is slightly more opaque than Control / Prop Wash, but both remain behind the data. The graph contains no region labels or redundant vertical boundary lines; two-line inspector rows show each name and its exact profile boundary with a matching colored dot. The former `Possible Resonance` and `Motor / Propeller Noise` profile areas are not rendered because their causal labels overstate what a static frequency range can establish. Guides never provide `Safe`, `Required`, `Pass`, or `Fail` values. Actual motor harmonics are drawn as a visually distinct measured layer.
-
-Measured motor harmonics intentionally have no inline text because several motors and harmonics overlap heavily. They form one accent-color horizontal density layer: opacity represents how frequently the combined eRPM harmonics occupied a frequency bin over the selected range. It does not represent vibration magnitude or spectral power. Horizontal Gyro and D-term references display only their dB value; pane content already supplies the signal context.
-
-### Neutral measurements
-
-For compatible traces, Airframe may show the 90th percentile of finite dB bins above the profile's analysis-start frequency. Gyro and D-term remain separate. The result is a measurement with its comparison reference, not a green/yellow/red judgment. No valid bins produce no measurement.
-
-The inspector groups measurements into one cell per signal, titled for example `Gyro P90` or `Gyro Unfiltered P90`. Beneath the title, secondary Roll, Pitch, and Yaw rows show `… dB above … Hz`. These values are calculated from the selected log and range; they are not values supplied by the selected profile. Profile values appear only as plot references.
-
-Every region and P90 data cell provides a trailing info popover organized as `What it is`, `Where it comes from`, and `How to read it`. The source statement stays literal and concise: regions are fixed reference ranges from the selected profile, while P90 is calculated from the signal's log data in the selected timeline range. Interpretation text carries the heuristic caveats and warns that narrow peaks can still exceed the percentile. Only the filtered `Gyro P90` help mentions its `-30 dB` comparison reference; unfiltered Gyro and other signal help must not inherit that signal-specific guidance.
-
-### Possible resonance candidates (not yet implemented)
-
-A future conservative detector may consider a narrow peak only when it is present across enough occupied throttle bins, remains approximately stationary, lies above the motion region, and is clearly separated from measured motor harmonics. It shows at most three candidates per axis and uses the wording `Possible Resonance`. Profile selection must not trigger hidden expensive heatmap computation.
-
-### Document default and log overrides
-
-- With no template, the first concrete selection becomes the document default and applies to every log.
-- A later concrete selection on a log initially creates or replaces that log's override.
-- After each selection, if no existing log effectively uses the old default, the latest choice becomes the new default; matching overrides are removed and different overrides remain.
-- New logs inherit the current document default.
-- `Off` is a concrete default or override value.
-- The ordinary picker does not expose a separate “remove override” action.
-- Reset View Settings clears the default and all overrides.
-- Removing a log cleans its override but does not itself promote a new default.
-
-## Implemented Profile Heuristic — Grade D
-
-The following table records the discussed inverse-diameter model. It is not approved physics and must remain visibly heuristic until validated:
-
-```text
-scale = 5.0 / representativePropellerDiameter
-scaledFrequency = fiveInchReferenceFrequency * scale
-```
-
-Values are rounded to readable 5 Hz increments.
-
-| Profile | Representative diameter | Scale | Motion ends | Analyze above | Control/propwash ends | Resonance reference ends | Evidence |
-|---|---:|---:|---:|---:|---:|---:|---|
-| 2–2.5″ / Whoop | 2.25″ | 2.22 | 45 Hz | 110 Hz | 220 Hz | 555 Hz | Grade D heuristic |
-| 3–3.5″ | 3.25″ | 1.54 | 30 Hz | 75 Hz | 155 Hz | 385 Hz | Grade D heuristic |
-| 4″ | 4.0″ | 1.25 | 25 Hz | 65 Hz | 125 Hz | 315 Hz | Grade D heuristic |
-| 5″ Freestyle | 5.0″ | 1.00 | 20 Hz | 50 Hz | 100 Hz | 250 Hz | Grade C secondary anchor; profile generalization remains Grade D |
-| 6–7″ Long Range | 6.5″ | 0.77 | 15 Hz | 40 Hz | 75 Hz | 190 Hz | Grade D heuristic |
-
-The dB comparison references discussed for known profiles are gyro `-30 dB` and D-term `-10 dB`; these retain Grade C and are not rescaled. If cross-size validation fails, the inch profiles may remain context labels while Airframe renders only measured eRPM, configured filters, and carefully detected candidates.
-
-## Validation Matrix
-
-| Craft class | Minimum representative logs | Required signals | Validation target |
-|---|---:|---|---|
-| 2–2.5″ / Whoop | 3 | Gyro, D-term, throttle; eRPM when available | Compare heuristic zones with actual ridges/noise and motor bands |
-| 3–3.5″ | 3 | Same | Same |
-| 4″ | 3 | Same | Same |
-| 5″ | 5 | Same | Check the Oscar/Betaflight anchor across varied builds |
-| 6–7″ | 3 | Same | Check lower motor bands and frame-specific resonances |
-| Other / Unknown | 2 | Any useful subset | Confirm no static prop-size claims appear |
-
-Fixtures should vary KV, voltage, blade count/pitch, frame/mass, and filter settings where practical. Until this matrix is satisfied, profile frequency scaling remains `proposed`, not `validated`.
+- Validate the existing Grade `D` profile scaling across representative craft classes before strengthening any wording.
+- Vary KV, voltage, blade count/pitch, frame/mass, and filter configuration where practical.
+- Compare only spectra with compatible units, normalization, windowing, sample rate, and estimator semantics.
+- Validate downstream gyro, D-term, and motor-output evidence before grading harmonic-weight or filter-efficiency claims.
 
 ## Source Register
 
