@@ -1,5 +1,28 @@
 # Current Plan
 
+## Sidebar Focus and Keyboard Shortcuts (Implemented 2026-08-05)
+
+### Think Before Coding
+
+- `LogDataView` explicitly reclaimed focus whenever the selected log's `stateKey` changed and whenever a view shortcut changed `selectedView`. That overrode the native Sidebar `List` first responder after user selection.
+- macOS shortcuts already resolve the active document through `LogViewCommandBroker` and menu key equivalents; they do not require the detail view to own focus.
+
+### Simplicity First
+
+- Keep native SwiftUI/AppKit focus ownership. Do not add a responder bridge, event monitor, or manual `NSWindow.makeFirstResponder` call.
+- Retain the existing initial `onAppear` detail focus and the complete command broker/menu implementation.
+
+### Surgical Changes
+
+- Remove only the two `isContentFocused = true` writes triggered by `context.stateKey` and `selectedView` changes. Keep playback reconfiguration on view changes unchanged.
+- Native macOS `List` consumes unmodified Space before the menu key equivalent. Handle Space only on the focused Sidebar log list and dispatch the existing broker-backed `.togglePlayback` command, preserving the same capability gates and avoiding any global event monitor or AppKit bridge.
+- No public API, type, persistence, document-format, or cross-platform command change.
+
+### Goal-Driven Execution
+
+- Completed after the focused-list Space correction: all 23 `LogViewSelectionTests` pass, including shortcut mapping, enablement, active-window broker routing, and close-barrier coverage.
+- Completed after the correction: a fresh isolated `Airframe Beta` macOS build succeeds. Live Sidebar Up/Down, Space playback, and focus-ring acceptance with a multi-log document remains the final interaction check.
+
 ## Active Analysis Crosshair Performance (Implemented 2026-08-05)
 
 ### Think Before Coding
@@ -143,6 +166,8 @@ Completed outcome:
 - Verification: 86 cadence/cache/state tests, 35 context-readiness/state tests, 11 focused playback-controller tests including surface readiness and stale-owner races, the complete post-fix app-hosted suite (652 XCTest tests plus 30 Swift Testing tests), all 151 AirframeUI tests, and fresh macOS plus generic iOS Simulator Beta builds pass. Temporary signpost instrumentation was removed after capture.
 
 ## UI Corrections: Frequency Response, Playback, and Log-Switch Focus (Implemented 2026-08-04)
+
+The log-switch focus decision in this historical section was superseded on 2026-08-05 by **Sidebar Focus and Keyboard Shortcuts** above. Sidebar selection now retains native list focus; the other UI corrections remain current.
 
 ### Think Before Coding
 
