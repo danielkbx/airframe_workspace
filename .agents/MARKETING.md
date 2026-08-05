@@ -88,17 +88,33 @@ Every flight tells a story.
 
 - The `release/0.1.0` highlights cover the native flight map, Spectrum filter insight, automatic log tags and hiding, restored view state and cached analysis, safer Airframe documents, and the more personal About/privacy/community experience.
 - Tester build 43 is marked in the public repository by `build/43` at `6e38f52`. Its tester notes cover aircraft settings and center-of-gravity diagnostics, interactive Spectrum tuning guides and stable mode switching, battery cell count with per-cell voltages, and restored per-log In/Out points.
+- Tester build 47 covers CHIRP frequency-response analysis and tune scoring, smoother Graph/Table playback and scrubbing, faster reopen through persistent derived-data caching, improved Craft attitude/loading/CHIRP status, Betaflight 2026.6.1 compatibility, UI refinements, and Acknowledgements/community access.
+- The in-app What's New entry uses numeric catalog ID `3` and covers four concise user-facing themes: CHIRP Analysis, performance, Acknowledgements, and broad UI improvements. Technical test instructions remain exclusive to TestFlight notes.
+- TestFlight notes for build 47:
+
+  ```text
+  What to Test
+
+  • Open a CHIRP log and check automatic detection, Frequency Response, spectrogram guides, Tune Score, and recorded PID settings.
+  • Scrub and play large logs in Graph and Table. Reopen a document to verify faster loading from the on-device cache; cache controls are available in Settings.
+  • Check Craft attitude, loading feedback, motor values, flight modes, and the active CHIRP axis while scrubbing.
+  • Review the reorganized Overview, updated Settings, inspector scrolling and hover behavior, and keyboard navigation between logs and views.
+  • If available, open a Betaflight 2026.6.1 log and verify its headers and analysis.
+
+  Please report regressions, confusing results, and logs that do not behave as expected through Send Feedback or Discord.
+  ```
 - Git commits are editorial source material, never direct user-facing release notes.
 - Public Airframe release tags use `release/<semver>`.
 - Tester build tags use `build/<build-number>`.
 - Only explicitly marked catalog releases trigger automatic presentation.
+- What's New uses monotonically increasing numeric catalog IDs independent of app versions and builds. The local and iCloud marker is stored under `lastSeenWhatsNewsCatalogId`; users receive every catalog entry with a higher ID, then the highest presented ID is retained.
 - A true first launch shows no What's New screen.
 - Changes across skipped releases are combined by topic rather than presented as consecutive version pages.
 - What's New remains manually accessible through About.
 - macOS also exposes `What's New in Airframe` in the Help menu for repeat viewing and testing; manual presentation never changes the synchronized seen marker.
 - A release counts as seen when its automatic presentation is shown.
 - The seen release is mirrored locally and through iCloud key-value storage so it normally appears once per iCloud user, not once per device.
-- The synchronized record contains only schema version, release ID, and semantic version.
+- The synchronized value contains only the highest presented numeric catalog ID.
 - Automatic presentation may wait up to two seconds for a newer cloud value; the app itself remains usable.
 - Offline devices can rarely show the same release more than once. No server is introduced to eliminate that edge case.
 

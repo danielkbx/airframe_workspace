@@ -87,7 +87,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Subtitle: A Blackbox Log Analyzer.
 - Brand slogan: `Every flight tells a story.` Public identity, contact channels, About direction, and release communication live in `MARKETING.md`.
 - Tester and TestFlight archives use the shared `Airframe Beta` scheme and its release-derived `Beta` configuration. `AIRFRAME_BETA` controls beta-only app presentation such as the icon badge; production archives use the normal `Airframe` scheme with `Release`. Swift packages remain release-optimized in both cases.
-- The What's New seen-release record is app-global and mirrored through local defaults and iCloud key-value storage. Reconciliation is monotonic: an older device must never overwrite a newer seen release. Only schema version, release ID, and semantic version are synchronized.
+- What's New uses monotonically increasing numeric catalog IDs independent of app version and build. The highest presented ID is stored locally and in iCloud under `lastSeenWhatsNewsCatalogId`; reconciliation takes the maximum so an older device cannot overwrite newer state. A first launch records the highest ID without presenting, while returning users receive all catalog entries above their stored ID when at least one is marked for automatic presentation. No legacy What's New marker is read or migrated.
 - Native Swift Universal app for iOS and macOS.
 - Swift-native parser and model; no WebView wrapper.
 - App Store distribution is optional.
