@@ -6,7 +6,8 @@ Durable research lives in the thematic [Knowledge Base](knowledge/README.md). `M
 
 | Topic | Contents | Last reviewed |
 |---|---|---|
-| [Spectrum Tuning Guides](knowledge/SPECTRUM_TUNING_GUIDES.md) | Sources and evidence for filter delay, dB references, prop-size dependence, guide profiles, uncertainties, and validation | 2026-08-01 |
+| [PID Tuning Principles](knowledge/PID_TUNING_PRINCIPLES.md) | UAV Tech and Chris Rosser evidence for PID-F signal flow, gain relationships, response interpretation, historical guidance, and Airframe relevance | 2026-08-05 |
+| [Spectrum Tuning Guides](knowledge/SPECTRUM_TUNING_GUIDES.md) | Sources and evidence for filter delay, dB references, prop-size dependence, guide profiles, uncertainties, and validation | 2026-08-05 |
 | [Blackbox Format and Compatibility](knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md) | Frame types, writer/viewer audit, headers, units, firmware versions, CHIRP debug payload generations, and compatibility baseline | 2026-08-05 |
 | [Upstream Analysis Tools](knowledge/UPSTREAM_ANALYSIS_TOOLS.md) | Blackbox Explorer, PIDtoolbox, CHIRP/Autotune, spectrum algorithms, and related parser references | 2026-08-05 |
 | [Flight Controller Connectivity](knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md) | Configurator transport, MSP/CLI, BLE/USB, FlashFS, hardware validation, and helpers | 2026-08-01 |
@@ -23,4 +24,4 @@ Specialized lab notebooks remain separate:
 
 Use this section only for observations that are not yet stable enough for a topic file. A stable item must be moved into the relevant Knowledge Base document during the same work round, leaving at most a link here.
 
-- No unclassified research as of 2026-08-01.
+- No unclassified research as of 2026-08-05.
