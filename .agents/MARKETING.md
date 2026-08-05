@@ -53,6 +53,8 @@ Every flight tells a story.
 
 - The final monetization model is not decided.
 - Airframe will not use subscriptions or recurring charges.
+- People who contribute publicly to the FPV community through open-source work, software, videos, guides, documentation, blog posts, or comparable resources are eligible for free lifetime access to every Airframe feature. They contact the developer through the existing feedback channel; eligibility is assessed personally without a published minimum audience, output, platform, or contribution threshold.
+- Any future purchase, Pro, licensing, or entitlement system must support this permanent community access policy.
 - The likely direction is a one-time purchase that unlocks a Pro-style set of capabilities.
 - Possible paid candidates include direct flight-controller communication and advanced analysis features needed by only a relatively small group of users.
 - Exact paid scope and pricing remain open and must not be presented as final.
@@ -61,6 +63,9 @@ Every flight tells a story.
 
 - The shared macOS/iOS About screen uses the Home screen's visual language.
 - It shows the app icon, `Airframe`, `Version <version> · Build <build>`, the prominent slogan, a short description, `Built by danielkbx`, feedback, Discord, and privacy.
+- `Acknowledgements` opens an in-app detail that thanks and links to the public websites for Betaflight (`https://betaflight.com`), Betaflight Blackbox Log Viewer (`https://blackbox.betaflight.com`), Betaflight Configurator (`https://app.betaflight.com`), and PIDtoolbox (`https://pidtoolbox.com/home`). It also states the permanent free-access policy for people who contribute public work or resources to the FPV community and routes requests through `Send Feedback`.
+- The community-access offer appears before the acknowledged project list. macOS also exposes `Acknowledgements` as its own Help-menu command opening the same view in a single reusable window.
+- About and standalone macOS Acknowledgements use key-capable borderless windows with clear outer window backgrounds, fully opaque system-window backing behind the rounded clipped SwiftUI content, shadows, and the shared in-content X close control. This preserves transparent rounded corners without allowing the desktop or other windows to show through the content, and no native titlebar remains to reserve or draw a top strip. Both macOS Acknowledgements presentation paths use an exact 420 × 620 pt size; iOS remains adaptive. Acknowledgements places its title and close control in a fixed non-scrolling header followed by a separately clipped ScrollView, so content cannot render behind the header even during macOS overscroll.
 - Keep `A Blackbox Log Analyzer` available as the factual subtitle.
 - On macOS, `About Airframe` opens one custom About window. On iOS and iPadOS, the settings button opens a menu containing Settings and About Airframe.
 - Website and imprint are not available yet; do not show dummy destinations in About.

@@ -2,6 +2,14 @@
 
 Only approved near-term work and unresolved acceptance gates belong here. Completed work belongs in Git and the current architecture; unapproved ideas belong in [BACKLOG.md](BACKLOG.md).
 
+## Completed: About Acknowledgements and Community Access
+
+- About includes an Acknowledgements action and an in-app detail thanking and linking to Betaflight, Betaflight Blackbox Log Viewer, Betaflight Configurator, and PIDtoolbox.
+- The detail offers permanent free access to every Airframe feature for people who contribute public open-source work, software, videos, guides, documentation, blog posts, or comparable resources to the FPV community and routes requests through the existing feedback email.
+- The community-access offer leads the detail content, and macOS exposes the same view through a dedicated Help-menu item and single reusable window.
+- About and standalone Acknowledgements use borderless rounded windows with an opaque system-window backing, an in-content X close control, and no native titlebar strip. Both macOS Acknowledgements paths use the same exact 420 × 620 pt size and a fixed header followed by a separately clipped scrolling region.
+- Project metadata, URLs, user-facing captions, accessibility identifiers, and the community promise have focused regression coverage.
+
 ## Live Acceptance Pending
 
 ### Analysis Crosshair Performance
