@@ -17,9 +17,11 @@ This file describes the current technical shape. Stable product and workflow rul
 - Locator publication after synchronized blob and commit writes is the durable boundary. Readers choose the newest valid commit and support bounded recovery.
 - Stable physical blob handles drive retention and logical deletion; commit-local identifiers may change.
 - Reader APIs provide bounded reads, range reads, and streaming copy without loading large blobs on open.
-- Full compaction streams live blobs into a validated sibling candidate. Tail compaction uses APFS clone-and-truncate with streaming fallback.
+- Full compaction streams live blobs into a validated candidate inside Foundation's same-volume item-replacement directory, then atomically replaces the exact source URL. Tail compaction uses APFS clone-and-truncate with streaming fallback.
 - The app-owned manifest maps normalized logical paths to kind, byte count, and SHA-256 without persisting offsets or handles. Logical metadata remains schema v2.
-- `AirframeDocumentStore` serializes revisions outside the Main Actor while AppKit/UIKit objects retain lifecycle and security-scope ownership.
+- `AirframeDocumentStore` serializes revisions outside the Main Actor while AppKit/UIKit objects retain lifecycle and security-scope ownership. Every written commit evaluates a full-liveness compaction plan; the existing 10 MiB and 25% thresholds bound metadata history and deleted payloads without adding unchanged-open or unchanged-close work.
+- `AirframeNSDocument` refreshes AppKit's `fileModificationDate` after its custom persistence path writes bytes so the native conflict detector recognizes Airframe's own append commits.
+- `AirframeNSDocument` opts out of AppKit autosave and suppresses editor-originated document change-count increments. Native editors retain their local undo behavior, while `AirframeWorkspaceController` remains the sole owner of dirty revisions and `AirframeDocumentPersistence` remains the sole save path.
 
 ## Overview Dashboard
 
