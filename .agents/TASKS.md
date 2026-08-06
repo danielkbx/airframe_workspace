@@ -2,6 +2,18 @@
 
 Only approved near-term work and unresolved acceptance gates belong here. Completed work belongs in Git and the current architecture; unapproved ideas belong in [BACKLOG.md](BACKLOG.md).
 
+## Completed: Action-Based Presets Foundation
+
+- The native toolbar exposes Default first and generation-2 user presets alphabetically immediately before the inspector toggle, without selection or dirty affordances.
+- A divided `Save Current Setup…` menu action opens a compact modal matching Airframe's Settings presentation. A native `Save As` dropdown chooses New Preset or an existing user preset to overwrite; Default is never offered, and the dropdown is omitted while no user presets exist. New Preset shows the name field; an overwrite target instead shows an explicit named overwrite notice. The primary action is consistently `Save`.
+- `Manage Presets…` remains visible below Save and is disabled only while no user preset exists. Its native platform modal excludes Default, supports transient checkbox-based multiple selection plus a leading visually unlabeled three-state checkbox, renames a user preset in place after double-clicking its name, atomically deletes after singular/plural confirmation, exports the selection together through one native Save dialog, and imports through a native Open panel. The same manager is available from the active document's View menu and stays disabled there without user presets.
+- Portable export/import uses the unambiguous `.airframepreset` extension with the new `com.kumkju.airframe.preset-file` UTI conforming to `public.data` and a deterministic generation-1 multi-preset JSON payload. The opaque system conformance preserves Airframe's file identity instead of inviting text-editor presentation; the fresh UTI prevents existing Launch Services registrations from retaining either the former `.apf` association or JSON conformance. Opening an archive, `File > Import Presets…`, or the management import button imports it atomically after native per-name conflict decisions and acknowledges a nonzero imported count. Former `.apf` and single-preset files are rejected without migration.
+- Applying a preset is an atomic one-shot copy into self-contained document state. The immutable app Default resets only portable analysis configuration.
+- The last manually applied preset is remembered locally and initializes truly new documents exactly once; invalid or missing records normalize to Default, while existing documents retain precedence.
+- Preset generation 2 uses compact versioned binary property-list storage and the existing iCloud KVS mirror. Legacy preset libraries and preset-bound document appearance are ignored without migration.
+- Ensure the built-in Default preset selects both Gyro and Gyro Unfiltered for the plain Frequency spectrum; keep the two heatmap-mode defaults independent and preserve unavailable requested groups.
+- Missing configured sources remain stored and visible but disabled across Graph/Table, Spectrum, Map, and fixed Step/Frequency Response options.
+
 ## Completed: About Acknowledgements and Community Access
 
 - About includes an Acknowledgements action and an in-app detail thanking and linking to Betaflight, Betaflight Blackbox Log Viewer, Betaflight Configurator, and PIDtoolbox.

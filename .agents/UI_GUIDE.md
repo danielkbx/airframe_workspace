@@ -1,10 +1,94 @@
 # Airframe UI Guide
 
 - Status: normative
-- Last reviewed: 2026-08-02
+- Last reviewed: 2026-08-06
 - Scope: shared interaction and layout conventions for Airframe's native SwiftUI interface
 
 This guide records reusable UI contracts. New UI and reviews must follow it together with `PRINCIPLES.md`.
+
+## Existing Airframe UI Is the Design System
+
+Before implementing a new surface, inspect the live production views and choose the closest existing Airframe reference.
+
+### Required Reference Pass
+
+- Identify at least one structurally similar production view before writing layout code. Prefer two when the surface must work on both macOS and iOS.
+- State which view is the reference and reuse its hierarchy, spacing, typography, control styles, background treatment, sizing, and action placement unless the new workflow requires a deliberate difference.
+- Search by interaction and presentation role, not only by feature name. For example, a compact settings modal should start from `AircraftSettingsView`; it should not start from a generic `Form` merely because it edits settings.
+- Existing app-specific composition takes precedence over a plausible generic SwiftUI composition. Native controls remain preferred inside that composition.
+- Do not invent a new visual language for an isolated feature. If no suitable reference exists, surface that as a design decision before implementation.
+
+### Meaning Before Container
+
+- Do not translate product nouns directly into SwiftUI container types. A requested “list of choices” may describe the available values, not a permanently visible `List`.
+- Resolve the interaction semantics first: how many values exist, whether one or many can be selected, how often the control is used, and whether the choices should remain visible.
+- When the user specifies a control type such as dropdown, menu, segmented control, or table, preserve that control type unless a platform limitation makes it impossible.
+- If the wording permits materially different interaction models, ask before choosing one. Do not silently turn a compact choice into a visible list of rows.
+
+## Compact Settings Modals
+
+Use this contract for small create/edit/save workflows such as Aircraft Settings and preset saving.
+
+### Composition
+
+- Use a content-sized `VStack(spacing: 0)` with three deliberate regions: explanatory header, compact settings content, and a footer separated by a divider.
+- The header uses the established Airframe pattern: accent symbol, clear title, and one short secondary explanation. Do not repeat the title in navigation chrome and again inside the content.
+- Put related controls in the established secondary-background card with consistent padding and corner radius.
+- Place Cancel and the primary action in the footer. Use `.borderedProminent` only for the primary action and disable it until the input is valid.
+- Prefer intrinsic/content-driven height. Do not add a large arbitrary minimum height that creates empty space.
+- Use the width and padding of the closest existing modal. Adapt the row layout for compact width without changing the interaction model.
+
+### Control Semantics
+
+- Use a native menu-style `Picker` for one-of-many compact choices. Let the picker own selection indication; do not rebuild it as custom rows with manual checkmarks.
+- Use a `TextField` only while text is relevant to the selected operation. Hide irrelevant inputs instead of leaving disabled or unexplained rows.
+- Hide a choice control entirely when there is no meaningful choice. Example: preset saving omits `Save As` when no user preset exists and shows only the new-preset name field.
+- Never offer immutable or invalid targets merely to disable them. Example: Default is absent from preset overwrite choices.
+- Show each field label once. Avoid stacking a section title, row label, and placeholder that all repeat the same concept.
+- Preserve keyboard focus and Return-key behavior for the active text field, but do not create duplicate hidden focusable controls through adaptive layout containers.
+
+### Density and Hierarchy
+
+- A small workflow must remain visually small. The number of visible controls should determine the modal's height.
+- Use spacing to express groups, not to fill a window.
+- Keep accent color limited to the header symbol, focused control, and primary action.
+- Avoid a bare `NavigationStack + Form` as the default modal template. Use it when the content is genuinely form-like, scrollable, or already follows an established Airframe form surface.
+
+## Visual Acceptance Gate
+
+Build success is not visual verification.
+
+- Before declaring native UI complete, inspect the rendered surface in its real presentation context on every materially different target platform.
+- Exercise representative states, not only the easiest preview: empty and populated collections, conditional fields shown and hidden, valid and invalid input, and long localized or user-provided names where relevant.
+- Compare the result directly with the chosen Airframe reference for hierarchy, density, alignment, sizing, and action placement.
+- A useful debug preview should make those states reproducible. Add multiple previews when one state cannot demonstrate the contract.
+- If the environment prevents visual inspection, say so explicitly. Report build/type-check success separately and do not characterize the UI as finished or polished until a screenshot or user check confirms it.
+- Treat user screenshots as acceptance evidence. If a screenshot exposes a structural mismatch, revisit the reference and interaction model rather than applying cosmetic spacing patches.
+
+## Multi-Selection Management Modals
+
+- Use a persistent list when the collection itself is the main content and the user can select several items for batch actions. This is distinct from compact one-of-many configuration, which remains a menu-style picker.
+- Make every item row full-width and interactive with a leading native square/checkmark symbol, stable model identity, and explicit selected/not-selected accessibility value. When the row also supports Finder-style inline rename, keep checkbox selection and the full-width name action separate so the editable text field is never nested inside a button.
+- When a batch list benefits from selecting all items, place a visually unlabeled checkbox as the first row; the standard position and tri-state mark communicate the action without redundant visible copy. Retain a localized `Select All` accessibility label. Use an indeterminate minus-square for a partial selection; clicking partial selects every current item, while clicking a complete selection clears it.
+- Keep batch selection transient. Reconcile it against observable collection changes so deleted or remotely removed identifiers cannot remain actionable; newly arriving items remain unselected.
+- Put destructive and export actions together in the established bottom action area, disable both for an empty selection, and keep the non-destructive dismissal available in empty states.
+- Immutable built-in records do not appear in a management list when none of its actions can apply to them.
+
+## Finder-Style Inline Renaming
+
+- Start rename by double-clicking the visible name, replacing only that label with a focused native text field in the same row.
+- Return and focus loss commit; Escape restores the existing name. Keep stable model identity while the name changes so list diffing can move the renamed row safely.
+- Keep every Airframe-owned key equivalent out of every native text-input session, not only inline rename. Register app shortcuts through the shared `airframeKeyboardShortcut` modifier; it removes the key equivalent while AppKit is editing a text field without disabling the underlying button or menu action. Do not add a raw `.keyboardShortcut`, and gate custom `.onKeyPress` handlers through `TextInputShortcutGate` when they could receive text-input keys.
+- Normalize and validate the name in the repository, preserve the record ID and content, and persist the rename atomically. Duplicate or invalid names produce a compact native error.
+- Keep the interaction accessible through a named `Rename` accessibility action; do not make pointer double-click the only available semantic action.
+
+## Native Decision and Result Alerts
+
+- Use the platform alert directly for a short decision or acknowledgement; do not wrap simple choices in an Airframe-styled modal, header, card, or custom footer.
+- Keep the title short and semantic. Add one concise informative sentence when it clarifies the decision or result; omit secondary text only when it would repeat the title.
+- For a conflict, present only the actions that are valid for that exact item. Mark destructive replacement as destructive, use the non-destructive preservation choice as the normal action, and use the skip/cancel choice as the cancel role.
+- Resolve repeated conflicts one at a time. Do not show a custom conflict list merely to batch a small sequence of independent native decisions.
+- Do not present a success alert for a zero-result operation. Errors and genuine nonzero results remain explicit.
 
 ## Collapsible Sidebar Sections
 

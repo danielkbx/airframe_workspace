@@ -4,6 +4,7 @@ Unapproved future ideas only. Promote an item to [TASKS.md](TASKS.md) or an appr
 
 ## Near-Term Cleanup
 
+- Revisit automatic regular-container compaction for metadata-only history. The current post-commit threshold selects `.tail` unless a payload deletion occurred, so it cannot see or reclaim obsolete commits and metadata blobs. A structurally valid real document at sequence 1,346 measured 141,577,792 bytes with no uncommitted tail, but full compaction estimated 65,867,328 bytes and 75,710,464 reclaimable bytes. Define a bounded full-compaction policy that avoids restoring the former unchanged-close memory and I/O cost.
 - Remove `LegacyAirframeConverter.swift`, `Convert Legacy File…`, legacy fixtures, and compatibility/migration/isolation tests after testers have converted their files. Rename remaining package-era type names at the same time; keep the logical metadata identifier `com.kumkju.airframe.document`.
 - Surface `AirframeContainer` recovery/locator issues in a user-visible diagnostic.
 - Add a transient Flight Controller import diagnostics view for uptime, temperature, CPU load, voltage, I2C errors, and arming-disable flags. Do not persist these runtime values.
@@ -76,7 +77,7 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 - Validate mixer-template inference beyond Quad X and expose attitude as selectable derived series only after complete presentation metadata exists.
 - Persist the attitude timeline only if long-log recomputation becomes a measured problem.
 - Add a Timeline metric switcher and hover/drag time readout.
-- Redesign the hidden preset/workspace UX before re-enabling `PresetList`, `PresetControls`, or `PresetManager`; future presets own semantic field-selection IDs.
+- Add the remaining preset management as a separate approved step: duplicate. Preserve the action-only semantics and compact generation-2 library; do not add active selection, dirty state, or automatic synchronization back from documents.
 - Add remaining native chart interactions or aggregation only when the current Graph model lacks a concrete workflow.
 
 ### Map and Export

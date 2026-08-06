@@ -62,6 +62,9 @@ Every SwiftUI view file in the app target and in the `AirframeUI` package must i
 
 All native UI work must follow [`UI_GUIDE.md`](UI_GUIDE.md).
 
+- Before writing layout code, identify the closest existing Airframe production view and use it as the explicit structural and visual reference. Generic SwiftUI plausibility is not a substitute for matching the app.
+- Resolve interaction semantics before selecting containers. Product language such as “list of choices” must not be mapped mechanically to `List`; honor explicitly requested controls such as dropdowns.
+- Build success is not visual acceptance. Inspect realistic rendered states against the chosen reference before calling UI complete; if visual inspection is unavailable, state that limitation clearly.
 - Before implementing any new collapsible sidebar or inspector section, explicitly ask the user what information or control should remain visible while collapsed.
 - Do not implement the collapsed state until that product decision is answered.
 - Never leave a collapsed macOS `Form` section empty; preserve the user-chosen summary or control.
