@@ -138,7 +138,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 
 ## Safety And Performance
 
-- High-frequency pointer and crosshair state must live in a small interaction leaf above the static data canvas. A static canvas must never observe that state: moving the pointer may redraw only crosshair lines, chips, and snap markers, while model, size, visibility, zoom, and discrete guide/filter/legend highlights remain legitimate static redraw inputs.
+- [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md) is the single cross-feature authority for high-frequency UI cost, preparation, invalidation boundaries, review, and profiling acceptance. Feature-specific decisions may add stricter invariants but must not duplicate or weaken it.
 
 - Treat every input byte, header, frame definition, event payload, and caller option as hostile.
 - Validate bounds and configured budgets before reads, allocation, iteration, or filesystem work.
@@ -325,7 +325,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - SpeedyBee Adapter 3 Wi-Fi import is implemented and hardware-verified. Normative behavior stays here; protocol framing, packet captures, and transport experiments live only in `SPEEDYBEE_REVERSE_ENGINEERING.md` and the connectivity Knowledge Base topic.
 - `LogViewCommandBroker` must ignore window notifications from windows that cannot become main. AppKit draws every open menu in an `NSPopupMenuWindow` that posts `didResignKey`/`willClose` while the pointer moves over the items; treating those as document-window changes bumps `revision`, makes SwiftUI re-render the commands, and its menu bridge then replaces the whole File submenu, dropping the AppKit items installed by `DocumentFileMenuPolicy` until the next run loop turn restores them. That race was the visible File-menu flicker (fixed 2026-07-31).
 - SwiftUI owns the macOS File menu through its own `AppKitMainMenuItem` delegate and rebuilds the complete submenu on every command re-render. Anything injected there by AppKit is transient by construction, so the number of SwiftUI command re-renders is the real budget. Do not "fix" this by deferring menu mutations while a menu is tracking: after a SwiftUI rebuild the menu would stay reduced to the SwiftUI items for the rest of the menu session.
-- Do not iterate further on the playback route inside SwiftUI `Map`. The accepted future fix is an `MKMapView` representable because the route must stay below annotations; detailed evidence and rejected alternatives live in [Map and Graph Research](knowledge/MAP_AND_GRAPH_RESEARCH.md#swiftui-map-polyline-playback-limitation).
+- Keep the playback route in SwiftUI `Map`. After isolating Map Timeline cursor invalidation and precomputing its series/domain/grid metadata, both the map and progressive route line are fluid even in a macOS Debug build. The earlier `MKMapView` replacement direction is retired; historical evidence remains in [Map and Graph Research](knowledge/MAP_AND_GRAPH_RESEARCH.md#swiftui-map-polyline-playback-limitation).
 
 ## Aircraft and Filter Guides
 

@@ -69,6 +69,10 @@ All native UI work must follow [`UI_GUIDE.md`](UI_GUIDE.md).
 - Do not implement the collapsed state until that product decision is answered.
 - Never leave a collapsed macOS `Form` section empty; preserve the user-chosen summary or control.
 
+## SwiftUI Rendering Performance Rule
+
+All Canvas, `GeometryReader`, data-backed SwiftUI view, render-model, geometry-publication, resize, pointer/gesture, scroll, animation, and playback work must follow [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md). It is the single normative cross-feature source for UI cost models, preparation, invalidation boundaries, forbidden hot-path work, review, and profiling acceptance. Feature contracts may add stricter domain-specific invariants but must not restate or weaken it.
+
 ## User-Facing String Rule
 
 Every user-facing string must be defined in `AirframeCaptions` and backed by Xcode-native localization resources.

@@ -81,7 +81,6 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 
 ### Map and Export
 
-- Replace the playback route surface with an `MKMapView` representable; the diagnosed SwiftUI `MapPolyline` update limitation and accepted constraints live in [Map and Graph Research](knowledge/MAP_AND_GRAPH_RESEARCH.md#swiftui-map-polyline-playback-limitation).
 - Add optional GPX export through CLI and app.
 - Consider follow camera, speed/altitude route coloring, geocoding/search, terrain/3D, and richer event detail only as separate features.
 - Add video synchronization/export on the shared Graph playback timeline rather than a separate transport clock.

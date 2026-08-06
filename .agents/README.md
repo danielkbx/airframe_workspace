@@ -6,6 +6,8 @@ For document formats, pickers, sandbox access, imports, exports, persistence, or
 
 For Graph playback, scrubbing, cursor consumers, Timeline/toolbar/inspector readouts, Graph cache persistence, or package cursor publication, `Airframe/doc/graph-playback-performance.md` is mandatory context. Its cadence classification and change checklist are architectural gates.
 
+For Canvas, `GeometryReader`, data-backed SwiftUI views, render models, geometry publication, resize, pointer/gesture, scrolling, animation, or playback work, [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md) is mandatory context and the single cross-feature UI performance authority. Graph work must follow both contracts.
+
 For every new data-backed view, analysis, in-memory cache, persistent-cache adapter, prefetcher, or document/window integration, the **Document Lifetime And Cache Ownership Rule** in `PRINCIPLES.md` is mandatory. Its shutdown and live-close gates apply even when the feature itself is not described as lifecycle work.
 
 The workspace root is now a private wrapper Git repository:
@@ -82,9 +84,10 @@ Git history is the archive for superseded snapshots and implementation diaries. 
 2. `MARKETING.md`: public identity, messaging, contact channels, and release communication.
 3. `PRINCIPLES.md`: working and review rules.
 4. `UI_GUIDE.md`: reusable native UI and interaction contracts.
-5. `ARCHITECTURE.md`: current technical shape.
-6. `TASKS.md`: active work and unresolved decisions.
-7. `PLAN.md`: current approved execution plan.
-8. `RESEARCH.md`: Knowledge Base index and research inbox; follow the relevant `knowledge/*.md` topic.
-9. `TOOLING.md`: repeatable workflows and corrections.
-10. `BACKLOG.md`: unapproved future ideas.
+5. `Airframe/doc/ui-performance.md`: authoritative UI rendering and interaction cost, preparation, invalidation, review, and profiling contract.
+6. `ARCHITECTURE.md`: current technical shape.
+7. `TASKS.md`: active work and unresolved decisions.
+8. `PLAN.md`: current approved execution plan.
+9. `RESEARCH.md`: Knowledge Base index and research inbox; follow the relevant `knowledge/*.md` topic.
+10. `TOOLING.md`: repeatable workflows and corrections.
+11. `BACKLOG.md`: unapproved future ideas.

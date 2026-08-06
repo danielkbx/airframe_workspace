@@ -24,12 +24,6 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 
 ## Live Acceptance Pending
 
-### Analysis Crosshair Performance
-
-- Verify with a usable CHIRP document that rapid pointer motion redraws only the crosshair layer in Frequency Response Response/Spectrogram and Spectrum Frequency/heatmap modes.
-- During a five-second pointer profile, static FFT traces, heatmaps, grids, labels, and response paths must remain flat after initial layout.
-- Recheck resize, zoom, snapping, guide/filter highlights, and pointer exit after profiling.
-
 ### Inspector Scroll and Hover Stability
 
 - On macOS, confirm Graph, Table, Spectrum, and Step Response inspectors scroll without visible stutter.
