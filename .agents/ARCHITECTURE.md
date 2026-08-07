@@ -1,5 +1,7 @@
 # Current Architecture
 
+- `CurrentSensorCalibrationAssistantState` is transient app-owned UI state with a pure nested calculator and route-specific steps. `DocumentHomeView.Overview.Container` supplies selected-log consumption, header Scale, and an associated-configuration-only fallback; `CurrentSensorCalibrationAssistantView` presents it through the shared `AssistantShell`, `AssistantHeading`, and `AssistantRow` components also used by FC import. The workflow owns no document data, cache, background work, or persistence.
+
 ## Airframe document storage
 
 - Normal `.airframe` documents are regular files backed by `AirframeContainer`; the application does not reconstruct or persist directory packages in ordinary open, save, duplicate, raw-log, or flight-controller flows.
@@ -81,6 +83,18 @@ FlightControllerImportPayload
 AirframeImportMaterializer
 ```
 
+CoreBluetooth connects without a service scan filter, discovers services after connection, then resolves the first candidate whose service, write characteristic, notify/indicate characteristic, and characteristic properties form a complete UART profile. Multiple layouts may share one service UUID: `FFE0` accepts both split `FFE1` write / `FFE2` notify and shared bidirectional `FFE1`. Manufacturer and advertised device names do not select the transport profile; the later Betaflight MSP handshake validates controller compatibility.
+
+The first idempotent `MSP_API_VERSION` request has one timeout retry regardless of the default request retry setting. This absorbs the hardware-validated post-notification race on BLE UART bridges without imposing a fixed delay on every connection or changing retry behavior for later identity, configuration, and download requests.
+
+USB configuration capture retains canonical `dump all`. After Bluetooth connects, its resolved GATT characteristic layout reports whether long continuous responses are supported. Every recognized profile uses canonical `dump all` except the hardware-validated shared-`FFE1` `FFE0 UART` layout, which uses Airframe's comprehensive segmented format; unresolved/unknown Bluetooth remains on that conservative fallback. The same capability controls whether CLI `env`/`status` enrichment is attempted. Format 2 is backed by generated upstream setting catalogs for BF 4.3 through 2026.6 plus raw MSP configuration records, emits its setting/profile portion as a safe replayable CLI batch, and ends with `save`. Pre-4.5.4 constrained controllers remain in one interactive CLI session and reconnect after exit/reboot; framed firmware uses bounded commands, while API 1.48+ reads values through `MSP2_CLI_SETTING`. Direct constrained capture runs before the log because it may require a reconnect; Direct complete-dump capture preserves the original proven order after the log transfer. Wi-Fi and Mass Storage expose configuration as a separate initial determinate stage.
+
+Log import provenance belongs to each immutable log descriptor, not only an import event: `file`, `usbCable`, or `bluetooth`. The value records the initial controller-contact path, so Wi-Fi and Mass Storage remain Bluetooth imports even though the log bytes later travel over another channel. Raw files and newly attached file sources are marked as files. Older descriptors tied to an FC import but lacking provenance remain unknown.
+
+Runtime hardware capture follows transport capability rather than guessed firmware/bridge combinations. Every connection first builds a baseline from bounded board/MSP responses; generated upstream hardware catalogs map version-specific active-sensor IDs for API 1.46+, and API 1.47+ supplies the MCU name directly. USB additionally attempts CLI `env` and `status` and merges their richer facts over the baseline. Bluetooth, including the BLE setup leg used by Wi-Fi and Mass Storage, never requests those potentially large continuous responses.
+
+`FlightControllerImportAssistantState` automatically selects a device only when no selection exists. Subsequent discovery snapshots retain the selected ID even while its BLE advertisement is temporarily absent, making `selectedDevice` nil and disabling Next instead of falling back to another transport. The selection becomes usable again if the same ID reappears; an explicit Bluetooth visibility-filter change may clear a now-hidden selection and choose a visible default.
+
 - `BlackboxCore`: byte streams, encodings, predictors, frame primitives, and typed parser failures.
 - `BlackboxReader`: imports, source/log/session identity, schemas, frame streams, recovery, scan overview, syncpoint index, range queries, raw series, events, and retained issues.
 - `BlackboxAnalysis`: derived series and dedicated calculations such as Spectrum, Step Response, attitude, motor normalization, and automatic timeline range.
@@ -106,6 +120,8 @@ Dependencies point downward. Domain packages never depend on captions, SwiftUI, 
 FC acquisition writes downloaded logs and optional CLI configuration to a managed temporary directory. The assistant returns `FlightControllerImportPayload`; `AirframeImportMaterializer` either creates a package or atomically appends the payload without coupling acquisition to document lifecycle. Log payloads are normalized to the Reader-discovered segment end before package storage, trimming FlashFS tail bytes after a valid terminal log-end marker.
 
 The app's neutral flight-controller runtime consumes provider replacement streams. On macOS it merges serial and Bluetooth snapshots; on iOS/iPadOS it consumes Bluetooth only. Provider-qualified assistant IDs map back to exact provider-owned devices, source failures remove only that source's snapshot, and all transports feed the same acquisition pipeline.
+
+Flight-controller import decisions are layered. `FlightControllerConnectionFlow` derives transfer policy once from the initial contact path plus resolved transport response capability: provenance, configuration capture, extended CLI status permission, and dataflash options. The assistant's `ImportCapabilities` separately derives product methods and option availability from contact path, controller storage, stored-log presence, and Wi-Fi capability. A single post-import deletion flow selects Direct MSP erase, SD-volume deletion, Mass Storage flash replug, or no cleanup. Views consume these resolved states and contain no BLE-profile or chipset policy.
 
 Main-frame time is the primary query axis. Valid auxiliary frames are associated with the active main-frame interval.
 
@@ -172,6 +188,8 @@ Do not collapse source, segment, session, and runtime-window identity.
 ## Presentation
 
 - `AnalysisSeriesCatalog` is the app-facing series catalog.
+- Opening a raw log or an embedded `.airframe` source that produces zero readable logs plus Reader issues enters a failed document state with the first localized actionable issue. A package with no readable source derives its empty/error presentation from its embedded-source open states instead of the otherwise idle package shell. Partially readable documents remain open and retain their issue summaries.
+- Import scanning isolates each marker-delimited Blackbox candidate. The strict scanner remains available for format validation, while the Reader's recovering scan retains valid segments before and after a malformed candidate, preserves their original candidate indices, and emits a source issue at the skipped candidate's start offset. Global source/segment limits remain fatal.
 - Series IDs remain stable semantic identifiers; Reader IDs may be resolved across schema index differences by marker and unique field name.
 - Presentation metadata defines semantic group, localized caption key, physical unit, conversion, precision, axis hint, and raw fallback.
 - Graph sections are ordered app-owned state. Table and Graph field assignments are independent.

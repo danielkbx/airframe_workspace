@@ -34,7 +34,7 @@ Claim status is one of `verified`, `partially verified`, `heuristic`, `conflicti
 |---|---|---|
 | [PID Tuning Principles](PID_TUNING_PRINCIPLES.md) | PID-F signal flow, response interpretation, gain relationships, version caveats, and Airframe analysis relevance | 2026-08-05 |
 | [Spectrum Tuning Guides](SPECTRUM_TUNING_GUIDES.md) | Filter-delay and spectrum evidence, uncertainties, proposed setup profiles, and validation requirements | 2026-08-05 |
-| [Blackbox Format and Compatibility](BLACKBOX_FORMAT_AND_COMPATIBILITY.md) | Frame format, writer/viewer compatibility, headers, versions, and parser behavior | 2026-08-05 |
+| [Blackbox Format and Compatibility](BLACKBOX_FORMAT_AND_COMPATIBILITY.md) | Frame format, writer/viewer compatibility, headers, versions, ESC-free hardware logging, SITL virtual logs, and parser behavior | 2026-08-06 |
 | [Upstream Analysis Tools](UPSTREAM_ANALYSIS_TOOLS.md) | Blackbox Explorer, PIDtoolbox, related parsers, graph/spectrum algorithms | 2026-08-05 |
 | [Flight Controller Connectivity](FLIGHT_CONTROLLER_CONNECTIVITY.md) | MSP, serial, BLE, USB/iPadOS, FlashFS, and hardware validation | 2026-08-01 |
 | [Apple Platforms and CI](APPLE_PLATFORMS_AND_CI.md) | Apple framework feasibility and Xcode Cloud entitlement behavior | 2026-08-01 |

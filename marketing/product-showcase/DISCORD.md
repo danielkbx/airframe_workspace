@@ -12,6 +12,20 @@ Build 43 also adds aircraft settings, center-of-gravity diagnostics, battery cel
 
 Image: `08-build-43-filter-guides.png`
 
+## Early Access Update — Build 47
+
+**CHIRP analysis is now in Airframe**
+
+Build 47 adds a dedicated frequency-response analysis for Betaflight CHIRP flights. Airframe detects recorded CHIRP sweeps automatically and presents the response, phase, sensitivity, and derived step response for Roll, Pitch, and Yaw.
+
+Tune Score summarizes stability margin, robustness, damping, and tracking fidelity, together with its confidence and the supporting measurements for each axis. It is intended to make the recorded response easier to interpret while keeping the underlying evidence visible.
+
+The Spectrogram view shows how the measured signal follows the expected sweep and can highlight its start, end, and harmonics. Together, the two views show both the resulting frequency response and the quality of the evidence behind it.
+
+Tune Score is an assessment of the recorded flight, not a tuning recommendation.
+
+Images: `09-build-47-chirp-response.png`, followed by `10-build-47-chirp-spectrogram.png`
+
 ## 00 — The Story Behind Airframe
 
 **Airframe**

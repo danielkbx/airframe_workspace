@@ -19,7 +19,24 @@ Current status:
 
 - Available: Overview, Graph and Playback, Spectrum, Step Response, Flight Map, Flight Controller Import.
 - Build update asset: `08-build-43-filter-guides.png`, showing the new Spectrum Filter Guides with measured gyro signals, frequency regions, P90 references, and filter curves.
-- This six-image set is final. No additional screenshots are planned for the Discord showcase.
+- Build 47 update assets: `09-build-47-chirp-response.png` and `10-build-47-chirp-spectrogram.png`, showing the complementary result and evidence views of CHIRP analysis.
+- The original six-image product showcase remains final; numbered build-update assets are added only for noteworthy release posts.
+
+### 09–10 — Build 47 CHIRP Analysis
+
+Filenames:
+
+- `09-build-47-chirp-response.png`
+- `10-build-47-chirp-spectrogram.png`
+
+Capture:
+
+- Use the same selected CHIRP log, window size, sidebar state, and inspector width in both images.
+- Response: show magnitude, phase, sensitivity, derived step response, Tune Score, axis measurements, and guides.
+- Spectrogram: show all three axes with the expected sweep enabled and the guide controls visible.
+- Keep neutral log names and ensure no filename, path, controller identifier, or other private data is exposed.
+
+Purpose: explain both the interpreted frequency-response result and the recorded sweep evidence supporting it.
 
 ### 01 — Overview
 

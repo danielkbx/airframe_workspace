@@ -43,6 +43,7 @@ Every flight tells a story.
 - Discord showcase messaging should promise channel updates when Airframe receives major changes or noteworthy new features, without implying a fixed update schedule.
 - Flight Controller Import messaging should explicitly name USB cable, Bluetooth, and SpeedyBee Adapter 3 support. Bluetooth and Adapter 3 enable direct flight-controller import on iOS devices.
 - Spectrum Filter Guides are a primary website feature and the headline for tester build 43. Describe them as placing aircraft-specific motion, prop-wash/control, and motor-noise regions, P90 references, and recorded Betaflight filter curves in the context of the measured spectrum so pilots can judge whether filters target the relevant noise.
+- The Build 47 Discord update focuses on CHIRP analysis. Its paired screenshots show the response/Tune Score result and the supporting Spectrogram evidence. Messaging must keep the underlying measurements visible and describe Tune Score as an assessment of the recorded flight rather than a tuning recommendation.
 - The macOS version comes first. Public messaging must say that iPhone and iPad will follow later because smaller displays and touch interaction still require dedicated adaptation.
 - Map must be described as beta. Show its useful current state honestly, use a static capture, and say that presentation and playback are still being refined.
 - Do not advertise backlog, hidden, incomplete, or known-problem behavior as finished.
@@ -90,6 +91,8 @@ Every flight tells a story.
 - Tester build 43 is marked in the public repository by `build/43` at `6e38f52`. Its tester notes cover aircraft settings and center-of-gravity diagnostics, interactive Spectrum tuning guides and stable mode switching, battery cell count with per-cell voltages, and restored per-log In/Out points.
 - Tester build 47 covers CHIRP frequency-response analysis and tune scoring, smoother Graph/Table playback and scrubbing, faster reopen through persistent derived-data caching, improved Craft attitude/loading/CHIRP status, Betaflight 2026.6.1 compatibility, UI refinements, and Acknowledgements/community access.
 - The in-app What's New entry uses numeric catalog ID `3` and covers four concise user-facing themes: CHIRP Analysis, performance, Acknowledgements, and broad UI improvements. Technical test instructions remain exclusive to TestFlight notes.
+- The next in-app What's New entry uses numeric catalog ID `4` and covers four concise user-facing themes: portable analysis presets, broader Bluetooth flight-controller import, new Overview tools, and performance/document reliability. Technical test instructions remain exclusive to TestFlight notes.
+- What's New shows the app version below its title. Beta builds also show the build number; production builds do not.
 - TestFlight notes for build 47:
 
   ```text
@@ -110,7 +113,7 @@ Every flight tells a story.
 - What's New uses monotonically increasing numeric catalog IDs independent of app versions and builds. The local and iCloud marker is stored under `lastSeenWhatsNewsCatalogId`; users receive every catalog entry with a higher ID, then the highest presented ID is retained.
 - A true first launch shows no What's New screen.
 - Changes across skipped releases are combined by topic rather than presented as consecutive version pages.
-- What's New remains manually accessible through About.
+- What's New remains manually accessible through About and shows only the newest catalog entry so the manual view stays concise.
 - macOS also exposes `What's New in Airframe` in the Help menu for repeat viewing and testing; manual presentation never changes the synchronized seen marker.
 - A release counts as seen when its automatic presentation is shown.
 - The seen release is mirrored locally and through iCloud key-value storage so it normally appears once per iCloud user, not once per device.

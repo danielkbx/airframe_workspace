@@ -23,14 +23,11 @@ Unapproved future ideas only. Promote an item to [TASKS.md](TASKS.md) or an appr
 - Add privacy-safe aggregate telemetry, a dataflash-specific timeout, bounded output-budget benchmarks from 400 through 4096 bytes, progress throttling, and same-offset adaptive fallback for timeout/checksum failures.
 - Treat a zero-character compressed response as insufficient output budget, not end-of-log. Preserve confirmed bytes, cancellation cleanup, and resumable offsets.
 - Compare against Configurator on the same hardware. Consider pipelining only after stop-and-wait optimization is exhausted.
-
-### Legacy BLE Configuration Capture
-
-- Betaflight 4.5.2 over SpeedyBee V2 completed a small `diff all` but truncated `dump all`; do not persist `diff all` as a complete configuration.
-- USB may use interactive `dump all`; Betaflight 4.5.4+ may use framed MSP CLI over BLE. Older BLE firmware remains log-only unless a complete structured configuration path is proven.
+- Reduce comprehensive configuration time on the constrained shared-`FFE1` Bluetooth layout without reintroducing large continuous CLI responses: map more bounded binary MSP payloads back to replayable settings and retain per-setting CLI only for uncovered values.
 
 ### Mass Storage and Wi-Fi
 
+- Investigate whether the SpeedyBee Adapter 3's transparent TCP 4278 MSP bridge offers a useful alternative to BLE for configuration capture after Wi-Fi join and before the existing MSC prepare command. The resolved ABF0 BLE profile now uses canonical `dump all`; retain this idea only if TCP proves materially faster or more reliable.
 - Validate Mass Storage import on physical iOS/iPadOS: deletion/flush semantics, external-volume presentation, flash replug over BLE, compact layout, and the deliberate absence of interactive legacy-BLE configuration capture.
 - Investigate a reliable host-side signal that a USB cable is actually attached before offering Mass Storage from a Bluetooth connection.
 - Give known import failures typed, actionable messages while retaining an honest generic fallback.
@@ -88,6 +85,7 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 
 ## CLI Follow-Ups
 
+- Add a controlled Blackbox test-log generator CLI that configures `MOTOR_TEST`, starts and stops recording cleanly, waits for Blackbox shutdown, restores `NORMAL`, and optionally verifies the resulting log. Explicitly avoid the `ALWAYS` save/reboot race.
 - Add `airframe frames`, `summary`, `stats`, `derived`, and `dump-config` commands.
 - Add value predicates and aggregate window filters only after the basic field/time query model is stable.
 
