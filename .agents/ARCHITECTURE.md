@@ -98,6 +98,8 @@ Runtime hardware capture follows transport capability rather than guessed firmwa
 - `BlackboxCore`: byte streams, encodings, predictors, frame primitives, and typed parser failures.
 - `BlackboxReader`: imports, source/log/session identity, schemas, frame streams, recovery, scan overview, syncpoint index, range queries, raw series, events, and retained issues.
 - `BlackboxAnalysis`: derived series and dedicated calculations such as Spectrum, Step Response, attitude, motor normalization, and automatic timeline range.
+- Step Response derives normalized peak, T50, and interpolated 10...90% rise time from each averaged Wiener-deconvolution axis response. The macOS inspector presents these as `Peak`, `T50`, and `tᵣ`; Step Response persistent-cache version 2 invalidates results without rise time.
+- A cancelled Step Response trace computation publishes no partial axis outcomes and writes no failure cache entry. Restore ignores cancellation failures written by the initial version-2 development build so the trace is recomputed once its source/range identity stabilizes.
 - `AirframeCaptions`: typed localization over domain semantic IDs.
 - `AirframeUnits`: focused locale-aware numeric and unit formatting.
 - `AirframeUI`: reusable data-driven rendering and display models without app navigation ownership.
