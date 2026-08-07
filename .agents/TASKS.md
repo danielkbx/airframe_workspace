@@ -80,6 +80,7 @@ Automated container and lifecycle work is complete. Remaining acceptance is envi
 - Real iCloud Drive and third-party document-provider open/save/duplicate/export.
 - Cross-volume replacement fallback.
 - Large real-world document performance and Instruments profiling.
+- Live-profile the 2026-08-07 Spectrum interaction fix with a representative large log: zoom deeply, pan by drag/trackpad/wheel, resize the window, and confirm no `exportedPackageState`, `updateMetadata`, FFT, or semantic preparation appears during direct manipulation. Confirm one state publication after the interaction boundary or one-second quiet period.
 - Exact picker/exporter behavior listed as manual in [DOCUMENT_IO_MATRIX.md](DOCUMENT_IO_MATRIX.md).
 
 ## Maintenance

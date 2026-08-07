@@ -1,5 +1,23 @@
 # Current Plan
 
+## Spectrum Interaction And Document-State Coalescing (Implemented; Live Acceptance Pending 2026-08-07)
+
+### Think Before Coding
+
+- Separate Spectrum interaction cadence from document-state publication and keep domain mutations independent from UI-state save cadence.
+
+### Simplicity First
+
+- Spectrum commits only at interaction boundaries; the workspace retains one latest `Metadata.State` candidate behind a one-second trailing debounce.
+
+### Surgical Changes
+
+- Preserve FFT, render models, document format, and the 350 ms domain-save path. Equality-gate only the existing Spectrum geometry publications and route main/reference UI state through one staging API.
+
+### Goal-Driven Execution
+
+- Workspace/controller and platform persistence tests, all AirframeUI package tests, and macOS/iPadOS builds pass. Physical large-log panning/resize profiling remains tracked in `TASKS.md`.
+
 ## Step Response Horizontal Zoom (Implemented; Live Acceptance Pending 2026-08-07)
 
 ### Think Before Coding

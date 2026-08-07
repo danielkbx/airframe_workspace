@@ -156,6 +156,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 ## Safety And Performance
 
 - [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md) is the single cross-feature authority for high-frequency UI cost, preparation, invalidation boundaries, review, and profiling acceptance. Feature-specific decisions may add stricter invariants but must not duplicate or weaken it.
+- Package-backed UI/document state uses a one-second trailing debounce at the workspace boundary. Only the latest `Metadata.State` candidate becomes a workspace revision and container commit; explicit flush, close, duplicate, and background publication materialize it immediately. Domain mutations retain their separate 350 ms save cadence and integrate any pending UI state first.
 
 - Treat every input byte, header, frame definition, event payload, and caller option as hostile.
 - Validate bounds and configured budgets before reads, allocation, iteration, or filesystem work.
