@@ -53,6 +53,7 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 
 ### Spectrum
 
+- Add threshold-duration analysis and heatmap/spectrogram Y-intensity measurement only after separate interaction and semantics are approved; neither belongs to the current X-only measurement.
 - Add Welch PSD frequency and PSD-vs-Throttle/RPM views after defining estimator compatibility, controls, dB normalization, and presentation metadata.
 - Add PID Error vs Setpoint.
 - Validate throttle-locus RPM-notch aggregation against PIDtoolbox Pro on the Q700 log; consider median or a minimum bin count only if evidence shows outlier/sparsity problems.

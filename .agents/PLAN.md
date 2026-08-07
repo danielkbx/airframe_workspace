@@ -1,5 +1,25 @@
 # Current Plan
 
+## X-Range Measurement (Implemented 2026-08-07; Live Validation Pending)
+
+### Think Before Coding
+
+- Keep mixed X domains pane-bound and use exact display-scaled samples, reliable-only Frequency Response data, neighboring boundary samples, and recorded gaps.
+
+### Simplicity First
+
+- One committed environment state, one leaf-local coalesced drag draft, one native tracking layer, one bounded overlay, and one streaming statistics/extrema reducer serve every supported surface without persistence or a new cache.
+
+### Surgical Changes
+
+- Spectrum snap paths were removed while its pixel-bounded peak index remains. Existing chart render models stay intact; measurement tasks belong to their surfaces and reject stale publications.
+- Pane-bound inspector results reuse each trace's render color, omit redundant pane names, consolidate related values into compact rows, and expose localized native help for every metric label. Oscillation output appears only for a stable estimate; rejection copy and completed-period counts remain hidden.
+- Drag updates remain inside the overlay leaf, are deduplicated and capped at 120 visible updates per second, reuse precomputed domains and a retained formatter, and redraw only bounded rectangles. Calculation handles are non-observable so task replacement cannot invalidate complete chart surfaces.
+
+### Goal-Driven Execution
+
+- Package tests, state tests, and both platform builds pass. Complete the remaining physical gesture, large-log performance, and repeated open/measure/close lifecycle checks before declaring live acceptance complete.
+
 ## Tuning Interpretation, Filter Score, and Assistance Roadmap (Approved 2026-08-05)
 
 ### Summary

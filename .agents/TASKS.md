@@ -2,6 +2,13 @@
 
 Only approved near-term work and unresolved acceptance gates belong here. Completed work belongs in Git and the current architecture; unapproved ideas belong in [BACKLOG.md](BACKLOG.md).
 
+## Implemented, Live Acceptance Pending: X-Range Measurement
+
+- The approved 1.0 exception replaces Spectrum snapping with persistent X-range selection on Graph, Spectrum, Step Response, Frequency Response, and spectrogram/heatmap modes.
+- Exact Graph statistics stream through indexed Reader chunks; prepared analysis curves use the same extrema/statistics reducer. Time curves expose conservative per-series oscillation estimates, including multiple-period averaging and typed rejection.
+- Automated package, state, macOS, and iOS build gates pass. Remaining acceptance is a live Option-drag/iPad ruler pass plus long-log profiling that confirms no decode during drag and no static-canvas invalidation from pointer updates.
+- The 2026-08-07 source-level SwiftUI performance remediation localizes and deduplicates the draft in the overlay leaf, coalesces visible pointer updates to at most 120 Hz, computes pane domains outside that leaf, formats the chip once with a retained formatter, replaces the chart-sized overlay `Canvas` with bounded rectangles, and hides surface calculation handles behind stable non-observable owners. Automated state/package tests and platform builds cover the structural fix; the remaining live Instruments pass must confirm no decoding during drag, no static-canvas invalidation from pointer updates, and prompt release after repeated open/measure/close cycles.
+
 ## Completed: Action-Based Presets Foundation
 
 - The native toolbar exposes Default first and generation-2 user presets alphabetically immediately before the inspector toggle, without selection or dirty affordances.
