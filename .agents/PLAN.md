@@ -1,5 +1,24 @@
 # Current Plan
 
+## Step Response Horizontal Zoom (Implemented; Live Acceptance Pending 2026-08-07)
+
+### Think Before Coding
+
+- Keep Step Response analysis/cache identity independent of its horizontal viewport. Treat semantic results, geometry projection, interaction state, and persistence as separate cadences.
+- Keep the transient vertical crosshair in its own interaction-cadence overlay, with only an X/time chip and no Y readout, so pointer motion never invalidates the semantic trace Canvas.
+
+### Simplicity First
+
+- Use one 1x...10x time window shared by all classic Step Response panes and traces. Preserve the Y domain and leave Frequency Response/Spectrogram unchanged.
+
+### Surgical Changes
+
+- Persist only normalized viewport fractions in existing document/preset Step Response storage. Draw visible uniform samples plus one neighbor without adding an analysis or cache layer.
+
+### Goal-Driven Execution
+
+- Package policy tests, focused app persistence/preset tests, and both platform builds pass. Remaining physical interaction and profiling gates are tracked in `TASKS.md`.
+
 ## X-Range Measurement (Implemented 2026-08-07; Live Validation Pending)
 
 ### Think Before Coding

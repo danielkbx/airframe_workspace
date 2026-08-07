@@ -31,6 +31,13 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 
 ## Live Acceptance Pending
 
+### Step Response Horizontal Zoom
+
+- On iPad hardware, verify touch-anchored pinch, two-finger pan, double-tap reset, the existing one-finger range measurement, VoiceOver adjustment, and hardware-keyboard Zoom commands at 1x...10x.
+- On macOS, verify trackpad pinch, trackpad/mouse-wheel pan, double-click reset, range measurement, and View-menu Zoom commands.
+- Profile a representative multi-log overlay while continuously zooming and panning. Analysis must not restart, static work must remain visible-sample bounded, and document persistence must publish only at interaction boundaries.
+- Manually verify the full-height vertical crosshair and attached time chip across the full and zoomed viewports on iPadOS and macOS, including coexistence with the armed range-measurement gesture.
+
 ### iPad Readiness And Canvas Touch Pass
 
 - Run the portrait/landscape and narrow/intermediate/wide window matrix in [IPAD_AUDIT.md](IPAD_AUDIT.md), including long document names and expanded/collapsed Timeline states.

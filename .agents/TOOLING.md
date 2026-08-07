@@ -372,6 +372,7 @@ Agents must update this file proactively when they learn a better command, workf
 # SwiftUI rendering-performance verification
 
 - Follow the single normative contract in [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md); this section contains tooling only.
+- An `@Entry` environment default for an explicitly `@MainActor` observable cannot call its initializer directly because the generated key is nonisolated. Initialize it with `MainActor.assumeIsolated { Type() }`; this preserves the modern `@Entry` API and satisfies Swift 5.9 actor checking.
 - For a read-only invalidation diagnosis, temporarily place `Self._logChanges()` in static, guide, and interaction bodies and/or wrap draw closures with signpost counters. Exercise the relevant high-frequency input for at least five seconds. Static draw counts must stay flat during interaction-only updates; then verify resize, zoom, visibility, and discrete selection changes still redraw their intended layers and remove the instrumentation.
 - Capture a running macOS app with `xcrun xctrace record --template 'Time Profiler' --attach <pid> --time-limit <duration> --output <trace>`.
 - Export an attach-based Time Profiler capture with `xcrun xctrace export --input <trace> --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]' --output <xml>`. Inspect resolved main-thread stacks and compare normalized behavior when input-event counts differ; raw totals alone are not stable acceptance evidence.
@@ -381,3 +382,6 @@ Agents must update this file proactively when they learn a better command, workf
 
 - For multi-page PDF review, render every page with `pdftoppm`, then create a compact ImageMagick contact sheet before opening selected full-resolution pages. On macOS, `montage` can fail with `unable to read font`; pass `-font /System/Library/Fonts/Helvetica.ttc` explicitly, for example: `montage page-*.jpg -font /System/Library/Fonts/Helvetica.ttc -thumbnail 320x180 -tile 3x -geometry +8+12 contact.jpg`.
 - Clean rendered `/tmp` review directories with `/usr/bin/trash <explicit-directory>`; recursive `rm` can be rejected by the terminal safety filter even for a validated temporary path.
+# Shell command wrappers
+
+- In zsh, `status` is a read-only special parameter. Capture an exit code in a task-specific name such as `build_exit` when a command must print a saved log before returning the original status.
