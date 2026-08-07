@@ -1,5 +1,9 @@
 # Project Memory
 
+- Airframe 1.0 is under feature freeze until further notice: its functional scope is fixed. Current work targets iPadOS readiness and platform adaptation, not additional product features. A Paywall remains an explicitly approved pre-release task and should be implemented shortly before the 1.0 release.
+- Until the user changes this direction, an unspecified platform always means iPad/iPadOS. macOS behavior and presentation are frozen and must remain unchanged unless the user explicitly requests macOS work.
+- iPadOS work must isolate platform differences where necessary. Prefer conditional compilation for compact differences. When platform-specific code grows beyond a few lines, move it into platform-specific files; substantial SwiftUI views should generally have separate macOS and iOS/iPadOS implementations so each remains readable and independently previewable.
+
 - BLE flight-controller compatibility is determined by the discovered GATT service/characteristic layout and a successful Betaflight MSP handshake, never by manufacturer or advertised device name. The name remains presentation/discovery evidence only. The `FFE0` UART family supports both split `FFE1` write / `FFE2` notify and shared bidirectional `FFE1` layouts.
 
 - Flight-controller device selection is sticky across discovery snapshots. A temporarily missing BLE peripheral must disable progression while retaining its ID; it must never silently select a remaining USB or Bluetooth device. Explicit filter changes may choose a new visible default when they intentionally hide the current selection.

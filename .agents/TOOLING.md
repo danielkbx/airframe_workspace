@@ -38,6 +38,7 @@
 - Coalescing an expensive task is insufficient when its completion is written only into SwiftUI surface-local `@State`: repeated surface replacement cancels every waiter, leaving a forever-resetting loading UI while the retained task runs. Keep the user-visible load state and completion delivery beside the coalesced task in a window-scoped observable store; make surface appearance an idempotent trigger only.
 
 - The Airframe Xcode project is `Airframe/App/Airframe.xcodeproj`; run app builds/tests with `Airframe/App` as the working directory (not `Airframe/App/Airframe`). Continue redirecting simulator/app `xcodebuild` output to a log and inspect it only after completion.
+- In zsh build wrappers, do not assign the exit code to `status` because that shell parameter is read-only. Use a task-specific name such as `build_status` before tailing the saved log and exiting with that code.
 - Create Airframe commit tags with `git -C Airframe tag ...`; running `git tag` from the wrapper root targets the private workspace repository and cannot resolve public-subrepo commit IDs.
 
 - Release tooling treats `Changelog:` trailers as editorial input and never publishes them without review.

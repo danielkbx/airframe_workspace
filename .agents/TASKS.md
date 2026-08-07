@@ -24,6 +24,13 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 
 ## Live Acceptance Pending
 
+### iPad Readiness And Canvas Touch Pass
+
+- Run the portrait/landscape and narrow/intermediate/wide window matrix in [IPAD_AUDIT.md](IPAD_AUDIT.md), including long document names and expanded/collapsed Timeline states.
+- Complete the VoiceOver, largest Dynamic Type, hardware-keyboard, Reduce Motion, and physical-device multi-touch checks documented in the audit.
+- Validate document close/background behavior with iCloud Drive and a third-party document provider, and profile aggressive Graph/Spectrum gestures with representative long logs.
+- Treat visual marker collision tuning and any findings from these gates as bounded follow-up work; do not expand the 1.0 feature set.
+
 ### T-Motor FFE0 Bluetooth UART
 
 - Root cause identified 2026-08-06 with the standalone probe `tools/tmotor_ble_probe.swift` (FCC-010): `FFE1` carries raw MSP with no activation or extra framing, and the board is confirmed as `TMOTORVELOXF7SE` (Betaflight 4.5.4, API 1.46) from BOARD_INFO. 10 of 10 probe sessions completed the full identity handshake, DATAFLASH_SUMMARY, and a 512-byte DATAFLASH_READ. The only fragility is the first MSP request directly after notify enable, which can be answered ~1.6 s late or dropped; a ~500 ms pre-write delay or one retry fixes every session. The Android capture idea is obsolete.
@@ -80,8 +87,15 @@ Automated container and lifecycle work is complete. Remaining acceptance is envi
 - Final project license before adding SPDX identifiers.
 - A transformed or persisted log index only after profiling package open, seek, memory, and autosave costs.
 
+## Airframe 1.0 Release Gate
+
+- Implement the Paywall shortly before the 1.0 release. Preserve the permanent community-access entitlement recorded in `MEMORY.md`.
+
 ## Current Constraints
 
+- Airframe 1.0 is under feature freeze until further notice; its functional scope is fixed apart from the approved pre-release Paywall.
+- Current product work targets iPad/iPadOS. When the user does not name a platform, interpret the request as iPad/iPadOS until explicitly changed.
+- Preserve macOS behavior and presentation unless the user explicitly requests macOS work. Isolate required platform differences with conditional compilation for small changes and platform-specific files for changes longer than a few lines. Prefer separate macOS and iOS/iPadOS SwiftUI view implementations when a view has substantial platform-specific structure.
 - New product work remains planning-only until the user selects a measure from [PLAN.md](PLAN.md) or a backlog item.
 - No new external dependency without explicit approval.
 - Raw Betaflight logs remain byte-identical and read-only.
