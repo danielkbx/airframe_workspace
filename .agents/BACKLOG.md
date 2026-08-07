@@ -51,6 +51,8 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 
 ## Analysis and Presentation Follow-Ups
 
+- Post-1.0 only: implement the approved [Battery Sag Score plan](BATTERY_SAG_SCORE_PLAN.md). It adds one evidence-backed Good/Okay/Poor row to the existing Power card and explicitly does not estimate internal resistance or Battery Health.
+
 ### Spectrum
 
 - Add threshold-duration analysis and heatmap/spectrogram Y-intensity measurement only after separate interaction and semantics are approved; neither belongs to the current X-only measurement.
