@@ -83,6 +83,8 @@ FlightControllerImportPayload
 AirframeImportMaterializer
 ```
 
+Each production import assistant owns one bounded, in-memory `FlightControllerDiagnosticsRecorder`. The same recorder is injected into discovery, serial/CoreBluetooth transports, MSP coordination, Betaflight operations, and app-side Direct/Wi-Fi/Mass-Storage orchestration. Events contain timestamps, stages, symbolic command/service metadata, counts, capabilities, and privacy-safe error domain/code pairs. Durable peripheral or route identifiers are replaced by salted per-session labels; Blackbox/configuration/protocol payloads, credentials, filesystem paths, raw SSIDs, and durable identifiers never enter the recorder. The user can explicitly export a deterministic plain-text snapshot through the assistant's persistent diagnostics action; dismissing the assistant shuts the recorder down and clears its memory.
+
 CoreBluetooth connects without a service scan filter, discovers services after connection, then resolves the first candidate whose service, write characteristic, notify/indicate characteristic, and characteristic properties form a complete UART profile. Multiple layouts may share one service UUID: `FFE0` accepts both split `FFE1` write / `FFE2` notify and shared bidirectional `FFE1`. Manufacturer and advertised device names do not select the transport profile; the later Betaflight MSP handshake validates controller compatibility.
 
 The first idempotent `MSP_API_VERSION` request has one timeout retry regardless of the default request retry setting. This absorbs the hardware-validated post-notification race on BLE UART bridges without imposing a fixed delay on every connection or changing retry behavior for later identity, configuration, and download requests.

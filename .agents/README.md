@@ -4,6 +4,8 @@ Airframe is a native Swift Betaflight Blackbox log analyzer. This file is only t
 
 For document formats, pickers, sandbox access, imports, exports, persistence, or lifecycle work, `DOCUMENT_IO_MATRIX.md` is also mandatory context and must remain current.
 
+For any received Flight Controller Diagnostics attachment or FC import communication diagnosis, [`FC_IMPORT_DIAGNOSTICS_RUNBOOK.md`](FC_IMPORT_DIAGNOSTICS_RUNBOOK.md) is mandatory context. Follow its layered fault-boundary procedure before proposing a cause or retest.
+
 For Graph playback, scrubbing, cursor consumers, Timeline/toolbar/inspector readouts, Graph cache persistence, or package cursor publication, `Airframe/doc/graph-playback-performance.md` is mandatory context. Its cadence classification and change checklist are architectural gates.
 
 For Canvas, `GeometryReader`, data-backed SwiftUI views, render models, geometry publication, resize, pointer/gesture, scrolling, animation, or playback work, [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md) is mandatory context and the single cross-feature UI performance authority. Graph work must follow both contracts.
