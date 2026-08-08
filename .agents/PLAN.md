@@ -1,5 +1,23 @@
 # Current Plan
 
+## iOS Recent Documents (Implemented; Provider Acceptance Pending 2026-08-08)
+
+### Think Before Coding
+
+- Keep provider authorization as persistent bookmark data and let the existing `AirframeUIDocument` lifecycle own active security-scope access.
+
+### Simplicity First
+
+- One device-local versioned store retains at most eight independently decodable bookmark records and projects them through the unchanged `StartView.RecentDocument` UI model.
+
+### Surgical Changes
+
+- Only the iOS `HomeView` open paths and a platform-specific store changed. Folder imports, fixtures, document formats, iCloud state, user-facing strings, layout, and macOS `NSDocumentController` behavior remain unchanged.
+
+### Goal-Driven Execution
+
+- Focused store tests, the complete iOS app-test bundle, and the macOS app build pass. Physical On My iPad, iCloud Drive, and third-party-provider acceptance remains tracked in `TASKS.md`.
+
 ## Spectrum Interaction And Document-State Coalescing (Implemented; Live Acceptance Pending 2026-08-07)
 
 ### Think Before Coding

@@ -5,6 +5,7 @@
 ## Airframe document storage
 
 - Normal `.airframe` documents are regular files backed by `AirframeContainer`; the application does not reconstruct or persist directory packages in ordinary open, save, duplicate, raw-log, or flight-controller flows.
+- On iOS/iPadOS, `IOSRecentDocumentStore` owns a device-local, versioned `UserDefaults` envelope containing at most eight independently decodable bookmark records and last-known URLs. `HomeView` records only successfully opened `.airframe`, `.bbl`, and `.bfl` files, resolves bookmarks before reopening, refreshes stale records, and removes an entry after a failed Recent open. `AirframeUIDocument` retains the resolved security scope for the open document lifetime. macOS Recent Documents remains `NSDocumentController`-owned.
 - Temporary legacy support is one-way and isolated in `WorkspaceDocument/Container/LegacyAirframeConverter.swift`. It preflights the selected package before presenting the destination dialog and publishes a fully validated regular container.
 - `AirframeContainerTransfer` prebuilds and validates regular files for SwiftUI export so platform document pickers never define the physical document format through a `FileWrapper` directory.
 - `LegacyFormatIsolationGuardTests` statically confines legacy directory symbols to the converter and dedicated legacy tests.
