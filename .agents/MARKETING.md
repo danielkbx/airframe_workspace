@@ -89,9 +89,11 @@ Every flight tells a story.
 
 - The `release/0.1.0` highlights cover the native flight map, Spectrum filter insight, automatic log tags and hiding, restored view state and cached analysis, safer Airframe documents, and the more personal About/privacy/community experience.
 - Tester build 43 is marked in the public repository by `build/43` at `6e38f52`. Its tester notes cover aircraft settings and center-of-gravity diagnostics, interactive Spectrum tuning guides and stable mode switching, battery cell count with per-cell voltages, and restored per-log In/Out points.
-- Tester build 47 covers CHIRP frequency-response analysis and tune scoring, smoother Graph/Table playback and scrubbing, faster reopen through persistent derived-data caching, improved Craft attitude/loading/CHIRP status, Betaflight 2026.6.1 compatibility, UI refinements, and Acknowledgements/community access.
+- Tester build 47 is marked by commit `6f8aa06`. It covers CHIRP frequency-response analysis and tune scoring, smoother Graph/Table playback and scrubbing, faster reopen through persistent derived-data caching, improved Craft attitude/loading/CHIRP status, Betaflight 2026.6.1 compatibility, portable presets, broader Bluetooth import, Overview tools, document reliability, UI refinements, and Acknowledgements/community access.
 - The in-app What's New entry uses numeric catalog ID `3` and covers four concise user-facing themes: CHIRP Analysis, performance, Acknowledgements, and broad UI improvements. Technical test instructions remain exclusive to TestFlight notes.
 - The next in-app What's New entry uses numeric catalog ID `4` and covers four concise user-facing themes: portable analysis presets, broader Bluetooth flight-controller import, new Overview tools, and performance/document reliability. Technical test instructions remain exclusive to TestFlight notes.
+- The next tester update changes only the TestFlight notes. The in-app What's New catalog remains unchanged at numeric catalog ID `4`.
+- TestFlight notes describe only what is new. They use concise declarative release-note language, never testing instructions, requests, or `What to Test` framing.
 - What's New shows the app version below its title. Beta builds also show the build number; production builds do not.
 - TestFlight notes for build 47:
 
@@ -105,6 +107,14 @@ Every flight tells a story.
   • If available, open a Betaflight 2026.6.1 log and verify its headers and analysis.
 
   Please report regressions, confusing results, and logs that do not behave as expected through Send Feedback or Discord.
+  ```
+- TestFlight notes for the next tester build after build 47:
+
+  ```text
+  • Improved iPad navigation, touch gestures, control sizing, and access to Home and Logs.
+  • Step Response now includes T50 and rise time, highlights the best axes, and supports horizontal zoom, panning, and a time crosshair.
+  • Spectrum range measurement is available again, hidden legends stay hidden, and zooming, panning, and window resizing are smoother.
+  • Flight Controller Import can create privacy-safe diagnostic emails with technical details for troubleshooting.
   ```
 - Git commits are editorial source material, never direct user-facing release notes.
 - Public Airframe release tags use `release/<semver>`.
