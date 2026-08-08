@@ -40,6 +40,7 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 
 ### iPad Readiness And Canvas Touch Pass
 
+- Implement iOS/iPadOS Recent Documents. `HomeView` currently passes an empty collection and a no-op open action to `StartView`; unlike macOS, there is no recent-document source. The implementation must retain provider-safe persistent access rather than storing bare URLs, refresh ordering after successful opens, handle stale or unavailable entries, and reuse the existing `AirframeUIDocument` open/close lifecycle without changing macOS behavior.
 - Run the portrait/landscape and narrow/intermediate/wide window matrix in [IPAD_AUDIT.md](IPAD_AUDIT.md), including long document names and expanded/collapsed Timeline states.
 - Complete the VoiceOver, largest Dynamic Type, hardware-keyboard, Reduce Motion, and physical-device multi-touch checks documented in the audit.
 - Validate document close/background behavior with iCloud Drive and a third-party document provider, and profile aggressive Graph/Spectrum gestures with representative long logs.

@@ -65,6 +65,18 @@ Build success is not visual verification.
 - If the environment prevents visual inspection, say so explicitly. Report build/type-check success separately and do not characterize the UI as finished or polished until a screenshot or user check confirms it.
 - Treat user screenshots as acceptance evidence. If a screenshot exposes a structural mismatch, revisit the reference and interaction model rather than applying cosmetic spacing patches.
 
+## In-App Application Icons
+
+- On iOS/iPadOS, loading an App Icon asset as a `UIImage` exposes its rectangular image pixels; SpringBoard's rounded icon mask is not inherited by an in-app SwiftUI `Image`. The shared icon view must apply its own continuous rounded-rectangle clip matching the established macOS artwork.
+- Keep the mask and any icon-relative overlay placement in the reusable icon view so Home, About, and future in-app presentations remain consistent. Position a badge relative to the visible icon edge; do not rely on transparent padding that exists only in another platform's asset.
+- Do not apply the iOS/iPadOS mask to the macOS branch. Preserve the established `NSApplication.applicationIconImage` presentation unless macOS is explicitly being changed.
+
+## All-Or-Nothing Adaptive Groups
+
+- When a small fixed group must appear either entirely in one row or entirely in one column, keep exactly those two complete arrangements. Do not use an adaptive grid that can create an unintended partial row such as `2 + 1`.
+- `ViewThatFits` evaluates candidate ideal sizes, which can reject a horizontal group of flexible children even when they can compress into the available row. When the choice must follow an exact content-width threshold, use a small custom `Layout` that reads `ProposedViewSize.width`, distributes the complete row explicitly, and otherwise places the complete column.
+- Keep the fallback candidate complete and ordered identically. Validate both sides of the threshold in narrow and wide iPad windows; size class alone is not a sufficient proxy for available content width.
+
 ## Multi-Selection Management Modals
 
 - Use a persistent list when the collection itself is the main content and the user can select several items for batch actions. This is distinct from compact one-of-many configuration, which remains a menu-style picker.
