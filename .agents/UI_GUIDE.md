@@ -54,6 +54,14 @@ Use this contract for small create/edit/save workflows such as Aircraft Settings
 - Keep accent color limited to the header symbol, focused control, and primary action.
 - Avoid a bare `NavigationStack + Form` as the default modal template. Use it when the content is genuinely form-like, scrollable, or already follows an established Airframe form surface.
 
+## Prominent Buttons
+
+- Use a prominent button for the single primary action in a dialog, assistant step, card, or compact workflow. Secondary, cancel, and dismissal actions retain their established native/plain styles.
+- Apply the shared `airframeProminentButtonStyle()` modifier instead of calling `.buttonStyle(.borderedProminent)` directly. Use it in production views and previews so every prominent button receives the same platform treatment.
+- On iOS/iPadOS, the button background uses Airframe's semantic accent color. Primary label and icon content use `primaryOnAccent`; subordinate content placed on the same accent surface uses `secondaryOnAccent`.
+- On iOS/iPadOS, prominent button labels use `.subheadline.weight(.semibold)`. Do not override the font, weight, foreground color, opacity, or disabled-state treatment at individual call sites.
+- On macOS, the shared modifier preserves the native `.borderedProminent` font and foreground treatment.
+
 ## Visual Acceptance Gate
 
 Build success is not visual verification.
@@ -76,6 +84,11 @@ Build success is not visual verification.
 - When a small fixed group must appear either entirely in one row or entirely in one column, keep exactly those two complete arrangements. Do not use an adaptive grid that can create an unintended partial row such as `2 + 1`.
 - `ViewThatFits` evaluates candidate ideal sizes, which can reject a horizontal group of flexible children even when they can compress into the available row. When the choice must follow an exact content-width threshold, use a small custom `Layout` that reads `ProposedViewSize.width`, distributes the complete row explicitly, and otherwise places the complete column.
 - Keep the fallback candidate complete and ordered identically. Validate both sides of the threshold in narrow and wide iPad windows; size class alone is not a sufficient proxy for available content width.
+
+## Overview Card Grid
+
+- Overview cards use one adaptive grid definition with a 280-point minimum and 520-point maximum card width across iOS, iPadOS, and macOS.
+- Keep the minimum stable unless compact card readability is deliberately redesigned. The larger maximum lets existing columns absorb intermediate-width remainder instead of leaving a narrow unused trailing strip.
 
 ## Multi-Selection Management Modals
 
