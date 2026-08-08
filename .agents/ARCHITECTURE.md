@@ -160,6 +160,8 @@ Do not collapse source, segment, session, and runtime-window identity.
 
 ## App Composition
 
+- The iOS/iPadOS target declares a storyboard-free `UILaunchScreen` whose only content is the fixed black `LaunchBackground` color asset (`#000000`), matching the rendered HomeView background. It intentionally has no branding content and does not affect macOS.
+
 - iOS: `WindowGroup` always routes through `HomeView`, including UI-test fixture launches, then owns at most one `AirframeUIDocument` workspace. The document toolbar exposes an explicit Home action that completes the existing flush/platform-close lifecycle before returning to the start surface; close failure leaves the document open and uses the existing error presentation. File-importer selection validates only the supported extension before handing the provider URL to `AirframeUIDocument`; regular-file and container validation occurs after the document starts security-scoped access.
 - The iOS/iPadOS empty-recents feature group uses one 680-point three-tile row when that complete row fits and otherwise one complete three-tile column; it never produces a partial row. macOS retains its existing fixed row.
 - Overview keeps its fixed adaptive card grid behind the concrete `CardGrid` view boundary. This prevents the container's modifier-heavy body and complete conditional card tree from forming one deeply nested generic type whose runtime metadata instantiation overflows the smaller physical-device arm64 stack; opaque `some View` helpers alone do not create this boundary.
