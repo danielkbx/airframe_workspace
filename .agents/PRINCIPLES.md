@@ -73,6 +73,10 @@ All native UI work must follow [`UI_GUIDE.md`](UI_GUIDE.md).
 
 All Canvas, `GeometryReader`, data-backed SwiftUI view, render-model, geometry-publication, resize, pointer/gesture, scroll, animation, and playback work must follow [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md). It is the single normative cross-feature source for UI cost models, preparation, invalidation boundaries, forbidden hot-path work, review, and profiling acceptance. Feature contracts may add stricter domain-specific invariants but must not restate or weaken it.
 
+## Stable Analytical Y-Axis Rule
+
+Every analytical graph must calculate its complete Y-domain exactly once from the full immutable render model. Pan, scroll, playback, X-axis Zoom, viewport changes, downsampling, and transient pointer interaction must never recompute, shrink, expand, or otherwise alter that Y-domain. Valid values must not be clipped to a default range; the initial model-domain calculation must expand its bounds to contain the complete represented dataset with appropriate stable headroom. Domain-specific no-data sentinels and analytical floors are not valid displayed values and must be excluded explicitly rather than treated as extrema. Traces, grids, guides, labels, crosshairs, and accessibility projections must all use the same fixed Y-domain. A feature that derives Y bounds from the current viewport is incomplete and must be rejected in review.
+
 ## User-Facing String Rule
 
 Every user-facing string must be defined in `AirframeCaptions` and backed by Xcode-native localization resources.
