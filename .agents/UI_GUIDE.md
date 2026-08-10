@@ -62,6 +62,11 @@ Use this contract for small create/edit/save workflows such as Aircraft Settings
 - On iOS/iPadOS, prominent button labels use `.subheadline.weight(.semibold)`. Do not override the font, weight, foreground color, opacity, or disabled-state treatment at individual call sites.
 - On macOS, the shared modifier preserves the native `.borderedProminent` font and foreground treatment.
 
+## Accent Background Contrast
+
+- On iOS/iPadOS, every Airframe-accent background must use the semantic on-accent foreground colors: `primaryOnAccent` for primary labels and icons, and `secondaryOnAccent` for subordinate content. Do not rely on the system's default accent-foreground inference because Airframe's iOS accent requires a white foreground.
+- This applies to prominent controls, tinted swipe actions, badges, chips, selections, and any future custom surface that paints the accent behind content. Keep macOS platform treatment unchanged unless its established component explicitly uses the same semantic colors.
+
 ## Visual Acceptance Gate
 
 Build success is not visual verification.
@@ -90,13 +95,14 @@ Build success is not visual verification.
 - Overview cards use one adaptive grid definition with a 280-point minimum and 520-point maximum card width across iOS, iPadOS, and macOS.
 - Keep the minimum stable unless compact card readability is deliberately redesigned. The larger maximum lets existing columns absorb intermediate-width remainder instead of leaving a narrow unused trailing strip.
 
-## Multi-Selection Management Modals
+## Management Modals
 
-- Use a persistent list when the collection itself is the main content and the user can select several items for batch actions. This is distinct from compact one-of-many configuration, which remains a menu-style picker.
+- On iOS/iPadOS, prefer a simple native list with per-row swipe actions when every operation naturally applies to one item. Do not expose selection checkboxes, Select All, batch-action footers, or redundant visible row-action icons without an approved workflow. Preset management exposes Edit, Share, and Delete only as trailing swipe actions.
+- On macOS, use a persistent list when the collection itself is the main content and the user can select several items for batch actions. This is distinct from compact one-of-many configuration, which remains a menu-style picker.
 - Make every item row full-width and interactive with a leading native square/checkmark symbol, stable model identity, and explicit selected/not-selected accessibility value. When the row also supports Finder-style inline rename, keep checkbox selection and the full-width name action separate so the editable text field is never nested inside a button.
 - When a batch list benefits from selecting all items, place a visually unlabeled checkbox as the first row; the standard position and tri-state mark communicate the action without redundant visible copy. Retain a localized `Select All` accessibility label. Use an indeterminate minus-square for a partial selection; clicking partial selects every current item, while clicking a complete selection clears it.
 - Keep batch selection transient. Reconcile it against observable collection changes so deleted or remotely removed identifiers cannot remain actionable; newly arriving items remain unselected.
-- Put destructive and export actions together in the established bottom action area, disable both for an empty selection, and keep the non-destructive dismissal available in empty states.
+- On macOS, put destructive and export actions together in the established bottom action area, disable both for an empty selection, and keep the non-destructive dismissal available in empty states.
 - Immutable built-in records do not appear in a management list when none of its actions can apply to them.
 
 ## Finder-Style Inline Renaming

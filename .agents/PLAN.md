@@ -1,5 +1,32 @@
 # Current Plan
 
+## iOS/iPadOS-Native Aircraft Settings (Implemented 2026-08-10)
+
+### Think Before Coding
+
+- Treat Aircraft Settings as a short modal editing task. Preserve the current macOS sheet unchanged and isolate the iOS/iPadOS presentation behind a platform-specific view.
+- Keep the existing draft-state and save semantics: Cancel discards the two local selections; Save publishes both values once and dismisses.
+
+### Simplicity First
+
+- On iOS/iPadOS, use one `NavigationStack` containing a native grouped `Form`, with the system navigation title `Aircraft Settings`.
+- Put `Cancel` in a `.cancellationAction` toolbar item and `Save` in a `.confirmationAction` toolbar item. Remove the in-content hero/title and bottom action bar on iOS/iPadOS.
+- Present one clearly labeled row per setting: `Propeller Size` and `Motor Layout`. Keep native menu pickers and their current option order.
+- Put the existing explanation in a form section footer so it remains available without competing with the navigation title.
+- Let `Form` own grouped row and canvas backgrounds. Remove the custom secondary control card and explicit sheet background on iOS/iPadOS.
+
+### Surgical Changes
+
+- Split only `AircraftSettingsView` presentation code. Reuse its inputs, local state, compatible-layout calculation, captions, save closure, call sites, and accessibility identifier.
+- Add no dependency, model change, document-format change, navigation-route change, or macOS visual change.
+- Keep user-facing text localizable and use semantic toolbar placements rather than hard-coded leading/trailing positions.
+
+### Goal-Driven Execution
+
+- iPad and iPhone previews cover the platform-specific presentation. A focused UI test opens a real Airframe document, verifies the navigation title, both labeled pickers, semantic Cancel/Save actions, captures the sheet, and verifies Cancel dismissal.
+- The focused UI test passes on the iPad (A16) iOS 26.5 Simulator. Its screenshot verifies the grouped background, labeled rows, explanatory footer, centered title, and leading/trailing toolbar actions.
+- The macOS app build passes. The iPhone 17 Pro iOS 26.5 build completes, but a compact-width UI-test rerun hit an Xcode 26.5 debugger/test-session finalization failure after the simulator returned to Home; compact live acceptance remains part of the general iPad/iPhone audit.
+
 ## iOS Recent Documents (Implemented; Provider Acceptance Pending 2026-08-08)
 
 ### Think Before Coding

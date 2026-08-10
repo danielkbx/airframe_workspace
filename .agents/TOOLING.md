@@ -382,6 +382,8 @@ Agents must update this file proactively when they learn a better command, workf
 
 # SwiftUI rendering-performance verification
 
+- On Xcode 26.5, UI-test runs can return the simulator to Home and leave `xcodebuild` stuck finalizing or launching after `DebuggerLLDB.DebuggerVersionStore.StoreError` / `no debugger version`; this reproduced on both iPhone and newly booted iPad Pro runtimes. Another failure mode is `XCUIApplication.launch()` spending 60 seconds unable to terminate an old Airframe process. A completed iPad run in the same work session can still produce a valid `.xcresult`. Treat these as runner infrastructure: inspect the live simulator and result bundle, try one clean simulator or exact `simctl terminate`, then stop only the exact task-owned `xcodebuild` session rather than repeatedly churning runtimes.
+
 - Follow the single normative contract in [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md); this section contains tooling only.
 - An `@Entry` environment default for an explicitly `@MainActor` observable cannot call its initializer directly because the generated key is nonisolated. Initialize it with `MainActor.assumeIsolated { Type() }`; this preserves the modern `@Entry` API and satisfies Swift 5.9 actor checking.
 - For a read-only invalidation diagnosis, temporarily place `Self._logChanges()` in static, guide, and interaction bodies and/or wrap draw closures with signpost counters. Exercise the relevant high-frequency input for at least five seconds. Static draw counts must stay flat during interaction-only updates; then verify resize, zoom, visibility, and discrete selection changes still redraw their intended layers and remove the instrumentation.
