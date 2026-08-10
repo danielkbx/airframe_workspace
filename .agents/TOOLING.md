@@ -1,5 +1,7 @@
 # Tooling Knowledge Base
 
+- In zsh, `status` is a read-only special parameter. When an `xcodebuild` wrapper captures the exit code before tailing a redirected log, use a task-specific name such as `command_exit=$?`; assigning `status=$?` makes the wrapper fail after the build even when the log ends in `BUILD SUCCEEDED`.
+
 - Swift Testing may capture a receiver immutably inside `#expect`, so do not call a mutating method directly in the macro. Store its result in a local constant first. Parameterized tuple literals containing nested enum cases may also require fully qualified case names for type inference.
 
 - `plutil -lint` does not parse `.xcstrings` catalogs on this host and reports `Unexpected character { at line 1` for valid catalogs. Use `jq empty <catalog>.xcstrings` for JSON syntax validation, then rely on the AirframeCaptions package build/tests for catalog compilation and key coverage.
