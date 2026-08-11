@@ -94,6 +94,9 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 
 ## Deferred Data and UX Ideas
 
+- Resume iPadOS readiness only after a new explicit approval. Deferred acceptance includes the full `IPAD_AUDIT.md` window/orientation matrix; VoiceOver, largest Dynamic Type, hardware-keyboard, Reduce Motion, and multi-touch checks; Recent Documents validation across On My iPad, iCloud Drive, and a third-party provider; close/background lifecycle checks; and representative long-log Graph/Spectrum profiling.
+- Add or restore iPhone support only as a separately approved product effort. It requires its own compact-width design, implementation, and acceptance work; do not re-add device family `1` as incidental shared-platform maintenance.
+
 - Design persistent bookmarks for important log positions before reserving document fields.
 - Add upstream-style flight-mode flag diffs to event chips using firmware-specific mode names.
 - Add a Start Location action that opens Map and focuses the coordinate.

@@ -2,6 +2,15 @@
 
 Only approved near-term work and unresolved acceptance gates belong here. Completed work belongs in Git and the current architecture; unapproved ideas belong in [BACKLOG.md](BACKLOG.md).
 
+## macOS 1.0 Release And Final iPad TestFlight Build
+
+- Release only the native macOS platform publicly. Keep the iOS/iPadOS App Store platform unpublished and do not submit it for App Review.
+- Produce one final iPad-only TestFlight build for existing testers. Verify App Store Connect build metadata reports iPad and not iPhone; assign the build only to the intended TestFlight group.
+- Verify the app target resolves `TARGETED_DEVICE_FAMILY = 2` in Debug, Beta, and Release; inspect the built iOS app's `UIDeviceFamily` and confirm an iPad simulator build succeeds.
+- Run the macOS Release build and relevant existing tests without changing macOS behavior.
+- On physical iPad, smoke-test launch, document opening, log presentation, and primary navigation before distributing the final build.
+- In App Store Connect, disable iPhone/iPad app availability on Apple silicon Macs if offered, so only the native macOS app is available there.
+
 ## Implemented, Live Acceptance Pending: X-Range Measurement
 
 - The approved 1.0 exception replaces Spectrum snapping with persistent X-range selection on Graph, Spectrum, Step Response, Frequency Response, and spectrogram/heatmap modes.
@@ -37,14 +46,6 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 - On macOS, verify trackpad pinch, trackpad/mouse-wheel pan, double-click reset, range measurement, and View-menu Zoom commands.
 - Profile a representative multi-log overlay while continuously zooming and panning. Analysis must not restart, static work must remain visible-sample bounded, and document persistence must publish only at interaction boundaries.
 - Manually verify the full-height vertical crosshair and attached time chip across the full and zoomed viewports on iPadOS and macOS, including coexistence with the armed range-measurement gesture.
-
-### iPad Readiness And Canvas Touch Pass
-
-- Live-validate iOS/iPadOS Recent Documents across On My iPad, iCloud Drive, and a third-party provider: relaunch persistence, reopen/promotion, provider rename/move, failed-open removal, and the eight-entry cap. Automated store coverage and both platform builds pass.
-- Run the portrait/landscape and narrow/intermediate/wide window matrix in [IPAD_AUDIT.md](IPAD_AUDIT.md), including long document names and expanded/collapsed Timeline states.
-- Complete the VoiceOver, largest Dynamic Type, hardware-keyboard, Reduce Motion, and physical-device multi-touch checks documented in the audit.
-- Validate document close/background behavior with iCloud Drive and a third-party document provider, and profile aggressive Graph/Spectrum gestures with representative long logs.
-- Treat visual marker collision tuning and any findings from these gates as bounded follow-up work; do not expand the 1.0 feature set.
 
 ### T-Motor FFE0 Bluetooth UART
 

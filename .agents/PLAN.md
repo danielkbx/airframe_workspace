@@ -354,3 +354,25 @@ Roadmap success means Airframe can progress from transparent evidence, through c
 - The existing CHIRP PID Assistant algorithm is extended, not replaced, and never changes filters.
 - Active Filter Tuning assistance is a separate future project and is not approved by this roadmap alone.
 - This roadmap records future implementation scope. Selection and implementation of each measure remain separate user decisions.
+
+# macOS 1.0 Release And Final iPad TestFlight Build (Approved 2026-08-11)
+
+## Think Before Coding
+
+- Keep the existing multiplatform app target and shared bundle identifier. Confirm build-setting ownership before editing and inspect the produced iOS bundle rather than trusting project text alone.
+- Treat App Store release and TestFlight distribution as separate gates: publish macOS only and leave the iOS/iPadOS App Store platform unsubmitted.
+
+## Simplicity First
+
+- Use Xcode's `TARGETED_DEVICE_FAMILY = 2` app-target setting to exclude iPhone. Add no new target, bundle identifier, runtime device check, or platform fork.
+
+## Surgical Changes
+
+- Change only the Airframe app target's Debug, Beta, and Release device-family settings. Leave unit/UI test bundle settings and all existing iPad implementation intact.
+- Pause general iOS/iPadOS development after one final iPad-only TestFlight build. Make no iPad UI improvements or macOS UI changes as part of this transition.
+
+## Goal-Driven Execution
+
+- Verify Debug, Beta, and Release resolve to iPad-only for iOS; build the iPad simulator app and inspect its final `UIDeviceFamily` as `[2]`.
+- Build macOS Release and run proportionate existing tests. Then smoke-test the archive on physical iPad, upload it to TestFlight, verify iPad-only metadata, and distribute it only to existing testers.
+- Complete only the native macOS App Store version. Keep iOS/iPadOS unpublished and disable the iPad app on Apple silicon Macs if App Store Connect exposes that option.
