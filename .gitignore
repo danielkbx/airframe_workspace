@@ -11,8 +11,7 @@ xcuserdata/
 *.moved-aside
 
 # Local logs and private smoke fixtures
-Flightlogs/
-Logs/
+fixtures/logs/
 
 # Local editor and temporary files
 *.swp
@@ -21,4 +20,4 @@ Logs/
 *.log
 
 # macOS metadata inside private assets
-Assets/.DS_Store
+marketing/assets/.DS_Store

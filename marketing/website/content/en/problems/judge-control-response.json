@@ -1,0 +1,77 @@
+{
+  "id": "judge-control-response",
+  "slug": "judge-control-response",
+  "status": "published",
+  "category": "tuning",
+  "order": 50,
+  "title": "Is the craft following the command well?",
+  "summary": "Use ordinary-flight Step Response for broad setpoint-to-gyro behaviour, and supported CHIRP Frequency Response for bounded frequency-domain evidence.",
+  "questions": [
+    "Does gyro response overshoot, lag, or rise slowly relative to setpoint?",
+    "Do roll, pitch, and yaw behave differently?",
+    "Is there enough CHIRP evidence for frequency response and a tune score?"
+  ],
+  "viewPaths": ["system-response", "graph", "spectrum", "overview"],
+  "concepts": ["system-response-evidence", "log-evidence-quality", "configuration-provenance"],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "Good control response is not merely 'fast' and definitely not 'largest number wins'. System Response asks how command becomes measured motion, while keeping ordinary-flight estimates separate from purpose-built CHIRP evidence."
+    },
+    {"type": "gallery", "assets": ["step-response", "chirp-response", "chirp-spectrogram"]},
+    {
+      "type": "viewPath",
+      "view": "system-response",
+      "steps": [
+        "Choose System Response.",
+        "Use Step Response for an ordinary flight with sufficient setpoint and filtered-gyro excitation.",
+        "Compare axes, accepted-window counts, peak, latency, and rise time; split low- and high-rate windows when the recording supports both.",
+        "Add reference logs to compare recorded setups under reasonably comparable flight conditions.",
+        "For a complete supported CHIRP log, choose Frequency Response and inspect Response and Spectrogram evidence by axis."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Ordinary-flight Step Response"
+    },
+    {
+      "type": "paragraph",
+      "text": "Airframe's estimator uses overlapping two-second windows whose peak setpoint reaches at least 20 deg/s by default. It applies regularized Wiener deconvolution and averages qualifying responses over 0–500 ms. Peak values above 1 indicate overshoot in the normalized estimate; latency is the first half-response crossing, and rise time is the interpolated 10–90% crossing interval."
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "Comparison needs comparable excitation",
+      "text": "Different manoeuvres, rates, battery state, props, payload, wind, filters, and accepted-window counts can change the estimate. Reference overlays make differences visible; they do not create a controlled experiment after the fact."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Purpose-built CHIRP Frequency Response"
+    },
+    {
+      "type": "paragraph",
+      "text": "For complete modern CHIRP data, Airframe shows magnitude, phase, sensitivity, coherence, bandwidth and resonance guides, a derived step response, and a spectrogram with the expected sweep and harmonic guides. The score combines stability margin, robustness, damping, and tracking fidelity only when the analysis has sufficient axes, metrics, runs, reliable coverage, and span."
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "A score is not permission to paste PIDs",
+      "text": "The current Tune Score describes this recorded response and exposes confidence separately. It does not prescribe PID values, certify mechanical safety, or authorize blind changes. Always corroborate with Spectrum, Graph, motor temperature, and controlled repeat flights."
+    },
+    {"type": "conceptReference", "concept": "system-response-evidence"},
+    {"type": "relatedProblems", "problems": ["chase-vibration-and-noise", "find-what-happened-at-a-moment", "understand-a-flight-at-a-glance"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Step Response method", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/StepResponse/AnalysisStepResponseCalculator.swift"},
+    {"label": "System Response inspector", "path": "Airframe/App/Airframe/App/DocumentHome/Content/StepResponse/StepResponseInspector.swift"},
+    {"label": "CHIRP response calculator", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseCalculator.swift"},
+    {"label": "Tune Score calculator", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseTuneScoreCalculator.swift"},
+    {"label": "CHIRP compatibility", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "PID interpretation evidence", "path": "knowledge/PID_TUNING_PRINCIPLES.md"},
+    {"label": "Betaflight CHIRP implementation", "path": "upstreams/betaflight/src/main/common/chirp.c"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-11"}
+}

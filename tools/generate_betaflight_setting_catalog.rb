@@ -3,7 +3,7 @@
 require "open3"
 
 workspace = File.expand_path("..", __dir__)
-betaflight = File.join(workspace, "betaflight")
+betaflight = File.join(workspace, "upstreams/betaflight")
 destination = File.join(
   workspace,
   "Airframe/Packages/FlightController/Sources/FlightController/BetaflightSettingCatalog.swift"

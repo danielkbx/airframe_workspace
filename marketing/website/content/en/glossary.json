@@ -1,0 +1,109 @@
+{
+  "entries": [
+    {
+      "id": "blackbox-log",
+      "term": "Blackbox log",
+      "definition": "A Betaflight recording made from several frame types and a header describing how those fields were encoded and configured.",
+      "aliases": ["BBL", "BFL"],
+      "source": {"label": "Betaflight Blackbox writer", "path": "upstreams/betaflight/src/main/blackbox/"}
+    },
+    {
+      "id": "main-frame",
+      "term": "Main frame",
+      "definition": "A high-rate Blackbox sample carrying the flight signals used by most plots and analyses. Airframe decodes both intra and predicted main-frame forms.",
+      "aliases": ["I frame", "P frame"],
+      "source": {"label": "Airframe Blackbox reader", "path": "Airframe/Packages/BlackboxReader/Sources/BlackboxReader/"}
+    },
+    {
+      "id": "setpoint",
+      "term": "Setpoint",
+      "definition": "The angular-rate command presented to the PID controller. Comparing it with gyro response shows what was requested versus what the craft measured.",
+      "aliases": ["commanded rate"],
+      "source": {"label": "Betaflight PID controller", "path": "upstreams/betaflight/src/main/flight/pid.c"}
+    },
+    {
+      "id": "gyro",
+      "term": "Gyro",
+      "definition": "The flight controller's measured angular rate. In Airframe, gyroADC is the filtered gyro signal used for ordinary response analysis.",
+      "aliases": ["gyroscope", "gyroADC"],
+      "source": {"label": "Airframe Step Response model", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/StepResponse/AnalysisStepResponse.swift"}
+    },
+    {
+      "id": "d-term",
+      "term": "D term",
+      "definition": "The derivative contribution of the PID controller. It is especially sensitive to high-frequency noise, so its spectrum deserves its own inspection.",
+      "aliases": ["D-term"],
+      "source": {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"}
+    },
+    {
+      "id": "erpm",
+      "term": "eRPM",
+      "definition": "Electrical motor speed reported through bidirectional DShot. Converting it to mechanical frequency requires the correct motor pole count.",
+      "aliases": ["electrical RPM"],
+      "source": {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"}
+    },
+    {
+      "id": "nyquist-limit",
+      "term": "Nyquist limit",
+      "definition": "Half the effective sample rate: the highest frequency a sampled signal can represent without aliasing. Airframe reports the observed logging-rate context in Overview.",
+      "aliases": ["Nyquist frequency"],
+      "source": {"label": "Airframe Blackbox presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/BlackboxPresentation.swift"}
+    },
+    {
+      "id": "log-gap",
+      "term": "Log gap",
+      "definition": "A missing interval between valid main frames. Gaps can hide or distort the very event under investigation.",
+      "aliases": ["main-frame gap"],
+      "source": {"label": "Airframe health report", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Health/AnalysisHealthReportBuilder.swift"}
+    },
+    {
+      "id": "spectrum",
+      "term": "Spectrum",
+      "definition": "A view of signal energy by frequency. Airframe's current result is periodogram-like and displayed in decibels; it is not a universal pass/fail meter.",
+      "aliases": ["frequency spectrum", "FFT plot"],
+      "source": {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"}
+    },
+    {
+      "id": "filter-delay",
+      "term": "Filter delay",
+      "definition": "The time shift introduced between an upstream and downstream signal. Attenuation is useful; delay is the bill, and both belong in the discussion.",
+      "aliases": ["phase delay"],
+      "source": {"label": "Airframe filter-delay analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisFilterDelay.swift"}
+    },
+    {
+      "id": "step-response",
+      "term": "Step response",
+      "definition": "Airframe's normalized estimate of how gyro output follows setpoint input over time, averaged from qualifying two-second windows using Wiener deconvolution.",
+      "aliases": ["time-domain response"],
+      "source": {"label": "Airframe Step Response calculator", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/StepResponse/AnalysisStepResponseCalculator.swift"}
+    },
+    {
+      "id": "chirp",
+      "term": "CHIRP",
+      "definition": "A Betaflight excitation that sweeps frequency on an axis. A CHIRP mode flag alone does not guarantee that all channels needed for modern frequency-response analysis were logged.",
+      "aliases": ["frequency sweep"],
+      "source": {"label": "CHIRP compatibility evidence", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"}
+    },
+    {
+      "id": "coherence",
+      "term": "Coherence",
+      "definition": "A frequency-by-frequency measure of how consistently input and output relate in the CHIRP estimate. Airframe uses it to bound reliable response evidence.",
+      "aliases": [],
+      "source": {"label": "Airframe Frequency Response model", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponse.swift"}
+    },
+    {
+      "id": "flight-mode-event",
+      "term": "Flight-mode event",
+      "definition": "A change in Betaflight's logged 32-bit mode mask. When an event carries no timestamp, Airframe places it using the latest valid main-frame time as context.",
+      "aliases": ["mode change"],
+      "source": {"label": "Blackbox compatibility evidence", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"}
+    },
+    {
+      "id": "airframe-document",
+      "term": "Airframe document",
+      "definition": "Airframe's regular-file document, which can retain imported logs, associated configuration evidence, aircraft settings, names, notes, and view state.",
+      "aliases": [".airframe"],
+      "source": {"label": "Airframe container implementation", "path": "Airframe/Packages/AirframeContainer/Sources/AirframeContainer/"}
+    }
+  ]
+}

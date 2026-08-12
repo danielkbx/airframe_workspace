@@ -6,9 +6,15 @@ Repository layout:
 
 - Root repository: private workspace repo, `git@github.com:danielkbx/airframe_workspace.git`.
 - `Airframe/`: public Airframe submodule, `git@github.com:danielkbx/airframe.git`.
-- `blackbox-log-viewer/`: upstream reference submodule, `git@github.com:betaflight/blackbox-log-viewer.git`.
-- `betaflight/`: upstream reference submodule, `git@github.com:betaflight/betaflight.git`.
-- `betaflight-configurator/`: pinned upstream reference submodule, `git@github.com:betaflight/betaflight-configurator.git`.
+- `upstreams/`: read-only upstream reference submodules.
+  - `upstreams/blackbox-log-viewer/`: `git@github.com:betaflight/blackbox-log-viewer.git`.
+  - `upstreams/betaflight/`: `git@github.com:betaflight/betaflight.git`.
+  - `upstreams/betaflight-configurator/`: pinned `git@github.com:betaflight/betaflight-configurator.git`.
+  - `upstreams/PIDtoolbox/`: `https://github.com/skoch1s/PIDtoolbox.git`.
+- `tools/`: private workspace tools, scripts, and agent-development helpers.
+- `marketing/`: marketing plans, website, product-showcase material, and private source assets.
+- `knowledge/`: factual domain research and reproducible evidence, separate from implementation decisions.
+- `fixtures/`: private development and test inputs; large/private logs remain ignored.
 - `.agents/`: private durable project context tracked only in the root workspace repo.
 
 Git safety rules:
@@ -16,7 +22,7 @@ Git safety rules:
 - Root workspace commits may be short, frequent, and attribution-free.
 - Commit inside `Airframe/` only with explicit user approval and with the stricter Airframe message rules.
 - **Mandatory public-commit gate:** Before every commit or amend inside `Airframe/`, explicitly determine with the user whether the change is changelog-relevant. Do not commit until this decision is known. Every changelog-relevant public commit must end, after a blank line, with exactly one English user-oriented `Changelog: <draft>` trailer. Never add this trailer to the private root repository.
-- Never commit or push inside `blackbox-log-viewer/`, `betaflight/`, or `betaflight-configurator/`.
+- Never commit or push inside any repository below `upstreams/`.
 - A changed submodule pointer is committed in the root repo only when the new referenced commit should be synchronized across machines.
 - Always check which repository owns the current directory before git commit, push, or status-sensitive work.
 
@@ -32,7 +38,7 @@ Before doing any work in this workspace, read:
 8. `.agents/PRINCIPLES.md`
 9. `.agents/BACKLOG.md`
 
-The upstream reference repositories are cloned in `blackbox-log-viewer/`, `betaflight/`, and `betaflight-configurator/`. Do not modify them unless the user explicitly asks for changes there.
+The upstream reference repositories are cloned below `upstreams/`. Do not modify them unless the user explicitly asks for changes there.
 
 Maintain the `.agents/` files proactively. When new stable information, rules, decisions, constraints, goals, risks, or project direction emerge, update the relevant `.agents/*.md` file during the same turn. This project is expected to hit context-window limits often, so durable context must not depend on chat history.
 

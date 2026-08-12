@@ -7,12 +7,12 @@ It contains private planning, coordination, reference checkouts, and local workf
 ## Layout
 
 - `Airframe/`: public Airframe app and Swift packages. This is its own repository: `git@github.com:danielkbx/airframe.git`.
-- `blackbox-log-viewer/`: upstream reference checkout. Pull only; do not commit or push from this workspace.
-- `betaflight/`: upstream firmware reference checkout. Pull only; do not commit or push from this workspace.
-- `betaflight-configurator/`: pinned upstream Configurator reference checkout. Do not commit or push from this workspace.
+- `upstreams/`: read-only reference submodules for Betaflight, Blackbox Log Viewer, Betaflight Configurator, and PIDtoolbox.
+- `tools/`: workspace maintenance scripts, probes, generators, and agent-development helpers.
+- `marketing/`: marketing plans, private source assets, the static website, and product-showcase material.
+- `knowledge/`: factual domain research about flight dynamics, tuning, logs, protocols, and platform feasibility. It does not define the implementation.
+- `fixtures/`: private development and test inputs such as representative Blackbox logs. Large/private inputs are ignored.
 - `.agents/`: durable private project context for local automation and handoff.
-- `Assets/`: private workspace assets and source design files.
-- `scripts/`: workspace maintenance helpers.
 
 ## Commit Rules
 
@@ -26,7 +26,7 @@ The `Airframe/` submodule has stricter rules:
 
 The upstream reference submodules have read-only rules:
 
-- `blackbox-log-viewer/` and `betaflight/` may be fetched or pulled. Keep `betaflight-configurator/` at its pinned workspace commit.
+- `upstreams/blackbox-log-viewer/` and `upstreams/betaflight/` may be fetched or pulled. Keep `upstreams/betaflight-configurator/` at its pinned workspace commit.
 - Do not commit in them.
 - Do not push them.
 - If their submodule pointers change, commit that pointer change only in the root workspace repo.
@@ -37,13 +37,13 @@ The upstream reference submodules have read-only rules:
 git clone git@github.com:danielkbx/airframe_workspace.git
 cd airframe_workspace
 git submodule update --init
-./scripts/ws-status.sh
+./tools/ws-status.sh
 ```
 
 ## Routine Sync
 
 ```bash
-./scripts/ws-pull.sh
+./tools/ws-pull.sh
 ```
 
 This updates the root repository and fast-forwards the read-only reference submodules. If reference pointers change, commit those pointer updates in the root repository.

@@ -1,0 +1,73 @@
+{
+  "id": "find-what-happened-at-a-moment",
+  "slug": "find-what-happened-at-a-moment",
+  "status": "published",
+  "category": "investigation",
+  "order": 20,
+  "title": "What happened at that exact moment?",
+  "summary": "Synchronize commands, gyro motion, PID terms, motors, flight modes, craft attitude, and events on one timeline.",
+  "questions": [
+    "What changed just before the wobble, dip, or disarm?",
+    "Did the command, gyro, PID output, or motors move first?",
+    "Which flight mode and craft state were active under the cursor?"
+  ],
+  "viewPaths": ["graph", "table", "overview", "map"],
+  "concepts": ["shared-timeline", "log-evidence-quality"],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "A memorable half-second can look surprisingly polite when averaged across a whole flight. Graph keeps the chronology: command, response, controller output, motors, mode changes, and craft state can all be read against the same cursor."
+    },
+    {"type": "image", "asset": "graph-playback"},
+    {
+      "type": "viewPath",
+      "view": "graph",
+      "steps": [
+        "Choose Graph and add only the signals needed for the question.",
+        "Scrub or play to the event marker or visible disturbance.",
+        "Zoom around the interval and use range measurement when duration or spread matters.",
+        "Open the Craft section for attitude, motor output, flight mode, and reliable centre-of-gravity context at the shared cursor."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Build a causal sequence, carefully"
+    },
+    {
+      "type": "table",
+      "caption": "A practical signal stack",
+      "columns": ["Question", "Signals or rows", "What to look for"],
+      "rows": [
+        ["Was it commanded?", "setpoint and gyroADC", "Whether measured rotation follows a pilot/controller request or appears without one."],
+        ["How did the controller react?", "axisP, axisI, axisD, axisF, axisSum", "Timing, saturation, and axis-specific response; availability depends on the log."],
+        ["Did an actuator run out of room?", "motor outputs", "One or more outputs pinned near their usable boundary while correction is demanded."],
+        ["Did state change?", "event rows and flight-mode flags", "Arming, disarming, mode transitions, and other decoded events in context."],
+        ["Was the recorder trustworthy here?", "time, gaps, and Overview quality", "Whether missing frames overlap the interval under investigation."]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Order is evidence; cause needs corroboration",
+      "text": "A motor output changing before gyro motion can support one hypothesis, but recorded output is a command, not proof of motor thrust. Likewise, an anomaly detector produces candidate intervals under specific eRPM and motor-output conditions; it does not inspect bearings, props, wiring, or ESC telemetry by magic."
+    },
+    {
+      "type": "paragraph",
+      "text": "When the graph reveals the right interval, switch to Table without changing the underlying time context. The table is slower to read but wonderfully literal: selected values and decoded events, row by row, with rather less interpretive jazz."
+    },
+    {"type": "conceptReference", "concept": "shared-timeline"},
+    {"type": "conceptReference", "concept": "log-evidence-quality"},
+    {"type": "relatedProblems", "problems": ["compare-recorded-values", "put-events-back-on-the-map", "understand-a-flight-at-a-glance"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Graph model", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphModel.swift"},
+    {"label": "Graph inspector", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphInspector.swift"},
+    {"label": "Craft timeline and inspector", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphCraftSection.swift"},
+    {"label": "Table event rows", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Table/TableModel.swift"},
+    {"label": "Motor anomaly analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/AnalysisMotorAnomaly.swift"},
+    {"label": "Betaflight PID loop", "path": "upstreams/betaflight/src/main/flight/pid.c"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-11"}
+}

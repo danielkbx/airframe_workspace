@@ -21,7 +21,7 @@ The workspace root is now a private wrapper Git repository:
 
 The upstream reference project is cloned at:
 
-- `blackbox-log-viewer/`
+- `upstreams/blackbox-log-viewer/`
 - Upstream: https://github.com/betaflight/blackbox-log-viewer
 - Local observed commit: `1222587e162fd2c881ee2ea3d74ec91c2397891d`
 - Observed version: `2026.6.0`
@@ -29,7 +29,7 @@ The upstream reference project is cloned at:
 
 The Betaflight firmware reference is cloned at:
 
-- `betaflight/`
+- `upstreams/betaflight/`
 - Upstream: https://github.com/betaflight/betaflight
 - Local observed commit: `6dbc4218fd6bc33bf16ea32c670304d4f89321d5`
 - Observed version: `2026.6.1`
@@ -37,7 +37,7 @@ The Betaflight firmware reference is cloned at:
 
 The Betaflight Configurator reference is cloned at:
 
-- `betaflight-configurator/`
+- `upstreams/betaflight-configurator/`
 - Upstream: https://github.com/betaflight/betaflight-configurator
 - Pinned commit: `14a050b7b57b4addadc209e5b67b3cfd9fdef943`
 - Workspace role: read-only reference submodule. Never commit or push from this workspace.
@@ -45,7 +45,7 @@ The Betaflight Configurator reference is cloned at:
 
 The PIDtoolbox reference (MATLAB source of the free PIDtoolbox, algorithmic ancestor of PIDtoolbox Pro) is cloned at:
 
-- `PIDtoolbox/`
+- `upstreams/PIDtoolbox/`
 - Upstream: https://github.com/skoch1s/PIDtoolbox (mirror; original bw1129 repo is no longer public)
 - Local observed commit: `1e12abb23188183f0f21998a6a89af3719ded22a` (v0.23-3-g1e12abb)
 - Workspace role: read-only reference submodule. Pull only; never commit or push from this workspace.
@@ -66,7 +66,7 @@ Agents must update `.agents/` proactively whenever stable project information ch
 
 Agents must also update `TOOLING.md` as a self-learning knowledge base. If a tool workflow works especially well, is faster than an alternative, or had to be corrected after a failed or unreliable attempt, write down the lesson.
 
-External facts, reproducible local observations, evidence grades, uncertainties, and product interpretations live in the thematic [`knowledge/`](knowledge/README.md) Knowledge Base. `RESEARCH.md` is its compact index and research inbox; `MEMORY.md` remains the normative source for accepted decisions.
+External facts, reproducible local observations, evidence grades, uncertainties, and product interpretations live in the top-level thematic [`knowledge/`](../knowledge/README.md) Knowledge Base. `RESEARCH.md` is its compact index and research inbox; `MEMORY.md` remains the normative source for accepted decisions.
 
 ## Document Role Hygiene
 
@@ -75,7 +75,7 @@ External facts, reproducible local observations, evidence grades, uncertainties,
 - `TASKS.md`: approved work or live acceptance still pending; remove completed work after its durable outcome is reflected elsewhere.
 - `PLAN.md`: current approved, not-yet-complete execution plans; Git preserves completed plans.
 - `BACKLOG.md`: unapproved future work only; keep research evidence and detailed approved designs out.
-- `RESEARCH.md` and `knowledge/`: research index plus evidence, uncertainty, source registers, and product interpretation; no duplicated implementation specification.
+- `RESEARCH.md` and `../knowledge/`: research index plus evidence, uncertainty, source registers, and product interpretation; no duplicated implementation specification.
 - `TOOLING.md`: current repeatable workflows and corrections; remove superseded command variants instead of accumulating them.
 
 Git history is the archive for superseded snapshots and implementation diaries. Do not maintain a second in-tree archive unless a historical artifact is itself required evidence.
@@ -83,13 +83,13 @@ Git history is the archive for superseded snapshots and implementation diaries. 
 ## Recommended First Read
 
 1. `MEMORY.md`: durable decisions and constraints.
-2. `MARKETING.md`: public identity, messaging, contact channels, and release communication.
+2. `../marketing/README.md`: public identity, messaging, contact channels, and release communication.
 3. `PRINCIPLES.md`: working and review rules.
 4. `UI_GUIDE.md`: reusable native UI and interaction contracts.
 5. `Airframe/doc/ui-performance.md`: authoritative UI rendering and interaction cost, preparation, invalidation, review, and profiling contract.
 6. `ARCHITECTURE.md`: current technical shape.
 7. `TASKS.md`: active work and unresolved decisions.
 8. `PLAN.md`: current approved execution plan.
-9. `RESEARCH.md`: Knowledge Base index and research inbox; follow the relevant `knowledge/*.md` topic.
+9. `RESEARCH.md`: Knowledge Base index and research inbox; follow the relevant `../knowledge/*.md` topic.
 10. `TOOLING.md`: repeatable workflows and corrections.
 11. `BACKLOG.md`: unapproved future ideas.

@@ -13,6 +13,14 @@
 
 This file describes the current technical shape. Stable product and workflow rules live in `MEMORY.md`; future ideas live in `BACKLOG.md`.
 
+## Static Website
+
+- `marketing/website/` separates structured locale content, HTML presentation fragments, and a dependency-free Node build engine. It deliberately lives outside the public `Airframe/` submodule. `site.config.json` owns deployment-dependent product, company, contact, and privacy values.
+- `content/en/manifest.json` owns problem-guide ordering. Problems, reusable concepts, view metadata, and the glossary are JSON and contain no raw HTML. The renderer validates schemas and every problem/view/concept/screenshot cross-reference before generating directory-style URLs.
+- `src/assets/screenshots/screenshots.json` is the logical asset boundary. Source masters live in `src/assets/screenshots/source/`; the build discovers dimensions, copies the full-resolution fallback, and emits responsive AVIF/WebP derivatives. Generated images always carry intrinsic dimensions and are never cropped.
+- Presentation uses one base layout, shared semantic components, platform fonts, CSS-only telemetry traces, responsive feature sections, mobile navigation, and one native `dialog` lightbox with a normal-link fallback.
+- `marketing/website/scripts/lib/engine.mjs` generates deterministic output below ignored `dist/`, validates internal links and image accessibility, and enforces real `domain`, `contactEmail`, and `appStoreURL` values for production builds.
+
 ## AirframeContainer
 
 - `Packages/AirframeContainer` depends only on local `Logging` and supports iOS and macOS.
@@ -47,7 +55,7 @@ This file describes the current technical shape. Stable product and workflow rul
 - `BlackboxAnalysisWorkspace.gpsRoute(using:)` builds an immutable MapKit-free `AnalysisGPSRoute`, drops non-monotonic points, calculates Home-relative altitude, normalizes heading, associates at most 256 events with preceding route points, and provides binary-search cursor projections.
 - The app owns transient MapKit camera state and document-wide map display settings. Route prefixes, position, and Map event annotations read the active log cursor; profile event lines show the complete prepared event set. Map playback always uses the complete Main-frame range. In the segmented mode picker, menu, and numeric command shortcuts, Map is displayed as the final/rightmost mode and uses `⌘6`.
 - `DocumentHomeView.LogContext.hasUsableGPSRoute` is the app-side shared gate for Map segment enablement, command routing, Map fallback, and Overview GPS-card visibility. It requires at least two monotonic time-associated GPS points with distinct coordinates; while scan/loading state is unresolved, Map fallback is deferred.
-- The SwiftUI `Map` owns the progressive `MapPolyline`, Home/Event annotations, and current-position marker. An earlier isolated playback diagnosis observed route-overlay lag, but after Map Timeline preparation and cursor invalidation were separated, live macOS verification found both the map and route line fully fluid even in Debug. A native `MKMapView` representable is no longer planned; historical evidence remains in [Map and Graph Research](knowledge/MAP_AND_GRAPH_RESEARCH.md#swiftui-map-polyline-playback-limitation).
+- The SwiftUI `Map` owns the progressive `MapPolyline`, Home/Event annotations, and current-position marker. An earlier isolated playback diagnosis observed route-overlay lag, but after Map Timeline preparation and cursor invalidation were separated, live macOS verification found both the map and route line fully fluid even in Debug. A native `MKMapView` representable is no longer planned; historical evidence remains in [Map and Graph Research](../knowledge/MAP_AND_GRAPH_RESEARCH.md#swiftui-map-polyline-playback-limitation).
 - Display-only route geometry is capped at 2,048 deterministically sampled points. First/final endpoints, every prepared Event route point, and the live current endpoint are retained; Analysis route data and position/event lookup remain unchanged.
 - Map annotations expose localized accessibility labels without visible titles. The current-position cone rotates around an apex fixed at the dot and widens in the recorded heading direction.
 - Home and progressively revealed Event symbols are native buttons with anchored transient popovers. Home shows coordinate and recorded absolute altitude; Events show localized title, flight-relative time, coordinate, and available relative altitude. Selection clears when scrubbing or settings hide its annotation.

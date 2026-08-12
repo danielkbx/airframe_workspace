@@ -11,6 +11,13 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 - On physical iPad, smoke-test launch, document opening, log presentation, and primary navigation before distributing the final build.
 - In App Store Connect, disable iPhone/iPad app availability on Apple silicon Macs if offered, so only the native macOS app is available there.
 
+## Website Publication Gates
+
+- Choose the final domain, create its public contact email, and add the live Mac App Store URL to `marketing/website/site.config.json`; `npm run build:production` must remain blocked until all three exist.
+- Confirm the Hetzner deployment actually retains access logs for no more than the stated seven days, then publish only `marketing/website/dist/`.
+- Re-run the production build and final Safari/VoiceOver smoke test once Safari remote automation is available. Apple requires both a public Privacy Policy URL and a Support URL with real contact information.
+- After the real domain is live, connect the app's About website/imprint destinations and App Store metadata in a separately approved app change.
+
 ## Implemented, Live Acceptance Pending: X-Range Measurement
 
 - The approved 1.0 exception replaces Spectrum snapping with persistent X-range selection on Graph, Spectrum, Step Response, Frequency Response, and spectrogram/heatmap modes.

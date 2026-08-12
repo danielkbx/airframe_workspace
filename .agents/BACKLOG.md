@@ -1,5 +1,7 @@
 # Backlog
 
+- Add client-side search to `Inside Airframe` only when the guide corpus makes browsing insufficient; keep JSON as the content source and avoid a search service or CMS.
+
 Unapproved future ideas only. Promote an item to [TASKS.md](TASKS.md) or an approved section in [PLAN.md](PLAN.md) when the user selects it. Completed work belongs in Git, current behavior in `ARCHITECTURE.md`, stable decisions in `MEMORY.md`, and evidence in the Knowledge Base.
 
 ## Near-Term Cleanup
@@ -36,7 +38,7 @@ Unapproved future ideas only. Promote an item to [TASKS.md](TASKS.md) or an appr
 - Investigate SpeedyBee F7 V3 storage reporting and Wi-Fi protocol before adding any board-specific behavior.
 - Consider an upstream Betaflight disarmed local-button gesture for entering USB MSC only after target hardware and safety/UX feasibility are understood.
 
-Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.md](SPEEDYBEE_REVERSE_ENGINEERING.md); general transport evidence remains in [Flight Controller Connectivity](knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md).
+Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.md](../knowledge/SPEEDYBEE_REVERSE_ENGINEERING.md); general transport evidence remains in [Flight Controller Connectivity](../knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md).
 
 ## Analysis, Compatibility, and Security
 

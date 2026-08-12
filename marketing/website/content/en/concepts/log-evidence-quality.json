@@ -1,0 +1,44 @@
+{
+  "id": "log-evidence-quality",
+  "title": "Check the recorder before blaming the aircraft",
+  "summary": "Logging rate, gaps, missing fields, and firmware-specific semantics determine which questions a log can answer.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Airframe recovers bounded damage where it can and reports log quality, frame gaps, recorded fields, and compatibility context. Recovery keeps usable neighbours; it does not turn missing samples into observations."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "title": "A short evidence check"
+    },
+    {
+      "type": "list",
+      "style": "numbered",
+      "items": [
+        "Confirm the selected segment and Betaflight version in Overview.",
+        "Read Log Quality, Recovered Gaps, Observed Main Rate, and Nyquist Limit.",
+        "Open Recorded Data to confirm the fields needed by the analysis were actually written.",
+        "Treat unavailable analyses as a property of this recording, not as a moral failing by the quad."
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "Compatibility is deliberately conservative",
+      "text": "Airframe's supported baseline is Betaflight 4.4.3 with Blackbox Data version 2. Older logs are best effort until representative fixtures and golden comparisons exist."
+    }
+  ],
+  "sources": [
+    {"label": "Overview presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/BlackboxPresentation.swift"},
+    {"label": "Health checks", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Health/AnalysisHealthReportBuilder.swift"},
+    {"label": "Compatibility evidence", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "Reader recovery tests", "path": "Airframe/Packages/BlackboxReader/Tests/BlackboxReaderTests/"}
+  ],
+  "reviewedAgainst": {
+    "appVersion": "0.1.0",
+    "betaflightVersion": "2026.6.1",
+    "betaflightCommit": "6dbc4218f",
+    "reviewDate": "2026-08-11"
+  }
+}

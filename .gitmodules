@@ -3,17 +3,17 @@
 	url = git@github.com:danielkbx/airframe.git
 	branch = master
 [submodule "blackbox-log-viewer"]
-	path = blackbox-log-viewer
+	path = upstreams/blackbox-log-viewer
 	url = git@github.com:betaflight/blackbox-log-viewer.git
 	branch = master
 [submodule "betaflight"]
-	path = betaflight
+	path = upstreams/betaflight
 	url = git@github.com:betaflight/betaflight.git
 	branch = master
 [submodule "PIDtoolbox"]
-	path = PIDtoolbox
+	path = upstreams/PIDtoolbox
 	url = https://github.com/skoch1s/PIDtoolbox.git
 [submodule "betaflight-configurator"]
-	path = betaflight-configurator
+	path = upstreams/betaflight-configurator
 	url = git@github.com:betaflight/betaflight-configurator.git
 	branch = master

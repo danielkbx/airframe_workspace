@@ -2,7 +2,7 @@
 """SpeedyBee Adapter 3 WiFi log-download probe / client.
 
 Replays the control-channel handshake and UDP bulk transfer documented in
-.agents/SPEEDYBEE_REVERSE_ENGINEERING.md against a live adapter. It is both a working
+knowledge/SPEEDYBEE_REVERSE_ENGINEERING.md against a live adapter. It is both a working
 downloader and a diagnostic instrument: every byte in and out of the control channel is
 logged, and the UDP receive loop reports sequence gaps and loss-recovery behaviour so the
 one remaining open question (how missing packets are re-requested) can be resolved from a

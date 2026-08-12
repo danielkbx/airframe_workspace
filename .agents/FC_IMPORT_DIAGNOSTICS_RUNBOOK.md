@@ -4,11 +4,11 @@
 - Last reviewed: 2026-08-07
 - Report schema: `FlightControllerDiagnosticsSnapshot.schemaVersion == 1`
 - Related implementation: `Airframe/Packages/FlightController/Sources/FlightController/FlightControllerDiagnostics.swift`
-- Related evidence: `knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md`
+- Related evidence: `../knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md`
 
 ## When To Use This Document
 
-Read this document before analyzing any Airframe Flight Controller Diagnostics attachment or any report copied from that attachment. Also read `knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md` when the failure concerns a specific BLE profile, FC, firmware generation, or SpeedyBee behavior.
+Read this document before analyzing any Airframe Flight Controller Diagnostics attachment or any report copied from that attachment. Also read `../knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md` when the failure concerns a specific BLE profile, FC, firmware generation, or SpeedyBee behavior.
 
 The diagnostic goal is to identify the last proven successful layer and the first failed transition. Do not jump from a terminal error to a hardware conclusion when the preceding transport and protocol evidence can localize the failure more narrowly.
 
