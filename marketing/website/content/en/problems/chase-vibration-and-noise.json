@@ -5,50 +5,48 @@
   "category": "tuning",
   "order": 40,
   "title": "Where is the vibration or noise coming from?",
-  "summary": "Separate frequency location, throttle dependence, measured motor harmonics, filter boundaries, and downstream residual noise before naming a cause.",
+  "summary": "Use frequency, throttle, eRPM, and time behaviour to separate motor-linked ridges, possible resonances, broadband noise, and one-off events before changing filters.",
   "questions": [
-    "Is this energy tied to throttle or measured motor RPM?",
-    "What changed between unfiltered gyro, filtered gyro, D term, and motor output?",
-    "Are the configured filters acting in the same region as the observed noise?"
+    "Does the energy move with throttle or measured motor RPM?",
+    "Is a peak largely stationary, broadband, or confined to one short event?",
+    "Which mechanical and recorded-data checks should happen before filter tuning?"
   ],
   "viewPaths": ["spectrum", "graph", "overview"],
-  "concepts": ["spectrum-reading", "configuration-provenance", "log-evidence-quality"],
+  "concepts": ["spectrum-reading", "log-evidence-quality"],
   "blocks": [
     {
       "type": "lead",
-      "text": "A tall peak is a location, not a confession. Spectrum lets you ask whether energy stays fixed, follows throttle, follows measured motor speed, survives filtering, or arrives downstream where D term and motors care about it."
+      "text": "A tall peak is a location, not a confession. Spectrum helps describe how energy behaves: whether it stays nearly fixed, moves with throttle, aligns with measured motor harmonics, spreads across a broad band, or appears only during one impact or manoeuvre."
     },
-    {"type": "gallery", "assets": ["spectrum", "filter-guides"]},
+    {"type": "image", "asset": "spectrum"},
     {
       "type": "viewPath",
       "view": "spectrum",
       "steps": [
-        "Begin with Frequency and compare appropriate signal groups, usually pre-filter gyro, filtered gyro, D term, or motors as available.",
-        "Switch to Frequency vs Throttle to see whether ridges move with load.",
+        "Begin with Frequency to locate concentrated and broadband energy across suitable signals and axes.",
+        "Switch to Frequency vs Throttle to see whether ridges move as propulsion load changes.",
         "Use Frequency vs RPM when eRPM was logged; confirm motor pole count before trusting mechanical-frequency alignment.",
-        "Overlay recorded filter positions and measured RPM-notch harmonics where available.",
-        "Measure a narrower time range if the suspected behaviour was brief."
+        "Measure a narrower time range when the suspected behaviour was brief.",
+        "Return to Graph to see whether the energy coincides with a move, propwash recovery, impact, or motor-anomaly interval."
       ]
     },
+    {"type": "heading", "level": 2, "title": "Classify the behaviour before naming the source"},
     {
-      "type": "heading",
-      "level": 2,
-      "title": "Read the signal path, not one screenshot"
-    },
-    {
-      "type": "steps",
-      "items": [
-        {"title": "Locate", "text": "Frequency mode shows where energy is concentrated and compares axes or signal stages. Hanning windowing is available to reduce leakage tradeoffs."},
-        {"title": "Relate", "text": "Throttle-dependent ridges are consistent with propulsion-related behaviour; RPM-aligned harmonics are stronger motor evidence when eRPM and pole count are sound."},
-        {"title": "Follow downstream", "text": "Compare what enters the filter path with filtered gyro, D term, and motor output. Raw gyro alone can understate the practical effect of residual high-frequency noise."},
-        {"title": "Account for delay", "text": "The inspector can estimate gyro, D-term, and total filter delay when the necessary paired signals exist. Less noise and more delay are both real outcomes."},
-        {"title": "Return to time", "text": "Use Graph to see whether the band is continuous, manoeuvre-specific, or concentrated around an impact, propwash recovery, or motor anomaly interval."}
+      "type": "table",
+      "caption": "What a spectral shape can support",
+      "columns": ["Observed behaviour", "Evidence it supports", "What it does not prove"],
+      "rows": [
+        ["Ridge moves with throttle", "A propulsion-linked effect is plausible.", "Throttle is not measured motor speed, and several mechanical sources can move with load."],
+        ["Ridge follows measured eRPM harmonics", "Motor-speed linkage is stronger when eRPM and motor poles are sound.", "The exact prop, motor, bearing, frame part, or mounting fault responsible."],
+        ["Narrow peak stays nearly fixed", "A possible structural or component resonance deserves inspection.", "That the frame alone caused it; antennas, mounts, cracked parts, props, and other structures can resonate."],
+        ["Energy is broadband", "Turbulence, impacts, rough mechanics, or several overlapping sources may be present.", "A single filter or component as the cure."],
+        ["Energy exists only in a short range", "The event context matters more than a whole-flight average.", "That the rest of the flight shares the same behaviour."]
       ]
     },
     {
       "type": "formula",
       "expression": "motor frequency = logged eRPM × 3.333 ÷ motor poles",
-      "explanation": "Airframe follows the current Betaflight conversion used for RPM-notch interpretation. The result is only as credible as the recorded eRPM and configured pole count.",
+      "explanation": "Airframe follows the current Betaflight conversion used for RPM-notch interpretation. The result is only as credible as the recorded eRPM and configured motor pole count.",
       "variables": [
         {"symbol": "eRPM", "meaning": "Electrical RPM value recorded for a motor"},
         {"symbol": "motor poles", "meaning": "The physical motor magnet-pole count configured for conversion"}
@@ -57,22 +55,31 @@
     {
       "type": "callout",
       "tone": "warning",
-      "title": "Do not tune from a universal red line",
-      "text": "Familiar 50 Hz, -30 dB, -10 dB, and prop-size regions come from particular tools, examples, and craft classes. Airframe presents setup guides as heuristic context and does not convert them into pass/fail. A quiet spectrum also does not prove safe motors. Check temperature and hardware after cautious changes."
+      "title": "Do not diagnose from a universal red line",
+      "text": "Familiar frequency regions and dB references come from particular craft classes, plots, and analysis methods. Prop size, KV, voltage, mass, stiffness, prop geometry, sample rate, windowing, and normalization all move the picture. Treat the guides as context, not pass/fail."
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "The next check may be physical",
+      "text": "Inspect props, motors, bearings, fasteners, antennas, stack and camera mounting, wiring, and damaged frame parts when the evidence points toward a mechanical source. A log cannot see looseness, heat, or damage directly."
+    },
+    {
+      "type": "paragraph",
+      "text": "Once the behaviour is located, judge the filter result separately. That next step compares the signal path, downstream D-term and motor activity, recorded filter positions, and delay instead of asking one peak to answer every question."
     },
     {"type": "conceptReference", "concept": "spectrum-reading"},
-    {"type": "conceptReference", "concept": "configuration-provenance"},
-    {"type": "relatedProblems", "problems": ["judge-control-response", "find-what-happened-at-a-moment", "understand-a-flight-at-a-glance"]},
+    {"type": "conceptReference", "concept": "log-evidence-quality"},
+    {"type": "relatedProblems", "problems": ["judge-filter-tune", "find-what-happened-at-a-moment", "setup-health-check"]},
     {"type": "sources"}
   ],
   "sources": [
     {"label": "Spectrum analyzer", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisSpectrumAnalyzer.swift"},
-    {"label": "Filter-delay analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisFilterDelay.swift"},
     {"label": "RPM-notch analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisRPMNotch.swift"},
     {"label": "Spectrum inspector and availability", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumInspector.swift"},
     {"label": "Spectrum evidence and limitations", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
     {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"},
-    {"label": "Betaflight tuning principles", "url": "https://betaflight.com/docs/wiki/guides/current/Freestyle-Tuning-Principles"}
+    {"label": "Betaflight DShot implementation", "path": "upstreams/betaflight/src/main/drivers/dshot.c"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-11"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
 }

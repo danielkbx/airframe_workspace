@@ -5,73 +5,90 @@
   "category": "tuning",
   "order": 50,
   "title": "Is the craft following the command well?",
-  "summary": "Use ordinary-flight Step Response for broad setpoint-to-gyro behaviour, and supported CHIRP Frequency Response for bounded frequency-domain evidence.",
+  "summary": "Use Graph and ordinary-flight Step Response to separate tracking, damping, sustained-error, Feedforward, saturation, and evidence quality—without turning one symptom into one gain change.",
   "questions": [
-    "Does gyro response overshoot, lag, or rise slowly relative to setpoint?",
-    "Do roll, pitch, and yaw behave differently?",
-    "Is there enough CHIRP evidence for frequency response and a tune score?"
+    "Does gyro response lag, lead, overshoot, or rise slowly relative to setpoint?",
+    "What do P, I, D, and Feedforward contribute to the recorded response?",
+    "Are filtering, motor headroom, excitation, and comparison quality good enough to support a PID hypothesis?"
   ],
   "viewPaths": ["system-response", "graph", "spectrum", "overview"],
   "concepts": ["system-response-evidence", "log-evidence-quality", "configuration-provenance"],
   "blocks": [
     {
       "type": "lead",
-      "text": "Good control response is not merely 'fast' and definitely not 'largest number wins'. System Response asks how command becomes measured motion, while keeping ordinary-flight estimates separate from purpose-built CHIRP evidence."
+      "text": "Good control response is not merely fast, and definitely not 'largest number wins'. Read the recorded signal order in Graph, use ordinary-flight Step Response for repeated behaviour, and keep every PID-F interpretation conditional on filter evidence, actuator headroom, and the quality of the flight input."
     },
-    {"type": "gallery", "assets": ["step-response", "chirp-response", "chirp-spectrogram"]},
+    {"type": "image", "asset": "step-response"},
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Establish filter evidence first",
+      "text": "Residual D-term noise and filter delay constrain meaningful PID interpretation. Confirm what remains after filtering and whether motor commands retain headroom before treating an overshoot, lag, or oscillation as a controller-balance problem."
+    },
+    {"type": "heading", "level": 2, "title": "Read the PID-F roles separately"},
+    {
+      "type": "table",
+      "caption": "Controller roles in the recorded response",
+      "columns": ["Term", "Primary role", "Interpretive boundary"],
+      "rows": [
+        ["P", "Responds to current processed rate error and contributes tracking authority.", "Its effect cannot be separated from D balance, common gain, saturation, and plant dynamics by one peak."],
+        ["I", "Accumulates processed error to correct sustained mismatch.", "Relax, anti-windup, leak, saturation, and firmware behaviour make slow correction a hypothesis, not an I-only diagnosis."],
+        ["D", "Responds to gyro change to add damping.", "It is high-frequency-sensitive; recorded output reflects both configured gain and noise passing through the filter path."],
+        ["Feedforward", "Responds to setpoint change before feedback error has to build.", "It is command-derived, not another feedback-error gain, and can interact with damping and saturation."]
+      ]
+    },
+    {"type": "heading", "level": 2, "title": "Use Graph for timing and saturation"},
+    {
+      "type": "table",
+      "caption": "Response cues and competing explanations",
+      "columns": ["Cue", "Consistent with", "Corroborate with"],
+      "rows": [
+        ["Initial gyro lag", "Limited Feedforward, filter delay, low control authority, or weak excitation.", "axisF timing, filters, motor headroom, and repeated moves."],
+        ["Leading response or end-of-move overshoot", "Feedforward timing or underdamped behaviour.", "P:D balance, D-term noise, saturation, mechanics, and comparable moves."],
+        ["Fast bounceback", "A damping-balance or command-tracking problem.", "P/D relationship, Feedforward, filter result, resonance, and motor output."],
+        ["Slow correction or drift", "Sustained-error behaviour involving I processing.", "I-Term Relax, anti-windup, wind, saturation, and firmware version."],
+        ["Motor command at a boundary", "The requested correction has limited actuator room.", "Individual motors, throttle state, axisSum, and whether the comparison interval remains valid."]
+      ]
+    },
     {
       "type": "viewPath",
       "view": "system-response",
       "steps": [
-        "Choose System Response.",
-        "Use Step Response for an ordinary flight with sufficient setpoint and filtered-gyro excitation.",
-        "Compare axes, accepted-window counts, peak, latency, and rise time; split low- and high-rate windows when the recording supports both.",
-        "Add reference logs to compare recorded setups under reasonably comparable flight conditions.",
-        "For a complete supported CHIRP log, choose Frequency Response and inspect Response and Spectrogram evidence by axis."
+        "Choose System Response and select Step Response.",
+        "Use a flight range with sufficient setpoint and filtered-gyro excitation.",
+        "Compare axes, accepted and candidate window counts, normalized peak, half-response latency, and 10–90% rise time.",
+        "Split low- and high-rate windows when the recording supports both rather than averaging unlike moves together.",
+        "Add reference logs only when manoeuvres, rates, hardware, filters, battery state, and evidence quality are reasonably comparable."
       ]
     },
-    {
-      "type": "heading",
-      "level": 2,
-      "title": "Ordinary-flight Step Response"
-    },
+    {"type": "conceptReference", "concept": "system-response-evidence"},
+    {"type": "heading", "level": 2, "title": "Balance is not the same as gain"},
     {
       "type": "paragraph",
-      "text": "Airframe's estimator uses overlapping two-second windows whose peak setpoint reaches at least 20 deg/s by default. It applies regularized Wiener deconvolution and averages qualifying responses over 0–500 ms. Peak values above 1 indicate overshoot in the normalized estimate; latency is the first half-response crossing, and rise time is the interpolated 10–90% crossing interval."
+      "text": "P:D balance primarily changes damping behaviour, while common P/D scaling changes controller authority without intentionally changing that balance. P:I balance concerns sustained-error correction, and Feedforward concerns anticipatory tracking. Modern nonlinear features, filters, saturation, and mechanics mean none of these relationships is a complete plant model."
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "Keep yaw separate",
+      "text": "Yaw has different authority and plant dynamics from roll and pitch, and it commonly uses a different D-term strategy. Do not copy roll/pitch damping expectations or gain relationships onto yaw without axis-specific evidence."
     },
     {
       "type": "callout",
       "tone": "limit",
       "title": "Comparison needs comparable excitation",
-      "text": "Different manoeuvres, rates, battery state, props, payload, wind, filters, and accepted-window counts can change the estimate. Reference overlays make differences visible; they do not create a controlled experiment after the fact."
+      "text": "Different manoeuvres, rates, battery state, props, payload, wind, filters, and accepted-window counts can change the estimate. Reference overlays reveal differences; they do not create a controlled experiment after the fact."
     },
-    {
-      "type": "heading",
-      "level": 2,
-      "title": "Purpose-built CHIRP Frequency Response"
-    },
-    {
-      "type": "paragraph",
-      "text": "For complete modern CHIRP data, Airframe shows magnitude, phase, sensitivity, coherence, bandwidth and resonance guides, a derived step response, and a spectrogram with the expected sweep and harmonic guides. The score combines stability margin, robustness, damping, and tracking fidelity only when the analysis has sufficient axes, metrics, runs, reliable coverage, and span."
-    },
-    {
-      "type": "callout",
-      "tone": "warning",
-      "title": "A score is not permission to paste PIDs",
-      "text": "The current Tune Score describes this recorded response and exposes confidence separately. It does not prescribe PID values, certify mechanical safety, or authorize blind changes. Always corroborate with Spectrum, Graph, motor temperature, and controlled repeat flights."
-    },
-    {"type": "conceptReference", "concept": "system-response-evidence"},
-    {"type": "relatedProblems", "problems": ["chase-vibration-and-noise", "find-what-happened-at-a-moment", "understand-a-flight-at-a-glance"]},
+    {"type": "relatedProblems", "problems": ["judge-filter-tune", "understand-tune-score", "find-what-happened-at-a-moment"]},
     {"type": "sources"}
   ],
   "sources": [
     {"label": "Step Response method", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/StepResponse/AnalysisStepResponseCalculator.swift"},
     {"label": "System Response inspector", "path": "Airframe/App/Airframe/App/DocumentHome/Content/StepResponse/StepResponseInspector.swift"},
-    {"label": "CHIRP response calculator", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseCalculator.swift"},
-    {"label": "Tune Score calculator", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseTuneScoreCalculator.swift"},
-    {"label": "CHIRP compatibility", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "Graph presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphModel.swift"},
     {"label": "PID interpretation evidence", "path": "knowledge/PID_TUNING_PRINCIPLES.md"},
-    {"label": "Betaflight CHIRP implementation", "path": "upstreams/betaflight/src/main/common/chirp.c"}
+    {"label": "Filter interpretation evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
+    {"label": "Betaflight PID loop", "path": "upstreams/betaflight/src/main/flight/pid.c"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-11"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
 }

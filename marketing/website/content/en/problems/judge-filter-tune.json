@@ -1,0 +1,90 @@
+{
+  "id": "judge-filter-tune",
+  "slug": "judge-filter-tune",
+  "status": "published",
+  "category": "tuning",
+  "order": 45,
+  "title": "Are the filters doing their job?",
+  "summary": "Judge a filter tune from the whole signal path: measured input noise, attenuation, residual D-term and motor output, and the delay paid for that result.",
+  "questions": [
+    "What reaches the gyro before and after filtering?",
+    "Do the configured filters align with the noise observed in this flight?",
+    "What remains in D term and motor output after filtering?",
+    "How much delay accompanies the achieved attenuation?"
+  ],
+  "viewPaths": ["spectrum", "graph", "overview"],
+  "concepts": ["spectrum-reading", "configuration-provenance", "log-evidence-quality"],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "A filter tune is not judged by the number of enabled filters, the quietest single trace, or the smallest delay estimate. The useful question is what entered the signal path, what was attenuated, what remained downstream, and what response delay accompanied that result."
+    },
+    {"type": "image", "asset": "filter-guides"},
+    {
+      "type": "viewPath",
+      "view": "spectrum",
+      "steps": [
+        "Choose a representative flight range and confirm logging quality, required signals, eRPM availability, and motor pole count.",
+        "Use Frequency to compare unfiltered gyro, filtered gyro, D term, and motor output where those stages were recorded.",
+        "Use Frequency vs Throttle and Frequency vs RPM to distinguish load-linked behaviour from measured motor harmonics and more stationary peaks.",
+        "Overlay recorded filter positions and measured RPM-notch harmonics when their provenance is valid.",
+        "Inspect gyro, D-term, and total filter delay alongside the attenuation achieved.",
+        "Return to Graph when residual energy is concentrated in a short manoeuvre or saturation interval."
+      ]
+    },
+    {"type": "heading", "level": 2, "title": "Judge the result, not the number of filters"},
+    {
+      "type": "table",
+      "caption": "Follow the signal path",
+      "columns": ["Stage", "Useful evidence", "Important limit"],
+      "rows": [
+        ["Unfiltered gyro", "Noise and motion reaching the controller before the main gyro filter path.", "A quiet input does not prove the motors are cool or the craft mechanically sound."],
+        ["Filtered gyro", "What remains after the recorded gyro filtering.", "Attenuation may include useful motion as well as unwanted energy."],
+        ["D term", "High-frequency-sensitive controller activity after gyro processing.", "Amplitude also depends on recorded D gain and firmware behaviour."],
+        ["Motor output", "Whether oscillatory controller demand reaches individual motor commands.", "Commands are not measured RPM, thrust, temperature, or ESC current."]
+      ]
+    },
+    {"type": "heading", "level": 2, "title": "Know which filter is solving which problem"},
+    {
+      "type": "steps",
+      "items": [
+        {"title": "RPM Filter", "text": "Uses bidirectional-DShot eRPM and motor pole count to track per-motor harmonic centres. Missing or mismatched evidence makes the apparent alignment untrustworthy."},
+        {"title": "Dynamic Notch", "text": "Tracks remaining spectral peaks, including possible resonances and other noise not covered by the motor-harmonic path. Tracking a peak does not identify its physical source."},
+        {"title": "Low-pass filters", "text": "Attenuate a broader high-frequency region in the gyro or D-term path. Their result must be read as attenuation together with the phase or delay cost."}
+      ]
+    },
+    {"type": "heading", "level": 2, "title": "Pay for attenuation with delay"},
+    {
+      "type": "paragraph",
+      "text": "Less residual noise and less delay are both desirable, but neither wins in isolation. A lower delay estimate is not progress if motor-linked energy reaches D term or motor output; heavier attenuation is not automatically better if it removes useful response and delays correction. Compare only compatible signals and analysis ranges."
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Establish filter evidence before PID interpretation",
+      "text": "Residual gyro and D-term noise constrains usable damping and can imitate or amplify controller-response problems. Do not diagnose P:D balance, common gain, or Feedforward until the filter path and motor headroom are credible for the selected flight."
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "A log cannot certify thermal or mechanical safety",
+      "text": "Motor temperature, damaged-prop tolerance, loose parts, bearing condition, and thermal headroom require physical checks and cautious repeat flights. A quiet result is evidence from one recording, not a safety certificate."
+    },
+    {"type": "conceptReference", "concept": "spectrum-reading"},
+    {"type": "conceptReference", "concept": "configuration-provenance"},
+    {"type": "conceptReference", "concept": "log-evidence-quality"},
+    {"type": "relatedProblems", "problems": ["chase-vibration-and-noise", "judge-control-response", "setup-health-check"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Spectrum analyzer", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisSpectrumAnalyzer.swift"},
+    {"label": "Filter-delay analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisFilterDelay.swift"},
+    {"label": "RPM-notch analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisRPMNotch.swift"},
+    {"label": "Filter configuration presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumFilterConfiguration.swift"},
+    {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
+    {"label": "PID tuning evidence", "path": "knowledge/PID_TUNING_PRINCIPLES.md"},
+    {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"},
+    {"label": "Betaflight tuning principles", "url": "https://betaflight.com/docs/wiki/guides/current/Freestyle-Tuning-Principles"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+}

@@ -272,6 +272,22 @@ function pictureSources(asset) {
 }
 
 function urlFor(locale, defaultLocale, path = "/") { return locale === defaultLocale ? path : `/${locale}${path === "/" ? "/" : path}`; }
+export function renderContentText(value, context = {}) {
+  const source = String(value ?? "");
+  if (context.problem?.id === "airframe-document") return escapeHTML(source);
+  const target = urlFor(context.locale, context.defaultLocale, "/inside-airframe/airframe-document/");
+  const matches = [...source.matchAll(/\bAirframe documents?\b|(?<![A-Za-z0-9_-])\.airframe(?![A-Za-z0-9_-])/g)];
+  if (!matches.length) return escapeHTML(source);
+  let rendered = "";
+  let offset = 0;
+  for (const match of matches) {
+    rendered += escapeHTML(source.slice(offset, match.index));
+    rendered += `<a class="document-guide-link" href="${attrs(target)}">${escapeHTML(match[0])}</a>`;
+    offset = match.index + match[0].length;
+  }
+  return rendered + escapeHTML(source.slice(offset));
+}
+
 export function renderBlocks(blocks, context) {
   const renderImage = id => {
     const asset = context.assets.get(id);
@@ -279,20 +295,20 @@ export function renderBlocks(blocks, context) {
     return fillTemplate(context.templates.screenshot, { fullURL: asset.original, pictureSources: pictureSources(asset), fallbackURL: asset.original, width: asset.width, height: asset.height, alt: escapeHTML(asset.alt), caption: escapeHTML(asset.caption), gallery: attrs(asset.gallery), assetId: attrs(asset.id), loading: "eager" }, "components/screenshot.html");
   };
   return asArray(blocks).map(block => {
-    const text = escapeHTML(textOf(block));
+    const text = renderContentText(textOf(block), context);
     switch (block.type) {
       case "lead": return `<p class="lead">${text}</p>`;
       case "paragraph": return `<p>${text}</p>`;
-      case "heading": return `<h${block.level}>${escapeHTML(block.title)}</h${block.level}>`;
-      case "list": { const tag = block.style === "numbered" ? "ol" : "ul"; return `<${tag}>${block.items.map(item => `<li>${escapeHTML(item)}</li>`).join("")}</${tag}>`; }
-      case "steps": return `<ol class="steps">${block.items.map(item => `<li><h3>${escapeHTML(item.title)}</h3><p>${escapeHTML(item.text)}</p></li>`).join("")}</ol>`;
-      case "callout": return `<aside class="callout callout--${attrs(block.tone)}"><span class="callout__kind">${CALLOUT_LABELS[block.tone]}</span><h3>${escapeHTML(block.title)}</h3><p>${escapeHTML(block.text)}</p></aside>`;
+      case "heading": return `<h${block.level}>${renderContentText(block.title, context)}</h${block.level}>`;
+      case "list": { const tag = block.style === "numbered" ? "ol" : "ul"; return `<${tag}>${block.items.map(item => `<li>${renderContentText(item, context)}</li>`).join("")}</${tag}>`; }
+      case "steps": return `<ol class="steps">${block.items.map(item => `<li><h3>${renderContentText(item.title, context)}</h3><p>${renderContentText(item.text, context)}</p></li>`).join("")}</ol>`;
+      case "callout": return `<aside class="callout callout--${attrs(block.tone)}"><span class="callout__kind">${CALLOUT_LABELS[block.tone]}</span><h3>${renderContentText(block.title, context)}</h3><p>${renderContentText(block.text, context)}</p></aside>`;
       case "image": return renderImage(block.asset);
       case "gallery": return `<div class="gallery">${block.assets.map(renderImage).join("")}</div>`;
-      case "table": { const headers = block.headers ?? block.columns; return `<div class="table-scroll"><table>${block.caption ? `<caption>${escapeHTML(block.caption)}</caption>` : ""}<thead><tr>${headers.map(item => `<th scope="col">${escapeHTML(textOf(item))}</th>`).join("")}</tr></thead><tbody>${asArray(block.rows).map(row => `<tr>${asArray(row.cells ?? row).map((cell, index) => `<${index === 0 && block.rowHeaders ? "th scope=\"row\"" : "td"}>${escapeHTML(textOf(cell))}</${index === 0 && block.rowHeaders ? "th" : "td"}>`).join("")}</tr>`).join("")}</tbody></table></div>`; }
-      case "formula": return `<figure class="formula"><code>${escapeHTML(block.expression)}</code><figcaption>${escapeHTML(block.explanation)}</figcaption>${block.variables.length ? `<dl>${block.variables.map(item => `<dt><code>${escapeHTML(item.symbol)}</code></dt><dd>${escapeHTML(item.meaning)}</dd>`).join("")}</dl>` : ""}</figure>`;
-      case "viewPath": { const view = context.views.get(block.view); return `<aside class="view-path" data-view-path="${attrs(block.view)}"><h3>${escapeHTML(view.name)}</h3><p>${escapeHTML(view.summary)}</p><p class="view-path__route">${escapeHTML(view.path)}</p>${block.steps.length ? `<ol>${block.steps.map(step => `<li>${escapeHTML(step)}</li>`).join("")}</ol>` : ""}</aside>`; }
-      case "conceptReference": { const concept = context.concepts.get(block.concept); return `<section class="concept" id="concept-${attrs(concept.id)}"><h2>${escapeHTML(concept.title)}</h2><p>${escapeHTML(concept.summary)}</p>${renderBlocks(concept.blocks, context)}</section>`; }
+      case "table": { const headers = block.headers ?? block.columns; return `<div class="table-scroll"><table>${block.caption ? `<caption>${renderContentText(block.caption, context)}</caption>` : ""}<thead><tr>${headers.map(item => `<th scope="col">${renderContentText(textOf(item), context)}</th>`).join("")}</tr></thead><tbody>${asArray(block.rows).map(row => `<tr>${asArray(row.cells ?? row).map((cell, index) => `<${index === 0 && block.rowHeaders ? "th scope=\"row\"" : "td"}>${renderContentText(textOf(cell), context)}</${index === 0 && block.rowHeaders ? "th" : "td"}>`).join("")}</tr>`).join("")}</tbody></table></div>`; }
+      case "formula": return `<figure class="formula"><code>${escapeHTML(block.expression)}</code><figcaption>${renderContentText(block.explanation, context)}</figcaption>${block.variables.length ? `<dl>${block.variables.map(item => `<dt><code>${escapeHTML(item.symbol)}</code></dt><dd>${renderContentText(item.meaning, context)}</dd>`).join("")}</dl>` : ""}</figure>`;
+      case "viewPath": { const view = context.views.get(block.view); return `<aside class="view-path" data-view-path="${attrs(block.view)}"><h3>${renderContentText(view.name, context)}</h3><p>${renderContentText(view.summary, context)}</p><p class="view-path__route">${escapeHTML(view.path)}</p>${block.steps.length ? `<ol>${block.steps.map(step => `<li>${renderContentText(step, context)}</li>`).join("")}</ol>` : ""}</aside>`; }
+      case "conceptReference": { const concept = context.concepts.get(block.concept); return `<section class="concept" id="concept-${attrs(concept.id)}"><h2>${renderContentText(concept.title, context)}</h2><p>${renderContentText(concept.summary, context)}</p>${renderBlocks(concept.blocks, context)}</section>`; }
       case "relatedProblems": return renderRelated(block.problems, context);
       case "sources": return "";
       default: throw new BuildError(`renderer: unsupported block type ${block.type}`);
@@ -362,15 +378,16 @@ export async function buildSite(root, { production = false, output = join(root, 
       if (!asset) throw new BuildError(`landing: unknown screenshot ${id}`);
       return fillTemplate(templates.screenshot, { fullURL: asset.original, pictureSources: pictureSources(asset), fallbackURL: asset.original, width: asset.width, height: asset.height, alt: escapeHTML(asset.alt), caption: escapeHTML(asset.caption), gallery: attrs(asset.gallery), assetId: attrs(asset.id), loading }, "components/screenshot.html");
     };
-    const feature = (label, title, summary, asset) => assets.has(asset) ? `<article class="feature"><div class="feature__copy"><p class="eyebrow">${escapeHTML(label)}</p><h3>${escapeHTML(title)}</h3><p>${escapeHTML(summary)}</p></div><div class="feature__media">${renderLandingScreenshot(asset)}</div></article>` : "";
+    const feature = (label, title, summary, asset) => assets.has(asset) ? `<article class="feature"><div class="feature__copy"><p class="eyebrow">${escapeHTML(label)}</p><h3>${renderContentText(title, context)}</h3><p>${renderContentText(summary, context)}</p></div><div class="feature__media">${renderLandingScreenshot(asset)}</div></article>` : "";
     const landingFeatures = [
+      feature("Check the setup", views.get("overview")?.name ?? "Overview", views.get("overview")?.summary ?? "Review the aircraft, flight controller, and available setup evidence before deeper analysis.", "overview"),
       feature("Follow the moment", views.get("graph")?.name ?? "Graph", views.get("graph")?.summary ?? "Read the flight on one shared timeline.", "graph-playback"),
       feature("Find the noise", views.get("spectrum")?.name ?? "Spectrum", views.get("spectrum")?.summary ?? "See where vibration energy lives.", "spectrum"),
       feature("Measure the response", views.get("system-response")?.name ?? "System Response", views.get("system-response")?.summary ?? "Compare what the craft was asked to do with what it actually did.", "step-response"),
       feature("Remember the place", views.get("map")?.name ?? "Map", views.get("map")?.summary ?? "Put events back where they happened.", "map"),
       feature("Skip the file shuffle", "Flight Controller Import", "Bring logs and available configuration evidence across by USB cable, Bluetooth, or SpeedyBee Adapter 3.", "flight-controller-import")
     ].join("");
-    const landingTeasers = ordered.slice(0, 6).map(item => `<article class="problem-card"><p class="eyebrow">${escapeHTML(item.category)}</p><h3><a href="${attrs(urlFor(locale, project.config.defaultLocale, `/inside-airframe/${item.slug}/`))}">${escapeHTML(item.title)}</a></h3><p>${escapeHTML(item.summary)}</p><a class="text-link" href="${attrs(urlFor(locale, project.config.defaultLocale, `/inside-airframe/${item.slug}/`))}">Read the guide <span aria-hidden="true">→</span></a></article>`).join("");
+    const landingTeasers = ordered.slice(0, 6).map(item => `<article class="problem-card"><p class="eyebrow">${escapeHTML(item.category)}</p><h3><a href="${attrs(urlFor(locale, project.config.defaultLocale, `/inside-airframe/${item.slug}/`))}">${escapeHTML(item.title)}</a></h3><p>${renderContentText(item.summary, { ...context, problem: item })}</p><a class="text-link" href="${attrs(urlFor(locale, project.config.defaultLocale, `/inside-airframe/${item.slug}/`))}">Read the guide <span aria-hidden="true">→</span></a></article>`).join("");
     const screenshot = assets.get("chirp-response") ?? assets.values().next().value;
     const primaryCTA = project.config.appStoreURL ? `<a href="${attrs(project.config.appStoreURL)}">Download on the App Store</a>` : `<a href="${attrs(project.config.discordURL)}">Join the Discord</a><span class="availability">Mac first. iPhone and iPad later.</span>`;
     await writePage(locale, "/", "landing", { productName: escapeHTML(project.config.product.name), subtitle: escapeHTML(project.config.product.subtitle), slogan: escapeHTML(project.config.product.slogan), primaryCTA, heroScreenshot: screenshot ? renderLandingScreenshot(screenshot.id, "eager") : "", featureSections: landingFeatures, insideAirframeTeasers: landingTeasers }, { description: project.config.product.slogan, bodyClass: "landing" });
@@ -378,12 +395,12 @@ export async function buildSite(root, { production = false, output = join(root, 
     const categories = new Map(asArray(data.manifest.categories).map(category => [category.id, category]));
     await writePage(locale, "/inside-airframe/", "inside-index", { insideAirframeGroups: [...groups].map(([categoryID, items]) => {
       const category = categories.get(categoryID) ?? { title: categoryID, summary: "" };
-      return `<section><header><p class="eyebrow">${escapeHTML(categoryID)}</p><h2>${escapeHTML(category.title)}</h2><p>${escapeHTML(category.summary)}</p></header><div class="problem-grid">${items.map(item => `<article class="problem-card"><h3><a href="${attrs(urlFor(locale, project.config.defaultLocale, `/inside-airframe/${item.slug}/`))}">${escapeHTML(item.title)}</a></h3><p>${escapeHTML(item.summary)}</p><a class="text-link" href="${attrs(urlFor(locale, project.config.defaultLocale, `/inside-airframe/${item.slug}/`))}">Read the guide <span aria-hidden="true">→</span></a></article>`).join("")}</div></section>`;
+      return `<section><header><p class="eyebrow">${escapeHTML(categoryID)}</p><h2>${renderContentText(category.title, context)}</h2><p>${renderContentText(category.summary, context)}</p></header><div class="problem-grid">${items.map(item => `<article class="problem-card"><h3><a href="${attrs(urlFor(locale, project.config.defaultLocale, `/inside-airframe/${item.slug}/`))}">${escapeHTML(item.title)}</a></h3><p>${renderContentText(item.summary, { ...context, problem: item })}</p><a class="text-link" href="${attrs(urlFor(locale, project.config.defaultLocale, `/inside-airframe/${item.slug}/`))}">Read the guide <span aria-hidden="true">→</span></a></article>`).join("")}</div></section>`;
     }).join("") }, { title: `Inside Airframe — ${project.config.product.name}`, description: "Problem-led Airframe guides." });
     for (const problem of ordered) {
       const body = renderBlocks(problem.blocks.filter(block => !["relatedProblems", "sources"].includes(block.type)), { ...context, problem });
       const relatedBlock = problem.blocks.find(block => block.type === "relatedProblems");
-      await writePage(locale, `/inside-airframe/${problem.slug}/`, "inside-problem", { articleHeader: `<header><p>${escapeHTML(problem.category)}</p><h1>${escapeHTML(problem.title)}</h1><p class="lead">${escapeHTML(problem.summary)}</p></header>`, articleBody: body, relatedProblems: relatedBlock ? renderRelated(relatedBlock.problems, context) : "" }, { title: `${problem.title} — ${project.config.product.name}`, description: problem.summary, bodyClass: "inside-problem" });
+      await writePage(locale, `/inside-airframe/${problem.slug}/`, "inside-problem", { articleHeader: `<header><p>${escapeHTML(problem.category)}</p><h1>${renderContentText(problem.title, { ...context, problem })}</h1><p class="lead">${renderContentText(problem.summary, { ...context, problem })}</p></header>`, articleBody: body, relatedProblems: relatedBlock ? renderRelated(relatedBlock.problems, context) : "" }, { title: `${problem.title} — ${project.config.product.name}`, description: problem.summary, bodyClass: "inside-problem" });
     }
     const common = { supportContact: contact(project.config, true), discordURL: attrs(project.config.discordURL ?? ""), companyName: escapeHTML(project.config.company.legalName), contactDisplay: contact(project.config), hostingProvider: escapeHTML(project.config.privacy.hostingProvider), serverLogRetentionDays: escapeHTML(project.config.privacy.serverLogRetentionDays), companyDetails: companyDetails(project.config.company) };
     for (const [route, page] of [["/support/", "support"], ["/privacy/", "privacy"], ["/imprint/", "imprint"], ["/acknowledgements/", "acknowledgements"]]) await writePage(locale, route, page, common, { title: `${page[0].toUpperCase()}${page.slice(1)} — ${project.config.product.name}` });

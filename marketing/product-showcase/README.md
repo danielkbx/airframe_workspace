@@ -16,8 +16,9 @@ Reusable source material for presenting Airframe on Discord and, later, on the w
 - Use one image per Discord post. Use two only where comparison is the point.
 - Keep every post understandable on its own; Discord provides no dependable layout relationship between text and image.
 - Show real flight data, but remove personal filenames, paths, coordinates, controller identifiers, and other private information.
-- The final Discord set consists of six macOS screenshots: Overview, Graph and Playback, Spectrum, Step Response, Flight Map, and Flight Controller Import.
+- The final Discord set consists of six macOS screenshots: Overview, Graph and Playback, Spectrum, Step Response, Flight Map, and Flight Controller Import. A matching iPad set is available for platform-specific material.
 - Capture one coherent visual set on the same macOS version, window size, appearance, accent color, and app build.
+- Keep assets in platform folders below `Screenshots/`. Reuse the same numbered semantic filename for the same feature on each platform.
 - Do not showcase incomplete, hidden, or known-problem behavior.
 - State clearly that Airframe remains in active development and does not yet include every feature planned for 1.0.
 

@@ -29,11 +29,7 @@
         "Scrub or play to the event; then switch to Graph or Table to inspect the same log-time context."
       ]
     },
-    {
-      "type": "heading",
-      "level": 2,
-      "title": "What the marker means"
-    },
+    {"type": "heading", "level": 2, "title": "What the marker means"},
     {
       "type": "paragraph",
       "text": "Airframe retains ordered GPS points inside the selected main-frame time range. An event marker is attached to the latest route point at or before its event time, or at the event's main-frame context time when the payload has no timestamp. Route events are bounded to 256 markers."
@@ -53,11 +49,17 @@
     {
       "type": "callout",
       "tone": "limit",
+      "title": "Location is context, not tuning evidence",
+      "text": "Position, speed, altitude, and manoeuvre context can help recover the right interval. They do not prove wind as the cause of a disturbance or identify a filter, PID, motor, or mechanical problem. Return to the synchronized signals for that investigation."
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
       "title": "Map is reconstruction, not telemetry tracking",
       "text": "Airframe shows recorded points from the file. It does not invent a route between missing samples, geolocate a log without GPS, or prove the craft's exact position during a long gap. Satellite tiles also describe the basemap, not what the camera saw that day."
     },
     {"type": "conceptReference", "concept": "shared-timeline"},
-    {"type": "relatedProblems", "problems": ["find-what-happened-at-a-moment", "compare-recorded-values", "understand-a-flight-at-a-glance"]},
+    {"type": "relatedProblems", "problems": ["find-what-happened-at-a-moment", "compare-recorded-values", "setup-health-check"]},
     {"type": "sources"}
   ],
   "sources": [
@@ -67,5 +69,5 @@
     {"label": "GPS field semantics", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
     {"label": "Betaflight GPS Blackbox writer", "path": "upstreams/betaflight/src/main/blackbox/blackbox.c"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-11"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
 }

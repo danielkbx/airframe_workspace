@@ -2,8 +2,8 @@
   "id": "get-logs-off-the-flight-controller",
   "slug": "get-logs-off-the-flight-controller",
   "status": "published",
-  "category": "workflow",
-  "order": 70,
+  "category": "getting-started",
+  "order": 10,
   "title": "How do I get logs off the flight controller?",
   "summary": "Use Airframe's guided USB, Bluetooth, mass-storage, direct MSP, or supported adapter workflow, with the available configuration evidence kept beside the import.",
   "questions": [
@@ -64,7 +64,7 @@
       "text": "Bluetooth still needs the right job in Betaflight. Assign MSP to the UART used by your Bluetooth connection and make sure it remains enabled after flashing or changing the configuration. The UART number depends on the flight controller—there is no universal setting to copy."
     },
     {"type": "conceptReference", "concept": "configuration-provenance"},
-    {"type": "relatedProblems", "problems": ["understand-a-flight-at-a-glance", "find-what-happened-at-a-moment"]},
+    {"type": "relatedProblems", "problems": ["airframe-document", "setup-health-check", "find-what-happened-at-a-moment"]},
     {"type": "sources"}
   ],
   "sources": [

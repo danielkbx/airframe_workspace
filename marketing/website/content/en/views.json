@@ -4,7 +4,7 @@
       "id": "overview",
       "name": "Overview",
       "path": "Open a log → Overview",
-      "summary": "Summarizes log quality, hardware, power, firmware, logging, flight, GPS, configuration, and health findings before deeper analysis.",
+      "summary": "Combines recorded flight data with aircraft details and any available flight-controller configuration, organized by topic. Review basics such as propeller size and motor layout alongside setup checks, warnings, and flight facts before going deeper.",
       "availability": "Available for opened Betaflight logs. Individual cards appear only when their source data exists.",
       "sourcePaths": [
         "Airframe/App/Airframe/App/DocumentHome/Content/Overview/OverviewContainer.swift",

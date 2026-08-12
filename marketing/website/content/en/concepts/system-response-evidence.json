@@ -1,44 +1,34 @@
 {
   "id": "system-response-evidence",
-  "title": "Two response methods, two different contracts",
-  "summary": "Ordinary-flight Step Response and CHIRP Frequency Response both study setpoint-to-gyro behaviour, but they do not produce interchangeable evidence.",
+  "title": "Ordinary-flight Step Response is an estimate",
+  "summary": "Airframe summarizes repeated setpoint-to-gyro behaviour from suitable flight windows; the curve is evidence about that recording, not a literal stick step or a one-term PID diagnosis.",
   "blocks": [
     {
-      "type": "heading",
-      "level": 3,
-      "title": "Step Response from ordinary flight"
-    },
-    {
       "type": "paragraph",
-      "text": "Airframe divides setpoint and filtered gyro into overlapping two-second windows, rejects windows without enough excitation, applies a Hamming taper, performs regularized Wiener deconvolution, smooths and integrates the impulse estimate, then averages accepted responses over the first 500 ms. The displayed peak, half-response latency, and 10–90% rise time describe that estimate—not a literal collection of stick steps."
+      "text": "Airframe divides setpoint and filtered gyro into overlapping two-second windows, rejects windows without enough excitation, applies a Hamming taper, performs regularized Wiener deconvolution, smooths and integrates the impulse estimate, then averages accepted responses over the first 500 ms."
     },
     {
-      "type": "heading",
-      "level": 3,
-      "title": "Frequency Response from CHIRP"
-    },
-    {
-      "type": "paragraph",
-      "text": "With complete modern CHIRP debug data, Airframe estimates magnitude, phase, sensitivity, coherence, bandwidth, resonance, and a derived step response by axis. The tune score is withheld when required metrics, axes, runs, reliable coverage, or frequency span are insufficient. Its confidence is evidence quality, not an extra handful of score points."
+      "type": "table",
+      "caption": "What the current result reports",
+      "columns": ["Evidence", "Meaning", "Limit"],
+      "rows": [
+        ["Accepted and candidate windows", "How much of the selected flight contributed to the estimate.", "More windows do not make dissimilar manoeuvres comparable."],
+        ["Normalized peak", "The highest value of the averaged response; values above 1 contain overshoot in the estimate.", "Peak alone does not identify P, D, Feedforward, filtering, or mechanics as the cause."],
+        ["Half-response latency", "Time until the estimate first reaches half of its steady-state value.", "Filtering, plant dynamics, control authority, and estimator quality all contribute."],
+        ["10–90% rise time", "Time between the first 10% and 90% crossings.", "Unavailable crossings remain unavailable rather than being inferred."]
+      ]
     },
     {
       "type": "callout",
       "tone": "limit",
-      "title": "Legacy CHIRP is not modern CHIRP",
-      "text": "Betaflight 2025.12.2 can log the CHIRP mode and phase while leaving the later axis, frequency, and excitation debug channels at zero. Airframe may still estimate ordinary-flight Step Response from setpoint and gyro, but it correctly withholds Frequency Response."
+      "title": "The flight supplies the excitation",
+      "text": "Manoeuvres, rates, battery state, props, payload, wind, filters, selected range, and accepted-window count can all change the estimate. Compare curves only when the evidence is reasonably comparable."
     }
   ],
   "sources": [
     {"label": "Step Response method", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/StepResponse/AnalysisStepResponseCalculator.swift"},
-    {"label": "CHIRP Frequency Response", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseCalculator.swift"},
-    {"label": "Tune Score availability", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseTuneScoreCalculator.swift"},
-    {"label": "CHIRP compatibility evidence", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "Step Response model", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/StepResponse/AnalysisStepResponse.swift"},
     {"label": "PID interpretation evidence", "path": "knowledge/PID_TUNING_PRINCIPLES.md"}
   ],
-  "reviewedAgainst": {
-    "appVersion": "0.1.0",
-    "betaflightVersion": "2026.6.1",
-    "betaflightCommit": "6dbc4218f",
-    "reviewDate": "2026-08-11"
-  }
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
 }

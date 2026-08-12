@@ -4,9 +4,9 @@
   "description": "Problem-led guides to reading Betaflight Blackbox logs with Airframe.",
   "categories": [
     {
-      "id": "first-look",
-      "title": "Start with the flight",
-      "summary": "Establish what was recorded, whether it is trustworthy, and where the interesting moments live."
+      "id": "getting-started",
+      "title": "Start with Airframe",
+      "summary": "Understand the document that keeps your work together, bring logs and available setup evidence into it, then check the fundamentals before deeper analysis."
     },
     {
       "id": "investigation",
@@ -16,21 +16,21 @@
     {
       "id": "tuning",
       "title": "Noise and control",
-      "summary": "Use spectra and response estimates as evidence, with the assumptions left attached."
-    },
-    {
-      "id": "workflow",
-      "title": "Get the data in",
-      "summary": "Bring logs and available configuration evidence off a supported Betaflight flight controller."
+      "summary": "Trace noise, judge filter outcome, then read PID-F and CHIRP response without turning one symptom or score into a setting change."
     }
   ],
   "problems": [
-    "understand-a-flight-at-a-glance",
+    "airframe-document",
+    "get-logs-off-the-flight-controller",
+    "setup-health-check",
+    "calibrate-current-sensor",
+    "reuse-analysis-setups",
     "find-what-happened-at-a-moment",
     "compare-recorded-values",
     "chase-vibration-and-noise",
+    "judge-filter-tune",
     "judge-control-response",
-    "put-events-back-on-the-map",
-    "get-logs-off-the-flight-controller"
+    "understand-tune-score",
+    "put-events-back-on-the-map"
   ]
 }

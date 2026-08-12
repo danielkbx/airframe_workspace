@@ -1,0 +1,111 @@
+{
+  "id": "calibrate-current-sensor",
+  "slug": "calibrate-current-sensor",
+  "status": "published",
+  "category": "getting-started",
+  "order": 30,
+  "title": "How do I calibrate the current sensor?",
+  "summary": "Use Airframe's guarded assistant to calculate a corrected Scale for an analog ADC current sensor, then apply and verify it in Betaflight.",
+  "questions": [
+    "Why does Betaflight's USED MAH disagree with what my charger puts back?",
+    "Which current-meter sources can this method calibrate?",
+    "How does Airframe calculate and verify a corrected Scale?"
+  ],
+  "viewPaths": ["overview"],
+  "concepts": [],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "An analog current sensor turns a measured voltage into current using its configured Scale. When that Scale is off, Betaflight's accumulated USED MAH can drift away from the capacity the charger puts back. Airframe compares those two measurements and calculates a corrected integer Scale without writing anything to the flight controller."
+    },
+    {"type": "image", "asset": "current-sensor-calibration"},
+    {
+      "type": "viewPath",
+      "view": "overview",
+      "steps": [
+        "Open the flight you want to use and choose Overview.",
+        "Find the Power card and choose Calibrate.",
+        "Follow the assistant through the battery, capacity, and Scale checks."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Check the prerequisites"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {"title": "Use an ADC current sensor", "text": "In Betaflight Configurator, Current Meter Source must be ADC. This capacity-based Scale correction does not apply to Virtual, ESC, MSP, or None sources."},
+        {"title": "Keep the current Scale", "text": "The calculation needs the Scale used during the measured flight. Do not change it before completing the calculation. Airframe prefers the Scale recorded in the flight header and can fall back to a suitable associated configuration."},
+        {"title": "Start genuinely full", "text": "Use a fully charged battery. Airframe cannot infer battery chemistry or a full charge from voltage, so it asks you to confirm this explicitly before reusing the selected log's USED MAH."},
+        {"title": "Use meaningful capacity", "text": "Make a normal flight that uses a meaningful portion of the battery, then land with your usual safety reserve. Do not deep-discharge the battery for calibration."},
+        {"title": "Measure what goes back", "text": "After the flight, let the same battery cool if necessary and fully recharge it with your normal charging program. Use the completed charge cycle's reported capacity—not the battery's label capacity."}
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Choose the evidence route"
+    },
+    {
+      "type": "paragraph",
+      "text": "If the selected flight started with a fully charged battery and contains a valid integrated USED MAH value, confirm that fact and Airframe reuses the recorded value. If it did not—or you are unsure—the assistant sends you through a new full-battery flight and asks for the Betaflight OSD value named USED MAH after landing. Uncertain memory is not calibration evidence."
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Use the same battery",
+      "text": "The OSD or log value and the charger value must describe one discharge-and-recharge cycle of the same battery. Mixing flights, batteries, partial charges, or charger sessions invalidates the comparison."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Calculate the corrected Scale"
+    },
+    {
+      "type": "formula",
+      "expression": "New Scale = Current Scale × USED MAH ÷ Charged mAh",
+      "explanation": "Airframe performs this calculation and rounds the result to the nearest whole number. It accepts only a resulting Betaflight Scale from 1 through 16000.",
+      "variables": [
+        {"symbol": "Current Scale", "meaning": "The ADC Scale used during the measured flight."},
+        {"symbol": "USED MAH", "meaning": "The capacity accumulated by Betaflight during that flight."},
+        {"symbol": "Charged mAh", "meaning": "The capacity the charger reports after fully recharging the same battery."}
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "For example, a Current Scale of 400, USED MAH of 320, and Charged mAh of 388 produce 400 × 320 ÷ 388 = 330 after rounding. If the correction changes the Scale by more than 25%, Airframe warns you to recheck all three values before applying it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Apply and verify"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {"title": "Copy the result", "text": "Airframe can copy the calculated Scale. It does not connect to the flight controller or change its configuration as part of this assistant."},
+        {"title": "Enter it in Betaflight", "text": "Open Betaflight Configurator → Power & Battery → Amperage Meter → Scale, enter the calculated value, then choose Save and Reboot."},
+        {"title": "Run a verification flight", "text": "Repeat the full-battery flight and recharge comparison. The next USED MAH and charged-capacity values should agree more closely; calibration is not complete until the new Scale has been checked."}
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "This corrects Scale only",
+      "text": "The workflow does not calibrate current offset, prove charger accuracy, diagnose wiring or sensor faults, or make non-ADC current sources more accurate. Resolve those issues separately before trusting the result."
+    },
+    {"type": "relatedProblems", "problems": ["setup-health-check", "compare-recorded-values"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Calibration state and calculation", "path": "Airframe/App/Airframe/App/CurrentSensorCalibrationAssistantState.swift"},
+    {"label": "Calibration assistant", "path": "Airframe/App/Airframe/App/CurrentSensorCalibrationAssistantView.swift"},
+    {"label": "Calibration captions", "path": "Airframe/Packages/AirframeCaptions/Sources/AirframeCaptions/CurrentSensorCalibrationCaptions.swift"},
+    {"label": "Overview calibration input", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/OverviewContainer.swift"},
+    {"label": "Calibration tests", "path": "Airframe/App/AirframeTests/CurrentSensorCalibrationAssistantStateTests.swift"},
+    {"label": "Betaflight Configurator power calibration", "path": "upstreams/betaflight-configurator/src/composables/usePower.js"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+}

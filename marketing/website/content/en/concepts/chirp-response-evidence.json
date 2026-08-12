@@ -1,0 +1,33 @@
+{
+  "id": "chirp-response-evidence",
+  "title": "CHIRP evidence has a stricter contract",
+  "summary": "Frequency Response and Tune Score require a complete supported sweep, reliable input-to-output evidence, and enough coverage on every required axis.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "A CHIRP deliberately sweeps excitation frequency on one axis. With complete modern debug data, Airframe estimates magnitude, phase, sensitivity, coherence, bandwidth, resonance, and a frequency-domain step response. Coherence marks frequencies where the measured input and output relate consistently enough to support interpretation."
+    },
+    {
+      "type": "list",
+      "style": "bulleted",
+      "items": [
+        "Tune Score requires all three control axes, recorded runs, the required response metrics, reliable frequency coverage, and sufficient reliable span.",
+        "Sweep completion, run count, axis coverage, reliable-frequency coverage, and modern debug data contribute to Confidence.",
+        "Missing evidence withholds Frequency Response or Tune Score; it is not converted into a poor result."
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Verify the sweep before considering the response",
+      "text": "The spectrogram must show a distinct, continuous sweep that follows the expected frequency curve from start to finish on each recorded axis. If the ridge is missing, broken, diffuse, or departs from that path, do not consider the response data. Even a valid-looking sweep remains measurement evidence, not permission to apply PID values."
+    }
+  ],
+  "sources": [
+    {"label": "CHIRP Frequency Response", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseCalculator.swift"},
+    {"label": "Tune Score availability", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseTuneScoreCalculator.swift"},
+    {"label": "CHIRP compatibility evidence", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "PID interpretation evidence", "path": "knowledge/PID_TUNING_PRINCIPLES.md"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+}

@@ -1,0 +1,101 @@
+{
+  "id": "understand-tune-score",
+  "slug": "understand-tune-score",
+  "status": "published",
+  "category": "tuning",
+  "order": 55,
+  "title": "What does Tune Score actually tell me?",
+  "summary": "Read Tune Score as a bounded assessment of one supported CHIRP recording, with confidence, component limits, and the underlying response still visible.",
+  "questions": [
+    "Which CHIRP evidence is required before Tune Score appears?",
+    "What do Stability Margin, Robustness, Damping, and Tracking Fidelity measure?",
+    "How is Confidence different from the score?",
+    "Why can a score not prescribe PID values?"
+  ],
+  "viewPaths": ["system-response", "spectrum", "overview"],
+  "concepts": ["chirp-response-evidence", "configuration-provenance", "log-evidence-quality"],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "Tune Score is a bounded reading of one supported CHIRP recording. It combines several closed-loop response properties only after Airframe has enough evidence, while Confidence remains a separate statement about the quality and coverage of that evidence."
+    },
+    {"type": "gallery", "assets": ["chirp-response", "chirp-spectrogram"]},
+    {
+      "type": "viewPath",
+      "view": "system-response",
+      "steps": [
+        "Open a complete supported CHIRP recording and choose Frequency Response.",
+        "Confirm that roll, pitch, and yaw runs were identified and that the expected sweep appears in the Spectrogram.",
+        "Inspect magnitude, phase, sensitivity, coherence, reliable coverage, resonance, and the derived step response by axis.",
+        "Read the four Tune Score components and their axis evidence before reading the overall number.",
+        "Read Confidence and any availability limitation separately from the score."
+      ]
+    },
+    {"type": "heading", "level": 2, "title": "First prove the CHIRP recording"},
+    {
+      "type": "paragraph",
+      "text": "Tune Score needs all three axes, recorded runs, required response metrics, reliable frequency coverage, and sufficient reliable frequency span. Missing evidence withholds the score instead of turning an incomplete flight into a poor rating."
+    },
+    {"type": "conceptReference", "concept": "chirp-response-evidence"},
+    {"type": "heading", "level": 2, "title": "Four components, one bounded score"},
+    {
+      "type": "table",
+      "caption": "What each component reads",
+      "columns": ["Component", "Underlying evidence", "Important boundary"],
+      "rows": [
+        ["Stability Margin", "Phase margin on each supported axis.", "It describes modeled closed-loop margin in this recording, not damaged-prop or thermal tolerance."],
+        ["Robustness", "Peak sensitivity on each axis.", "It is not a reward for maximum gain or bandwidth."],
+        ["Damping", "Closed-loop resonance plus derived-step overshoot and settling evidence.", "Similar damping symptoms can still involve filtering, Feedforward, saturation, or mechanics."],
+        ["Tracking Fidelity", "Low-frequency gain and final error from the derived response.", "Good tracking does not make the other components optional."]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Each component is aggregated conservatively across axes, giving the weakest axis more influence than a simple mean. The overall score combines every required component, and critical response evidence can cap it. Airframe does not silently reweight around a missing component."
+    },
+    {"type": "heading", "level": 2, "title": "Confidence is not part of the score"},
+    {
+      "type": "paragraph",
+      "text": "Confidence summarizes evidence such as analyzed axes, run count, reliable-frequency coverage, sweep completion, and modern debug-data availability. It does not add points to or subtract points from an otherwise identical response score. A strong-looking number with limited evidence remains limited evidence."
+    },
+    {"type": "heading", "level": 2, "title": "Read the plots behind the number"},
+    {
+      "type": "table",
+      "caption": "Corroborating the score",
+      "columns": ["Evidence", "Question"],
+      "rows": [
+        ["Magnitude and phase", "Where does tracking change, resonate, or lose margin?"],
+        ["Sensitivity", "Where does the closed loop amplify disturbance or uncertainty?"],
+        ["Coherence", "At which frequencies is the input-to-output estimate reliable enough to interpret?"],
+        ["Spectrogram", "Did the expected sweep occur cleanly, with visible gaps, contamination, or harmonics?"],
+        ["Derived step response", "How do the same frequency-domain measurements translate into overshoot, settling, and final tracking?"],
+        ["Spectrum and Graph", "Were filtering, saturation, noise, and event context credible around the test?" ]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "A score is not permission to paste PIDs",
+      "text": "Tune Score describes the recorded closed-loop response. It does not prescribe P, I, D, Feedforward, or slider values; certify an optimal tune; prove mechanical or thermal safety; or authorize blind changes."
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "Filter evidence remains separate",
+      "text": "Tune Score does not replace inspection of unfiltered and filtered gyro, D term, motor output, filter delay, saturation, motor temperature, or physical condition. Establish those limits before interpreting controller changes."
+    },
+    {"type": "conceptReference", "concept": "configuration-provenance"},
+    {"type": "relatedProblems", "problems": ["judge-control-response", "judge-filter-tune", "setup-health-check"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "CHIRP response calculator", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseCalculator.swift"},
+    {"label": "Tune Score model", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseTuneScore.swift"},
+    {"label": "Tune Score calculator", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseTuneScoreCalculator.swift"},
+    {"label": "Tune Score presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/StepResponse/StepResponseInspector.swift"},
+    {"label": "CHIRP compatibility", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "PID interpretation evidence", "path": "knowledge/PID_TUNING_PRINCIPLES.md"},
+    {"label": "Betaflight CHIRP implementation", "path": "upstreams/betaflight/src/main/common/chirp.c"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+}

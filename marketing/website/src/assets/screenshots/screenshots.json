@@ -1,10 +1,31 @@
 [
   {
+    "id": "airframe-document",
+    "source": "airframe-document.png",
+    "alt": "Airframe asking whether to keep a raw Blackbox log in an Airframe document while leaving the original file unchanged",
+    "caption": "The raw log stays unchanged; the Airframe document keeps the work around it.",
+    "gallery": "workflow"
+  },
+  {
     "id": "overview",
     "source": "overview.png",
-    "alt": "Airframe overview with a loaded flight and its analysis tools",
-    "caption": "A flight, its timeline and the useful answers—without a maze of setup screens.",
+    "alt": "Airframe Overview organizing aircraft details, flight-controller configuration, flight facts, and health checks",
+    "caption": "The log and available setup data, organized into one general health check.",
     "gallery": "flight-analysis"
+  },
+  {
+    "id": "current-sensor-calibration",
+    "source": "current-sensor-calibration.png",
+    "alt": "Airframe Current Sensor Calibration assistant showing a calculated Scale and the path for applying it in Betaflight Configurator",
+    "caption": "Calculate the corrected Scale, then apply it deliberately in Betaflight Configurator.",
+    "gallery": "workflow"
+  },
+  {
+    "id": "manage-presets",
+    "source": "manage-presets.png",
+    "alt": "Airframe Manage Presets window listing reusable analysis setups with import, export, rename, and delete controls",
+    "caption": "Keep reusable analysis setups organized, portable, and separate from the documents that use them.",
+    "gallery": "workflow"
   },
   {
     "id": "graph-playback",

@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import test from "node:test";
-import { BuildError, buildSite, fillTemplate, imageDimensions, loadProject, renderBlocks, validateProject } from "../scripts/lib/engine.mjs";
+import { BuildError, buildSite, fillTemplate, imageDimensions, loadProject, renderBlocks, renderContentText, validateProject } from "../scripts/lib/engine.mjs";
 
 const write = async (root, path, value) => {
   const target = join(root, path); await mkdir(dirname(target), { recursive: true });
@@ -82,6 +82,17 @@ test("renders every supported block with per-image intrinsic dimensions", async 
   const html = renderBlocks(problem.blocks, { assets, templates: { screenshot: "<img src=\"{{fallbackURL}}\" width=\"{{width}}\" height=\"{{height}}\" alt=\"{{alt}}\">" }, locale: "en", defaultLocale: "en", views: new Map(data.views.map(item => [item.id, item])), concepts: new Map(data.concepts.map(item => [item.id, item])), problems: new Map(data.problems.map(item => [item.id, item])), problem });
   for (const marker of ["<p class=\"lead\">", "<ol>", "class=\"steps\"", "callout--tip", "class=\"callout__kind\">Tip", "width=\"1600\" height=\"900\"", "width=\"900\" height=\"1600\"", "<table>", "class=\"formula\"", "data-view-path=\"graph\"", "id=\"concept-sampling\"", "class=\"related-problems\""]) assert.match(html, new RegExp(marker));
   assert.doesNotMatch(html, /class=\"sources\"/);
+});
+
+test("links Airframe document terms without partial matches or self-links", () => {
+  const context = { locale: "en", defaultLocale: "en", problem: { id: "another-guide" } };
+  const html = renderContentText("An Airframe document, Airframe documents, and .airframe—but not .airframepreset or preset.airframeIdentifier.", context);
+  assert.equal((html.match(/class="document-guide-link"/g) ?? []).length, 3);
+  assert.equal((html.match(/href="\/inside-airframe\/airframe-document\/"/g) ?? []).length, 3);
+  assert.match(html, /\.airframepreset/);
+  assert.match(html, /preset\.airframeIdentifier/);
+  assert.doesNotMatch(renderContentText("Airframe document and .airframe", { ...context, problem: { id: "airframe-document" } }), /document-guide-link/);
+  assert.match(renderContentText("Airframe document", { ...context, locale: "de" }), /href="\/de\/inside-airframe\/airframe-document\/"/);
 });
 
 test("rejects unresolved template values and broken content references", async () => {

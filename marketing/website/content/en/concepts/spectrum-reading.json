@@ -14,8 +14,23 @@
       ]
     },
     {
+      "type": "heading",
+      "level": 3,
+      "title": "Filters answer different parts of the problem"
+    },
+    {
+      "type": "table",
+      "caption": "Filter roles in the evidence",
+      "columns": ["Filter", "Evidence role", "Important limit"],
+      "rows": [
+        ["RPM Filter", "Tracks per-motor harmonics derived from recorded eRPM.", "Alignment needs usable eRPM and the correct motor pole count."],
+        ["Dynamic Notch", "Tracks remaining spectral peaks not already handled by the motor-harmonic path.", "Following a peak does not identify the physical part that created it."],
+        ["Low-pass filters", "Attenuate a broader high-frequency region in the gyro or D-term path.", "Attenuation and added delay must be judged together."]
+      ]
+    },
+    {
       "type": "paragraph",
-      "text": "Configured filter overlays show where recorded settings act. Comparing pre-filter gyro, filtered gyro, D term, and motor output can show what remains downstream. Every filter attenuates something and adds delay, so 'more filtering' is not a strategy; it is merely a direction."
+      "text": "Configured filter overlays show where recorded settings act. Comparing unfiltered gyro, filtered gyro, D term, and motor output can show what remains downstream. Every filter attenuates something and adds delay, so 'more filtering' is not a strategy; it is merely a direction."
     },
     {
       "type": "callout",
@@ -30,10 +45,5 @@
     {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
     {"label": "Betaflight RPM filter implementation", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"}
   ],
-  "reviewedAgainst": {
-    "appVersion": "0.1.0",
-    "betaflightVersion": "2026.6.1",
-    "betaflightCommit": "6dbc4218f",
-    "reviewDate": "2026-08-11"
-  }
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
 }

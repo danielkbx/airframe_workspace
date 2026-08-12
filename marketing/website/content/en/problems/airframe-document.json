@@ -1,0 +1,85 @@
+{
+  "id": "airframe-document",
+  "slug": "airframe-document",
+  "status": "published",
+  "category": "getting-started",
+  "order": 0,
+  "title": "What is an Airframe document?",
+  "summary": "An Airframe document keeps your Blackbox logs together with the context and analysis setup that make them useful—without locking the logs away.",
+  "questions": [
+    "What does an Airframe document add to a Blackbox log?",
+    "Can I keep several logs and their analysis setup together?",
+    "Can I get the included .bbl or .bfl files back out?"
+  ],
+  "viewPaths": [],
+  "concepts": [],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "An Airframe document is a workspace for an investigation. It keeps the Blackbox logs, the context around them, and the analysis setup in one place instead of making the log format itself carry everything."
+    },
+    {"type": "image", "asset": "airframe-document"},
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "A workspace for the investigation"
+    },
+    {
+      "type": "paragraph",
+      "text": "A single .airframe file can hold several related logs. They can be named, organized, hidden without deletion, and compared while the document remembers where the investigation left off. When an existing .bbl or .bfl file is saved as an Airframe document, the original file stays unchanged at its existing location."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "What the document keeps"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {"title": "Multiple logs", "text": "Keep flights that belong together in one file instead of rebuilding the same working set every time."},
+        {"title": "Views and analysis settings", "text": "Keep selected fields, graph and table layouts, Spectrum settings, ranges, and other persistent view state with the work."},
+        {"title": "Names, notes, and aircraft context", "text": "Keep log names, notes, propeller size, motor layout, and other document-owned aircraft settings beside the recordings they describe."},
+        {"title": "Available FC evidence", "text": "Keep captured Betaflight configuration and flight-controller import information with the logs when those details are available."}
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Your logs are not locked away"
+    },
+    {
+      "type": "paragraph",
+      "text": "Every included log can be exported individually through Export Log. The exported file remains in the familiar .bbl or .bfl format, so the recording is still available outside Airframe and can be opened by other compatible tools."
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "The original file stays where it is",
+      "text": "Save as Airframe Document… creates an additional .airframe file. It does not replace or modify the Blackbox file that is already on disk. Continuing read-only without creating a document remains available too."
+    },
+    {
+      "type": "callout",
+      "tone": "tip",
+      "title": "No lock-in",
+      "text": "Use Export Log on any included recording to write it out again as a .bbl or .bfl file. The useful workspace around the logs does not take the logs away from you."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "What does not need to live in the document"
+    },
+    {
+      "type": "paragraph",
+      "text": "Reproducible derived-data caches stay in the device's cache storage rather than inside the Airframe document. They can be discarded and rebuilt, and they are not required to export the included logs."
+    },
+    {"type": "relatedProblems", "problems": ["get-logs-off-the-flight-controller", "setup-health-check"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Airframe document model", "path": "Airframe/App/Airframe/App/WorkspaceDocument/AirframeWorkspaceDocument.swift"},
+    {"label": "Document conversion presentation", "path": "Airframe/App/Airframe/App/DocumentView.swift"},
+    {"label": "Log export action", "path": "Airframe/App/Airframe/App/DocumentHome/Sidebar.swift"},
+    {"label": "Airframe container implementation", "path": "Airframe/Packages/AirframeContainer/Sources/AirframeContainer/"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+}

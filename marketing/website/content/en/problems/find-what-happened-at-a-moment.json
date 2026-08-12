@@ -8,15 +8,15 @@
   "summary": "Synchronize commands, gyro motion, PID terms, motors, flight modes, craft attitude, and events on one timeline.",
   "questions": [
     "What changed just before the wobble, dip, or disarm?",
-    "Did the command, gyro, PID output, or motors move first?",
-    "Which flight mode and craft state were active under the cursor?"
+    "Did the command, measured response, controller output, or motors move first?",
+    "Does the interval support a tuning hypothesis—or only show where to investigate next?"
   ],
   "viewPaths": ["graph", "table", "overview", "map"],
   "concepts": ["shared-timeline", "log-evidence-quality"],
   "blocks": [
     {
       "type": "lead",
-      "text": "A memorable half-second can look surprisingly polite when averaged across a whole flight. Graph keeps the chronology: command, response, controller output, motors, mode changes, and craft state can all be read against the same cursor."
+      "text": "A memorable half-second can look surprisingly polite when averaged across a whole flight. Graph keeps the chronology before an average or score smooths it away: desired rate, measured motion, controller terms, motor commands, mode changes, and craft state can all be read against the same cursor."
     },
     {"type": "image", "asset": "graph-playback"},
     {
@@ -25,40 +25,51 @@
       "steps": [
         "Choose Graph and add only the signals needed for the question.",
         "Scrub or play to the event marker or visible disturbance.",
-        "Zoom around the interval and use range measurement when duration or spread matters.",
-        "Open the Craft section for attitude, motor output, flight mode, and reliable centre-of-gravity context at the shared cursor."
+        "Zoom around the interval and use range measurement when duration, oscillation, or spread matters.",
+        "Open the Craft section for attitude, motor output, flight mode, and reliable centre-of-gravity context at the shared cursor.",
+        "Move to Spectrum when the question becomes frequency behaviour or filter outcome rather than event order."
       ]
     },
-    {
-      "type": "heading",
-      "level": 2,
-      "title": "Build a causal sequence, carefully"
-    },
+    {"type": "heading", "level": 2, "title": "Read the signal sequence"},
     {
       "type": "table",
-      "caption": "A practical signal stack",
-      "columns": ["Question", "Signals or rows", "What to look for"],
+      "caption": "A practical tuning-aware signal stack",
+      "columns": ["Question", "Signals or rows", "What the evidence can show"],
       "rows": [
-        ["Was it commanded?", "setpoint and gyroADC", "Whether measured rotation follows a pilot/controller request or appears without one."],
-        ["How did the controller react?", "axisP, axisI, axisD, axisF, axisSum", "Timing, saturation, and axis-specific response; availability depends on the log."],
-        ["Did an actuator run out of room?", "motor outputs", "One or more outputs pinned near their usable boundary while correction is demanded."],
-        ["Did state change?", "event rows and flight-mode flags", "Arming, disarming, mode transitions, and other decoded events in context."],
-        ["Was the recorder trustworthy here?", "time, gaps, and Overview quality", "Whether missing frames overlap the interval under investigation."]
+        ["What was requested?", "setpoint", "The desired angular rate presented to the controller—not the aircraft's measured motion."],
+        ["What did the craft do?", "gyroADC", "Whether measured angular rate follows, leads, lags, or departs from the request."],
+        ["How did feedback react?", "axisP, axisI, axisD", "Current-error, accumulated-error, and damping contributions as recorded; availability and exact processing depend on the log and firmware."],
+        ["What anticipated the command?", "axisF", "Feedforward derived from setpoint change rather than another feedback-error term."],
+        ["What reached the mixer?", "axisSum and motor outputs", "Controller demand and available command headroom; a motor command is not measured thrust."],
+        ["Can this interval be trusted?", "time, gaps, and Overview quality", "Whether missing frames or limited logging rate overlap the event under investigation."]
+      ]
+    },
+    {"type": "heading", "level": 2, "title": "Patterns suggest the next question"},
+    {
+      "type": "table",
+      "caption": "Useful cues, not one-term diagnoses",
+      "columns": ["Observed pattern", "Consistent with", "What else must be checked"],
+      "rows": [
+        ["Gyro initially trails setpoint", "Limited anticipatory tracking, filter delay, low control authority, or the manoeuvre itself.", "Feedforward, filter evidence, motor headroom, and repeated response."],
+        ["Gyro leads or overshoots near the end of a move", "Feedforward timing or an underdamped response.", "P:D balance, saturation, mechanics, and comparable moves."],
+        ["Fast reversal or bounceback", "A damping-balance or command-tracking issue.", "D-term noise, filtering, Feedforward, actuator limits, and physical resonance."],
+        ["Slow correction or drift after the move", "Sustained-error behaviour involving I-term processing.", "I-Term Relax, anti-windup, saturation, wind, and firmware-specific behaviour."],
+        ["Dense high-frequency activity", "Noise or oscillation reaching a controller stage.", "Spectrum across unfiltered gyro, filtered gyro, D term, and motors."]
       ]
     },
     {
       "type": "callout",
       "tone": "warning",
       "title": "Order is evidence; cause needs corroboration",
-      "text": "A motor output changing before gyro motion can support one hypothesis, but recorded output is a command, not proof of motor thrust. Likewise, an anomaly detector produces candidate intervals under specific eRPM and motor-output conditions; it does not inspect bearings, props, wiring, or ESC telemetry by magic."
+      "text": "No timing pattern maps uniquely to P, I, D, or Feedforward. Filtering, saturation, mechanics, flight input, estimator quality, and several controller terms can create similar traces. Recorded motor output is a command, not proof of motor speed or thrust."
     },
     {
       "type": "paragraph",
-      "text": "When the graph reveals the right interval, switch to Table without changing the underlying time context. The table is slower to read but wonderfully literal: selected values and decoded events, row by row, with rather less interpretive jazz."
+      "text": "When Graph reveals the right interval, switch to Table without changing the underlying time context. Use the literal samples to challenge the visual story, then use Spectrum or System Response when the question needs frequency or repeated-response evidence."
     },
     {"type": "conceptReference", "concept": "shared-timeline"},
     {"type": "conceptReference", "concept": "log-evidence-quality"},
-    {"type": "relatedProblems", "problems": ["compare-recorded-values", "put-events-back-on-the-map", "understand-a-flight-at-a-glance"]},
+    {"type": "relatedProblems", "problems": ["compare-recorded-values", "judge-filter-tune", "judge-control-response", "chase-vibration-and-noise"]},
     {"type": "sources"}
   ],
   "sources": [
@@ -66,8 +77,9 @@
     {"label": "Graph inspector", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphInspector.swift"},
     {"label": "Craft timeline and inspector", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphCraftSection.swift"},
     {"label": "Table event rows", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Table/TableModel.swift"},
-    {"label": "Motor anomaly analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/AnalysisMotorAnomaly.swift"},
+    {"label": "PID interpretation evidence", "path": "knowledge/PID_TUNING_PRINCIPLES.md"},
+    {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
     {"label": "Betaflight PID loop", "path": "upstreams/betaflight/src/main/flight/pid.c"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-11"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
 }

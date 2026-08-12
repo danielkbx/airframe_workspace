@@ -1,0 +1,92 @@
+{
+  "id": "setup-health-check",
+  "slug": "setup-health-check",
+  "status": "published",
+  "category": "getting-started",
+  "order": 20,
+  "title": "Does my setup pass its health check?",
+  "summary": "Use a recorded flight—and any setup evidence available with it—to review the aircraft, flight controller, logging, power, and health findings before tuning.",
+  "questions": [
+    "What does this recording actually show about my aircraft and flight-controller setup?",
+    "Do the recorded values, aircraft details, and available configuration agree?",
+    "Which checks found something, and which could not run?"
+  ],
+  "viewPaths": ["overview"],
+  "concepts": ["log-evidence-quality", "configuration-provenance"],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "A health check needs evidence. In Airframe, a recorded flight is the examination record, while the aircraft and its flight-controller setup are the patient. Overview brings together what the log recorded, what the Airframe document knows about the aircraft, any configuration captured from the flight controller, and the checks those inputs can support."
+    },
+    {"type": "image", "asset": "overview"},
+    {
+      "type": "viewPath",
+      "view": "overview",
+      "steps": [
+        "Open a Betaflight log or Airframe document and select a representative segment.",
+        "Choose Overview.",
+        "Read the setup by topic before opening a deeper analysis."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "What feeds the health check"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {"title": "Recorded evidence", "text": "The Blackbox header and recorded frames provide firmware, hardware, logging, power, flight, GPS, field-availability, and data-quality facts. A plain .bbl or .bfl can supply only what travelled inside that recording."},
+        {"title": "Aircraft context", "text": "An Airframe document can add the aircraft name, propeller size, and motor layout. These details help interpret the setup; they are aircraft settings, not values imported from the flight controller."},
+        {"title": "Captured FC configuration", "text": "When a matching configuration was captured during flight-controller import, Overview can add settings that are not guaranteed to exist in the log header. Without it, Airframe stays with the recorded evidence."},
+        {"title": "Derived findings", "text": "Airframe runs only the checks supported by the available fields and configuration. A check that lacks its required evidence cannot produce a healthy or unhealthy verdict."}
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Read the setup by system"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {"title": "Aircraft", "text": "Confirm the aircraft identity, propeller size, and motor layout. They provide the physical context needed by craft presentation and aircraft-specific analysis."},
+        {"title": "Flight controller and hardware", "text": "Review the Betaflight version, firmware build, board, MCU family, gyro rate, and detected sensors when those facts are present."},
+        {"title": "Blackbox and configuration", "text": "Check the logging device, mode, effective rate, loop time, motor protocol, bidirectional DShot, idle setup, and receiver protocol where the log or associated configuration exposes them."},
+        {"title": "Power and flight evidence", "text": "Use cell-count context, start and end voltage, used capacity, current, duration, throttle, GPS, modes, and disarms to understand the conditions under which the setup was recorded."},
+        {"title": "Checks and warnings", "text": "Look for log defects and gaps, a restrictive logging rate, incomplete CHIRP evidence, a noticeable center-of-gravity estimate, a motor-pole mismatch, candidate motor eRPM dropouts, eRPM data with RPM filtering disabled, or low battery charge at arm. Each row appears only when its prerequisites and reporting gates are met."}
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Not checked is not healthy",
+      "text": "Missing fields or configuration can prevent individual checks from running. Their absence must not be read as a clean bill of health. Overview reports supported evidence; it does not fill gaps with assumptions."
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "A baseline, not a diagnosis",
+      "text": "The health check cannot inspect loose hardware, prove a universal cause, or recommend a complete tune. Use Spectrum for vibration and filter evidence, System Response for control behaviour, and the physical aircraft for anything a log cannot observe."
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "Cell count is Betaflight context",
+      "text": "Overview reports Betaflight's likely effective cell count: a forced configured count is authoritative; otherwise Airframe reproduces firmware-style voltage detection and marks boundary or fallback uncertainty. It is not an independent battery chemistry detector."
+    },
+    {"type": "conceptReference", "concept": "log-evidence-quality"},
+    {"type": "conceptReference", "concept": "configuration-provenance"},
+    {"type": "relatedProblems", "problems": ["chase-vibration-and-noise", "judge-control-response", "find-what-happened-at-a-moment"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Overview cards", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/OverviewCards.swift"},
+    {"label": "Overview checks", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/ChecksCard.swift"},
+    {"label": "Recorded Data detail", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/RecordedDataDetailView.swift"},
+    {"label": "Health report builder", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Health/AnalysisHealthReportBuilder.swift"},
+    {"label": "Blackbox compatibility evidence", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "Betaflight battery source", "path": "upstreams/betaflight/src/main/sensors/battery.c"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+}

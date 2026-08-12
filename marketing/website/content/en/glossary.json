@@ -36,6 +36,27 @@
       "source": {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"}
     },
     {
+      "id": "p-term",
+      "term": "P term",
+      "definition": "The controller contribution based on current processed rate error. It contributes tracking authority, but its recorded output is evidence to compare with the whole response rather than a diagnosis of one gain.",
+      "aliases": ["P-term"],
+      "source": {"label": "PID tuning principles", "path": "knowledge/PID_TUNING_PRINCIPLES.md"}
+    },
+    {
+      "id": "i-term",
+      "term": "I term",
+      "definition": "The controller contribution built from accumulated processed error. Its behaviour can also reflect I-term Relax, anti-windup, saturation, and firmware details, so it is not a standalone gain verdict.",
+      "aliases": ["I-term"],
+      "source": {"label": "PID tuning principles", "path": "knowledge/PID_TUNING_PRINCIPLES.md"}
+    },
+    {
+      "id": "feedforward",
+      "term": "Feedforward",
+      "definition": "A setpoint-based contribution that anticipates commanded motion. It is distinct from feedback terms driven by tracking error, and its recorded output must be interpreted with setpoint, gyro, and saturation evidence.",
+      "aliases": ["F term", "F-term"],
+      "source": {"label": "Betaflight PID controller", "path": "upstreams/betaflight/src/main/flight/pid.c"}
+    },
+    {
       "id": "erpm",
       "term": "eRPM",
       "definition": "Electrical motor speed reported through bidirectional DShot. Converting it to mechanical frequency requires the correct motor pole count.",
@@ -71,6 +92,20 @@
       "source": {"label": "Airframe filter-delay analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisFilterDelay.swift"}
     },
     {
+      "id": "rpm-filter",
+      "term": "RPM Filter",
+      "definition": "A per-motor harmonic filter driven by measured eRPM. Judging its alignment requires valid eRPM data and the correct motor pole count.",
+      "aliases": ["RPM filtering"],
+      "source": {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"}
+    },
+    {
+      "id": "dynamic-notch",
+      "term": "Dynamic Notch",
+      "definition": "A filter that tracks remaining spectral peaks. Following a peak does not identify its mechanical cause, so source evidence and physical inspection remain separate questions.",
+      "aliases": ["dynamic notch filter"],
+      "source": {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"}
+    },
+    {
       "id": "step-response",
       "term": "Step response",
       "definition": "Airframe's normalized estimate of how gyro output follows setpoint input over time, averaged from qualifying two-second windows using Wiener deconvolution.",
@@ -92,6 +127,20 @@
       "source": {"label": "Airframe Frequency Response model", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponse.swift"}
     },
     {
+      "id": "tune-score",
+      "term": "Tune Score",
+      "definition": "Airframe's bounded assessment of one supported CHIRP response across stability margin, robustness, damping, and tracking fidelity. It describes the recorded response and does not prescribe PID values.",
+      "aliases": [],
+      "source": {"label": "Airframe Tune Score calculator", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseTuneScoreCalculator.swift"}
+    },
+    {
+      "id": "confidence",
+      "term": "Confidence",
+      "definition": "Airframe's description of the completeness and quality of the evidence supporting a CHIRP assessment. Confidence is reported separately and does not change Tune Score.",
+      "aliases": ["Tune Score confidence"],
+      "source": {"label": "Airframe Tune Score model", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseTuneScore.swift"}
+    },
+    {
       "id": "flight-mode-event",
       "term": "Flight-mode event",
       "definition": "A change in Betaflight's logged 32-bit mode mask. When an event carries no timestamp, Airframe places it using the latest valid main-frame time as context.",
@@ -101,7 +150,7 @@
     {
       "id": "airframe-document",
       "term": "Airframe document",
-      "definition": "Airframe's regular-file document, which can retain imported logs, associated configuration evidence, aircraft settings, names, notes, and view state.",
+      "definition": "Airframe's regular-file workspace, which can keep multiple logs with associated configuration evidence, aircraft settings, names, notes, and view state. Included logs can be exported again as .bbl or .bfl files.",
       "aliases": [".airframe"],
       "source": {"label": "Airframe container implementation", "path": "Airframe/Packages/AirframeContainer/Sources/AirframeContainer/"}
     }

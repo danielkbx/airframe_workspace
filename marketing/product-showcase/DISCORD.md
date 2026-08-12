@@ -10,7 +10,7 @@ The highlight of this build is the new Filter Guides in Spectrum. They place cra
 
 Build 43 also adds aircraft settings, center-of-gravity diagnostics, battery cell information, and several state-restoration fixes.
 
-Image: `08-build-43-filter-guides.png`
+Image: `macOS/08-build-43-filter-guides.png`
 
 ## Early Access Update — Build 47
 
@@ -24,7 +24,7 @@ The Spectrogram view shows how the measured signal follows the expected sweep an
 
 Tune Score is an assessment of the recorded flight, not a tuning recommendation.
 
-Images: `09-build-47-chirp-response.png`, followed by `10-build-47-chirp-spectrogram.png`
+Images: `macOS/09-build-47-chirp-response.png`, followed by `macOS/10-build-47-chirp-spectrogram.png`; use the matching `iPad/` files for an iPad-specific post.
 
 ## 00 — The Story Behind Airframe
 
@@ -42,7 +42,7 @@ Airframe is still in active development. It does not yet offer every view or typ
 
 I’ll keep this channel updated whenever there are major changes or new features worth showing.
 
-Image: `01-overview.png`
+Image: `macOS/01-overview.png`
 
 ## 01 — Overview
 
@@ -52,7 +52,7 @@ The Overview gathers the most relevant context from a Blackbox log in one place:
 
 Its purpose is to establish what happened, how the flight controller was configured, and whether the log is suitable for a deeper analysis.
 
-Image: `01-overview.png`
+Image: `macOS/01-overview.png`
 
 ## 02 — Graph and Playback
 
@@ -62,7 +62,7 @@ Graph places raw and derived signals on a shared flight timeline. Setpoint and g
 
 Configurable graph sections keep related signals together. Playback, the timeline, and the craft visualization provide context for how the aircraft behaved during a maneuver.
 
-Image: `02-graph-playback.png`
+Image: `macOS/02-graph-playback.png`
 
 ## 03 — Spectrum
 
@@ -72,7 +72,7 @@ Spectrum shows the frequency content recorded during a flight. The frequency vie
 
 Filter curves and RPM-notch information can be placed alongside the measured signals when the required configuration is available. This makes it easier to relate a filter setup to the noise it is intended to address.
 
-Image: `04-spectrum-frequency.png`
+Image: `macOS/04-spectrum-frequency.png`
 
 ## 04 — Step Response
 
@@ -82,7 +82,7 @@ Step Response describes how Roll, Pitch, and Yaw react to setpoint changes. It h
 
 Reference logs place several tuning revisions in the same view, together with their recorded PID values. The comparison is intended to show whether a change produced a measurable improvement rather than merely a different curve.
 
-Image: `05-step-response-comparison.png`
+Image: `macOS/05-step-response-comparison.png`
 
 ## 05 — Flight Map Beta
 
@@ -92,7 +92,7 @@ Map relates the Blackbox timeline to the physical route of a GPS-equipped flight
 
 This helps identify where an event or change in the log occurred. Map is still a beta feature, and its presentation and playback behavior are being refined.
 
-Image: `06-flight-map.png`
+Image: `macOS/06-flight-map.png`
 
 ## 06 — Flight Controller Import
 
@@ -104,7 +104,7 @@ Betaflight settings can be stored with the imported logs. This preserves the con
 
 Bluetooth and the SpeedyBee Adapter 3 provide the connection paths needed for flight-controller import on iOS devices. The iOS version of Airframe will arrive later, because smaller displays and touch interaction still require more dedicated adaptation.
 
-Image: `07-flight-controller-import.png`
+Image: `macOS/07-flight-controller-import.png`
 
 ## 07 — But What About the Money?
 
@@ -120,7 +120,7 @@ The goal behind Airframe is still the same as it was in that camping chair: redu
 
 Airframe is still in active development, and not every feature planned for 1.0 is available yet. Suggestions for useful analyses, views, or workflows are welcome. Feedback from real flights will help decide what to refine and build next on the way to the first full release.
 
-Image: reuse `02-graph-playback.png` or `07-flight-controller-import.png`
+Image: reuse `macOS/02-graph-playback.png` or `macOS/07-flight-controller-import.png`
 
 ## Website-Only Copy — Airframe Documents
 

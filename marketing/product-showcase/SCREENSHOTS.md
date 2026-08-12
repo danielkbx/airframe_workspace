@@ -2,7 +2,9 @@
 
 ## Shared Capture Setup
 
-The visible flight-controller UID in `01-overview.png` and the recognizable flight location in `06-flight-map.png` are approved for publication in this specific screenshot set.
+The visible flight-controller UID in `macOS/01-overview.png` and the recognizable flight location in `macOS/06-flight-map.png` are approved for publication in this specific screenshot set.
+
+Assets are grouped by platform below `Screenshots/`. The same feature uses the same numbered filename across platform folders. The current `iPad/` captures are 13-inch iPad simulator images; they are not iPhone captures.
 
 - Use the latest verified beta build on macOS for the main set.
 - Use one representative flight with clean, visually interesting data. Use a GPS flight where required and a tuning flight where Spectrum or Step Response benefits.
@@ -18,16 +20,27 @@ The visible flight-controller UID in `01-overview.png` and the recognizable flig
 Current status:
 
 - Available: Overview, Graph and Playback, Spectrum, Step Response, Flight Map, Flight Controller Import.
-- Build update asset: `08-build-43-filter-guides.png`, showing the new Spectrum Filter Guides with measured gyro signals, frequency regions, P90 references, and filter curves.
-- Build 47 update assets: `09-build-47-chirp-response.png` and `10-build-47-chirp-spectrogram.png`, showing the complementary result and evidence views of CHIRP analysis.
+- Build update asset: `macOS/08-build-43-filter-guides.png`, showing the new Spectrum Filter Guides with measured gyro signals, frequency regions, P90 references, and filter curves.
+- Build 47 update assets: `09-build-47-chirp-response.png` and `10-build-47-chirp-spectrogram.png` in both platform folders, showing the complementary result and evidence views of CHIRP analysis.
 - The original six-image product showcase remains final; numbered build-update assets are added only for noteworthy release posts.
+
+Current iPad captures:
+
+- `00-home.png`
+- `01-overview.png`
+- `02-graph-playback.png`
+- `04-spectrum-frequency.png`
+- `05-step-response-comparison.png`
+- `06-flight-map.png`
+- `09-build-47-chirp-response.png`
+- `10-build-47-chirp-spectrogram.png`
 
 ### 09–10 — Build 47 CHIRP Analysis
 
 Filenames:
 
-- `09-build-47-chirp-response.png`
-- `10-build-47-chirp-spectrogram.png`
+- `macOS/09-build-47-chirp-response.png` and `iPad/09-build-47-chirp-response.png`
+- `macOS/10-build-47-chirp-spectrogram.png` and `iPad/10-build-47-chirp-spectrogram.png`
 
 Capture:
 
@@ -40,7 +53,7 @@ Purpose: explain both the interpreted frequency-response result and the recorded
 
 ### 01 — Overview
 
-Filename: `01-overview.png`
+Filename: `macOS/01-overview.png` or `iPad/01-overview.png`
 
 Capture:
 
@@ -53,7 +66,7 @@ Purpose: the clearest broad introduction to the app.
 
 ### 02 — Graph and Playback
 
-Filename: `02-graph-playback.png`
+Filename: `macOS/02-graph-playback.png` or `iPad/02-graph-playback.png`
 
 Capture:
 
@@ -66,7 +79,7 @@ Purpose: show how a flight becomes an explorable timeline rather than a static f
 
 ### 04 — Spectrum
 
-Filename: `04-spectrum-frequency.png`
+Filename: `macOS/04-spectrum-frequency.png` or `iPad/04-spectrum-frequency.png`
 
 Capture:
 
@@ -79,7 +92,7 @@ Purpose: explain where noise occurs and how it relates to operating conditions.
 
 ### 05 — Step Response Comparison
 
-Filename: `05-step-response-comparison.png`
+Filename: `macOS/05-step-response-comparison.png` or `iPad/05-step-response-comparison.png`
 
 Capture:
 
@@ -92,7 +105,7 @@ Purpose: make iterative tune comparison immediately understandable.
 
 ### 06 — Flight Map
 
-Filename: `06-flight-map.png`
+Filename: `macOS/06-flight-map.png` or `iPad/06-flight-map.png`
 
 Capture:
 
@@ -107,7 +120,7 @@ Purpose: connect log data with the physical flight while presenting Map as a pro
 
 ### 07 — Flight Controller Import
 
-Filename: `07-flight-controller-import.png`
+Filename: `macOS/07-flight-controller-import.png`
 
 Capture:
 

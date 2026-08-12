@@ -1,0 +1,134 @@
+{
+  "id": "reuse-analysis-setups",
+  "slug": "reuse-analysis-setups",
+  "status": "published",
+  "category": "getting-started",
+  "order": 40,
+  "title": "How do I reuse an analysis setup?",
+  "summary": "Save a preferred collection of analysis views as a preset, apply it to another flight, and keep reusable setup separate from document content.",
+  "questions": [
+    "How can I reuse the same analysis layout across flights?",
+    "Does changing a document also change the preset I applied?",
+    "How do I organize or share presets with another device?"
+  ],
+  "viewPaths": ["overview"],
+  "concepts": [],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "When you have arranged Airframe's analysis views for a particular job, a preset lets you reuse that setup on another flight instead of rebuilding it control by control. Presets are portable snapshots of analysis configuration—not containers for logs, aircraft data, findings, or a continuing link to a document."
+    },
+    {"type": "image", "asset": "manage-presets"},
+    {
+      "type": "viewPath",
+      "view": "overview",
+      "steps": [
+        "Open a log in an Airframe document.",
+        "Choose Presets in the document toolbar.",
+        "Save the current setup, apply an existing preset, or open Manage Presets."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "What a preset remembers"
+    },
+    {
+      "type": "list",
+      "style": "bulleted",
+      "items": [
+        "The selected Graph and Table fields, their presentation, and Graph zoom.",
+        "Spectrum mode, selected signals and settings, plus its frequency window.",
+        "Map presentation settings.",
+        "Step Response and supported Frequency Response presentation settings."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The setup is portable across logs. A requested signal that one log does not contain can remain part of the preset and become available when another compatible log supplies it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Save the current setup"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {"title": "Arrange the analysis views", "text": "Choose the fields, ranges, modes, and presentation you want to reuse."},
+        {"title": "Open Presets", "text": "Choose Presets in the document toolbar, then choose Save Current Setup…"},
+        {"title": "Choose the destination", "text": "Create a named user preset or deliberately select an existing user preset to overwrite. The built-in Default is never an overwrite destination."},
+        {"title": "Save the snapshot", "text": "Choose Save. This updates the preset library only; it does not apply the preset, alter the current document, or change the setup remembered for future documents."}
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Apply a preset once"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {"title": "Choose a preset", "text": "Open the Presets toolbar menu and choose Default or a named user preset."},
+        {"title": "Receive the snapshot", "text": "Airframe atomically copies that analysis setup into the current document."},
+        {"title": "Continue normally", "text": "Adjust the document for this flight without changing the preset. To update the library entry, use Save Current Setup… and explicitly overwrite it."}
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "A snapshot, not a live link",
+      "text": "Applying a preset creates no continuing relationship. Later document edits do not dirty or update the preset, and overwriting the preset does not retroactively change documents that used an earlier version."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Default and new documents"
+    },
+    {
+      "type": "paragraph",
+      "text": "Default is Airframe's immutable built-in analysis setup. It can be applied but cannot be overwritten, renamed, deleted, or exported. The last preset you manually apply is remembered on that device and initializes a genuinely new document once. Existing documents keep their own saved state, saving a preset alone does not select it for new documents, and an unavailable remembered preset falls back to Default."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Manage the library"
+    },
+    {
+      "type": "paragraph",
+      "text": "On macOS, Manage Presets lists user presets only. Rename a preset in place, select one or several entries for export or permanent deletion, or import an archive. Default is deliberately absent because it is not a mutable library entry."
+    },
+    {
+      "type": "paragraph",
+      "text": "On iOS and iPadOS, Import is the leading action. Each row provides Apply, Rename, Share, and Delete through native trailing swipe actions; Apply is the full-swipe default. User-preset library changes can sync through iCloud when available, while the identity of the last manually applied preset remains a device-local preference."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Share and import presets"
+    },
+    {
+      "type": "paragraph",
+      "text": "A .airframepreset archive can carry one or several user presets. Airframe validates the complete archive before changing the library. When an imported name already exists, choose Keep Both, Overwrite, or Don’t Import for that entry; after those decisions, the import is persisted atomically. Former .apf files and obsolete single-preset exports are not supported."
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "Analysis setup only",
+      "text": "Presets do not contain Blackbox log data, Airframe document contents, aircraft identity or settings, captured flight-controller configuration, per-flight results, findings, annotations, or a live synchronization relationship with documents. A .airframepreset file is not an Airframe document."
+    },
+    {"type": "relatedProblems", "problems": ["airframe-document", "compare-recorded-values", "chase-vibration-and-noise"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Preset controls", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Presets/PresetControls.swift"},
+    {"label": "Document preset application", "path": "Airframe/App/Airframe/App/DocumentStateStore.swift"},
+    {"label": "Portable preset configuration", "path": "Airframe/App/Airframe/App/Presets/PresetConfiguration.swift"},
+    {"label": "Preset library", "path": "Airframe/App/Airframe/App/Presets/PresetRepository.swift"},
+    {"label": "Preset archive", "path": "Airframe/App/Airframe/App/Presets/PresetArchiveCodec.swift"},
+    {"label": "Preset file document", "path": "Airframe/App/Airframe/App/LogDocument.swift"},
+    {"label": "Preset repository tests", "path": "Airframe/App/AirframeTests/PresetRepositoryTests.swift"},
+    {"label": "Preset captions", "path": "Airframe/Packages/AirframeCaptions/Sources/AirframeCaptions/CaptionSet.swift"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+}

@@ -93,6 +93,8 @@ h3 { font-size: clamp(1.35rem, 2vw, 1.85rem); font-weight: 600; }
 .button--quiet:hover { background: var(--ink); color: #111; border-color: var(--ink); }
 .text-link { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; font-weight: 620; text-decoration: underline; text-decoration-color: #55594d; }
 .text-link:hover { text-decoration-color: var(--accent); }
+.document-guide-link { text-decoration-color: #55594d; }
+.document-guide-link:hover { text-decoration-color: var(--accent); }
 .hero__media { position: relative; margin-top: clamp(72px, 10vw, 148px); }
 .hero__media .screenshot figcaption { display: none; }
 
