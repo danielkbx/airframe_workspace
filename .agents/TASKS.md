@@ -102,6 +102,7 @@ Automated container and lifecycle work is complete. Remaining acceptance is envi
 - Map timeline source picker and source colors on the MAYA Betaflight 4.5.2 document on macOS and iPadOS.
 - Craft roll/pitch signs against the reference viewer on a representative real log.
 - Craft motor gauge colors against Graph colors while scrubbing.
+- Map Craft Preview on real magnetometer and GPS-only logs: verify nose/course conventions, multiplicative barometer/GPS height and map-zoom scaling, full/silhouette/point LOD hysteresis, standard/satellite contrast, fast scrub cadence, and Heading-off behavior on iPadOS and macOS.
 - Mixer-template inference beyond Quad X using representative bicopter, tricopter, Y4, V-tail, A-tail, Hex, Y6, X8, and octocopter logs.
 - Compatibility across representative Betaflight versions, multi-log files, GPS logs, and damaged/truncated logs.
 - One representative real Betaflight 2026.6.1 log to supplement source-backed compatibility tests.
