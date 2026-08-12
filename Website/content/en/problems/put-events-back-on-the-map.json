@@ -1,0 +1,71 @@
+{
+  "id": "put-events-back-on-the-map",
+  "slug": "put-events-back-on-the-map",
+  "status": "published",
+  "category": "investigation",
+  "order": 60,
+  "title": "Where did that event happen?",
+  "summary": "Replay a usable GPS route with event markers and the shared timeline, then corroborate the same moment in Graph or Table.",
+  "questions": [
+    "Where along the route did the mode change or disarm occur?",
+    "What were altitude, speed, distance, and heading around that point?",
+    "Can I move from a map marker back to the matching signal interval?"
+  ],
+  "viewPaths": ["map", "graph", "table", "overview"],
+  "concepts": ["shared-timeline", "log-evidence-quality"],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "Time says when. GPS may say where. Map binds retained route points and decoded events to the same cursor used by Graph and Table, which is considerably nicer than estimating 'somewhere beyond that suspicious tree'."
+    },
+    {"type": "image", "asset": "map"},
+    {
+      "type": "viewPath",
+      "view": "map",
+      "steps": [
+        "Open a log with at least two distinct retained GPS positions and choose Map.",
+        "Select Standard or Satellite and enable available home, heading, and event overlays.",
+        "Choose GPS Altitude, Barometer Altitude, GPS Speed, or Distance from Home for the timeline.",
+        "Scrub or play to the event; then switch to Graph or Table to inspect the same log-time context."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "What the marker means"
+    },
+    {
+      "type": "paragraph",
+      "text": "Airframe retains ordered GPS points inside the selected main-frame time range. An event marker is attached to the latest route point at or before its event time, or at the event's main-frame context time when the payload has no timestamp. Route events are bounded to 256 markers."
+    },
+    {
+      "type": "table",
+      "caption": "Optional map evidence",
+      "columns": ["Overlay", "Source", "Limitation"],
+      "rows": [
+        ["Home", "Recorded GPS home frame", "Absent when the log did not retain a usable home position."],
+        ["Heading", "Recorded ground course", "Represents movement course, not a full craft yaw solution."],
+        ["Relative altitude", "GPS altitude relative to home or first usable altitude", "GPS vertical accuracy and baseline quality apply."],
+        ["Barometer altitude", "Barometer field on the shared timeline", "Requires the field and may drift with pressure."],
+        ["Event", "Decoded Blackbox event plus event/context time", "Placement is limited by event timing and GPS sample cadence."]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "Map is reconstruction, not telemetry tracking",
+      "text": "Airframe shows recorded points from the file. It does not invent a route between missing samples, geolocate a log without GPS, or prove the craft's exact position during a long gap. Satellite tiles also describe the basemap, not what the camera saw that day."
+    },
+    {"type": "conceptReference", "concept": "shared-timeline"},
+    {"type": "relatedProblems", "problems": ["find-what-happened-at-a-moment", "compare-recorded-values", "understand-a-flight-at-a-glance"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "GPS route analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/GPS/AnalysisGPSRoute.swift"},
+    {"label": "Map settings", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Map/MapSettings.swift"},
+    {"label": "Map presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Map/MapContainer.swift"},
+    {"label": "GPS field semantics", "path": ".agents/knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "Betaflight GPS Blackbox writer", "path": "betaflight/src/main/blackbox/blackbox.c"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-11"}
+}

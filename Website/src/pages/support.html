@@ -1,0 +1,33 @@
+<article class="text-page">
+  <header class="text-page__header">
+    <p class="eyebrow">Support</p>
+    <h1>Something not flying straight?</h1>
+    <p>Tell us what you expected, what happened instead, and which Airframe version you used. A screenshot is useful. Your entire life story is optional.</p>
+  </header>
+  <div class="contact-options">
+    <section>
+      <p class="index">01</p>
+      <h2>Send feedback</h2>
+      <p>Best for bugs, private details, and anything that needs a considered reply.</p>
+      {{supportContact}}
+    </section>
+    <section>
+      <p class="index">02</p>
+      <h2>Ask the community</h2>
+      <p>Compare notes with other pilots, discuss Blackbox analysis, or just say hello.</p>
+      <a class="button button--quiet" href="{{discordURL}}">Join Discord</a>
+    </section>
+  </div>
+  <section class="support-details" aria-labelledby="formal-contact-heading">
+    <p class="eyebrow">Formal contact</p>
+    <h2 id="formal-contact-heading">A real address, with a door and everything.</h2>
+    <address>
+      kumkju Beteiligungs- und Verwaltungsgesellschaft mbH<br>
+      Romain-Rolland-Straße 172<br>
+      13089 Berlin, Germany<br>
+      Telephone: <a href="tel:+4915123038068">+49 1512 30 38 068</a><br>
+      Email: {{supportContact}}
+    </address>
+  </section>
+  <aside class="callout"><strong>Please keep the props off.</strong> Airframe explains recorded data; it cannot make a spinning quad safe on your desk.</aside>
+</article>

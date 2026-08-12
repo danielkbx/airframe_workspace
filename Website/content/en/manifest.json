@@ -1,0 +1,36 @@
+{
+  "locale": "en",
+  "title": "Inside Airframe",
+  "description": "Problem-led guides to reading Betaflight Blackbox logs with Airframe.",
+  "categories": [
+    {
+      "id": "first-look",
+      "title": "Start with the flight",
+      "summary": "Establish what was recorded, whether it is trustworthy, and where the interesting moments live."
+    },
+    {
+      "id": "investigation",
+      "title": "Investigate a moment",
+      "summary": "Move from an impression in the goggles to synchronized signals, exact values, and—when GPS cooperated—a place."
+    },
+    {
+      "id": "tuning",
+      "title": "Noise and control",
+      "summary": "Use spectra and response estimates as evidence, with the assumptions left attached."
+    },
+    {
+      "id": "workflow",
+      "title": "Get the data in",
+      "summary": "Bring logs and available configuration evidence off a supported Betaflight flight controller."
+    }
+  ],
+  "problems": [
+    "understand-a-flight-at-a-glance",
+    "find-what-happened-at-a-moment",
+    "compare-recorded-values",
+    "chase-vibration-and-noise",
+    "judge-control-response",
+    "put-events-back-on-the-map",
+    "get-logs-off-the-flight-controller"
+  ]
+}

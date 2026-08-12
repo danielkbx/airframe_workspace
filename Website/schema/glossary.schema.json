@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://airframe.app/schema/glossary.schema.json",
+  "title": "Airframe glossary",
+  "type": "object",
+  "required": ["entries"],
+  "additionalProperties": false,
+  "properties": { "entries": { "type": "array", "items": { "type": "object", "required": ["id", "term", "definition", "aliases", "source"], "additionalProperties": false, "properties": { "id": { "$ref": "common.schema.json#/$defs/id" }, "term": { "type": "string" }, "definition": { "type": "string" }, "aliases": { "type": "array", "items": { "type": "string" } }, "source": { "$ref": "common.schema.json#/$defs/source" } } } } }
+}

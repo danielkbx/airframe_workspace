@@ -1,0 +1,72 @@
+{
+  "id": "understand-a-flight-at-a-glance",
+  "slug": "understand-a-flight-at-a-glance",
+  "status": "published",
+  "category": "first-look",
+  "order": 10,
+  "title": "What kind of flight did I actually record?",
+  "summary": "Start with log integrity, recording context, power, hardware, flight facts, GPS, and health findings before chasing a suspicious squiggle.",
+  "questions": [
+    "Is this the flight and craft I think it is?",
+    "Is the recording complete enough to analyse?",
+    "What firmware, hardware, power, GPS, and configuration facts travelled with the log?"
+  ],
+  "viewPaths": ["overview", "graph", "table"],
+  "concepts": ["log-evidence-quality", "configuration-provenance"],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "The first useful answer is often not 'bad D term'. It is 'this is segment 3, the logger dropped twelve intervals, GPS existed, and the battery started lower than expected'. Overview is where the flight introduces itself before anyone starts diagnosing its personality."
+    },
+    {"type": "image", "asset": "overview"},
+    {
+      "type": "viewPath",
+      "view": "overview",
+      "steps": [
+        "Open the Betaflight log or Airframe document and select the intended segment.",
+        "Choose Overview.",
+        "Read status and recording facts before the attractive numbers farther down."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "title": "Read the evidence in this order"
+    },
+    {
+      "type": "steps",
+      "items": [
+        {"title": "Confirm identity", "text": "Check filename or document, segment, aircraft name, Betaflight version, firmware build, board, and sensors. Aircraft naming is editable only in an Airframe document; recorded identity stays separate."},
+        {"title": "Check the recording", "text": "Read compatibility, log quality, recovered gaps, observed main rate, configured logging rate, and Nyquist limit. These decide which later plots deserve confidence."},
+        {"title": "Scan power and flight facts", "text": "Start and end voltage, used capacity, current, duration, throttle, altitude, speed, distance, modes, and disarms appear only when the required fields exist."},
+        {"title": "Read checks as findings, not diagnoses", "text": "Airframe can report gaps, eRPM with RPM filtering disabled, low charge at arm, motor-pole mismatch, and candidate motor anomaly intervals. Each is evidence with gates, not a universal declaration of cause."},
+        {"title": "Confirm field availability", "text": "Recorded Data lists frame and field coverage. If the desired field was never logged, a later analysis cannot summon it through optimism."}
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "Cell count is Betaflight context",
+      "text": "Overview reports Betaflight's likely effective cell count: a forced configured count is authoritative; otherwise Airframe reproduces firmware-style voltage detection and marks boundary or fallback uncertainty. It is not an independent battery chemistry detector."
+    },
+    {
+      "type": "callout",
+      "tone": "tip",
+      "title": "Then open one corroborating view",
+      "text": "Use Graph to see whether a summary maximum was a single spike or a sustained interval. Use Table when the exact displayed samples and decoded event row matter. Overview is the map of the evidence, not the entire country."
+    },
+    {"type": "conceptReference", "concept": "log-evidence-quality"},
+    {"type": "conceptReference", "concept": "configuration-provenance"},
+    {"type": "relatedProblems", "problems": ["find-what-happened-at-a-moment", "compare-recorded-values", "chase-vibration-and-noise"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Overview cards", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/OverviewCards.swift"},
+    {"label": "Overview checks", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/ChecksCard.swift"},
+    {"label": "Recorded Data detail", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/RecordedDataDetailView.swift"},
+    {"label": "Health report builder", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Health/AnalysisHealthReportBuilder.swift"},
+    {"label": "Blackbox compatibility evidence", "path": ".agents/knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
+    {"label": "Betaflight battery source", "path": "betaflight/src/main/sensors/battery.c"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-11"}
+}

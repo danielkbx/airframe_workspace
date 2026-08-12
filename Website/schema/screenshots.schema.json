@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://airframe.app/schema/screenshots.schema.json",
+  "title": "Airframe screenshot registry",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "source", "alt", "caption", "gallery"],
+    "properties": {
+      "id": { "$ref": "common.schema.json#/$defs/id" },
+      "source": { "type": "string", "pattern": "\\.(?:png|jpe?g|webp)$" },
+      "alt": { "type": "string", "minLength": 1 },
+      "caption": { "type": "string", "minLength": 1 },
+      "gallery": { "$ref": "common.schema.json#/$defs/id" },
+      "cropInsets": {
+        "type": "object",
+        "description": "Pixel insets removed from a presentation-framed source while preserving the master file.",
+        "additionalProperties": false,
+        "required": ["top", "right", "bottom", "left"],
+        "properties": {
+          "top": { "type": "integer", "minimum": 0 },
+          "right": { "type": "integer", "minimum": 0 },
+          "bottom": { "type": "integer", "minimum": 0 },
+          "left": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "focalPoint": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["x", "y"],
+        "properties": { "x": { "type": "number", "minimum": 0, "maximum": 1 }, "y": { "type": "number", "minimum": 0, "maximum": 1 } }
+      }
+    }
+  }
+}

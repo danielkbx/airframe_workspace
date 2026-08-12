@@ -1,0 +1,33 @@
+{
+  "product": {
+    "name": "Airframe",
+    "subtitle": "A Blackbox Log Analyzer",
+    "slogan": "Every flight tells a story."
+  },
+  "defaultLocale": "en",
+  "locales": ["en"],
+  "releaseState": "prerelease",
+  "domain": null,
+  "contactEmail": null,
+  "appStoreURL": null,
+  "discordURL": "https://discord.gg/rZkmzRE93",
+  "githubURL": "https://github.com/danielkbx/airframe",
+  "company": {
+    "legalName": "kumkju Beteiligungs- und Verwaltungsgesellschaft mbH",
+    "address": ["Romain-Rolland-Straße 172", "13089 Berlin", "Germany"],
+    "registerCourt": "Amtsgericht Charlottenburg",
+    "registerNumber": "HRB 178056 B",
+    "representedBy": "Daniel Wetzel",
+    "representativeAddress": ["Mommsenstraße 13", "30173 Hannover", "Germany"],
+    "phone": "+49 1512 30 38 068",
+    "vatId": "DE413447111",
+    "contentResponsible": "Daniel Wetzel"
+  },
+  "privacy": {
+    "hostingProvider": "Hetzner Online GmbH",
+    "serverLogRetentionDays": 7,
+    "analytics": false,
+    "cookies": false,
+    "localStorage": false
+  }
+}

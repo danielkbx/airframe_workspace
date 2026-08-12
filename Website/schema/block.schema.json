@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://airframe.app/schema/block.schema.json",
+  "title": "Airframe structured content block",
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "base": { "type": "object", "required": ["type"], "properties": { "type": { "type": "string" } } }
+  },
+  "oneOf": [
+    { "type": "object", "additionalProperties": false, "required": ["type", "text"], "properties": { "type": { "const": "lead" }, "text": { "$ref": "#/$defs/text" } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "text"], "properties": { "type": { "const": "paragraph" }, "text": { "$ref": "#/$defs/text" } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "level", "title"], "properties": { "type": { "const": "heading" }, "level": { "enum": [2, 3, 4] }, "title": { "$ref": "#/$defs/text" } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "style", "items"], "properties": { "type": { "const": "list" }, "style": { "enum": ["bulleted", "numbered"] }, "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" } } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "items"], "properties": { "type": { "const": "steps" }, "items": { "type": "array", "minItems": 1, "items": { "type": "object", "additionalProperties": false, "required": ["title", "text"], "properties": { "title": { "$ref": "#/$defs/text" }, "text": { "$ref": "#/$defs/text" } } } } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "tone", "title", "text"], "properties": { "type": { "const": "callout" }, "tone": { "enum": ["note", "warning", "limit", "tip"] }, "title": { "$ref": "#/$defs/text" }, "text": { "$ref": "#/$defs/text" } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "asset"], "properties": { "type": { "const": "image" }, "asset": { "$ref": "common.schema.json#/$defs/id" } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "assets"], "properties": { "type": { "const": "gallery" }, "assets": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/id" } } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "columns", "rows"], "properties": { "type": { "const": "table" }, "caption": { "type": "string" }, "columns": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" } }, "rows": { "type": "array", "items": { "type": "array", "items": { "type": "string" } } } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "expression", "explanation", "variables"], "properties": { "type": { "const": "formula" }, "expression": { "$ref": "#/$defs/text" }, "explanation": { "$ref": "#/$defs/text" }, "variables": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["symbol", "meaning"], "properties": { "symbol": { "$ref": "#/$defs/text" }, "meaning": { "$ref": "#/$defs/text" } } } } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "view", "steps"], "properties": { "type": { "const": "viewPath" }, "view": { "$ref": "common.schema.json#/$defs/id" }, "steps": { "type": "array", "items": { "$ref": "#/$defs/text" } } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "concept"], "properties": { "type": { "const": "conceptReference" }, "concept": { "$ref": "common.schema.json#/$defs/id" } } },
+    { "type": "object", "additionalProperties": false, "required": ["type", "problems"], "properties": { "type": { "const": "relatedProblems" }, "problems": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/id" } } } },
+    { "type": "object", "additionalProperties": false, "required": ["type"], "properties": { "type": { "const": "sources" } } }
+  ]
+}

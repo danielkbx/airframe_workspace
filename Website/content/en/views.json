@@ -1,0 +1,75 @@
+{
+  "views": [
+    {
+      "id": "overview",
+      "name": "Overview",
+      "path": "Open a log → Overview",
+      "summary": "Summarizes log quality, hardware, power, firmware, logging, flight, GPS, configuration, and health findings before deeper analysis.",
+      "availability": "Available for opened Betaflight logs. Individual cards appear only when their source data exists.",
+      "sourcePaths": [
+        "Airframe/App/Airframe/App/DocumentHome/Content/Overview/OverviewContainer.swift",
+        "Airframe/App/Airframe/App/DocumentHome/Content/Overview/ChecksCard.swift",
+        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Health/AnalysisHealthReportBuilder.swift"
+      ]
+    },
+    {
+      "id": "table",
+      "name": "Table",
+      "path": "Open a log → Table",
+      "summary": "Shows selected recorded or derived fields as timestamped rows, with decoded events inserted into the same ordered view.",
+      "availability": "Requires a readable main-frame time range and at least one selected field.",
+      "sourcePaths": [
+        "Airframe/App/Airframe/App/DocumentHome/Content/Table/TableModel.swift",
+        "Airframe/App/Airframe/App/DocumentHome/Content/Table/TableInspector.swift"
+      ]
+    },
+    {
+      "id": "graph",
+      "name": "Graph",
+      "path": "Open a log → Graph",
+      "summary": "Plots selectable signals on a shared time axis with events, range measurement, playback, and a synchronized craft inspector.",
+      "availability": "Requires readable time-series fields; unavailable configured fields remain visible but cannot produce a trace.",
+      "sourcePaths": [
+        "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphModel.swift",
+        "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphInspector.swift",
+        "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphCraftSection.swift"
+      ]
+    },
+    {
+      "id": "spectrum",
+      "name": "Spectrum",
+      "path": "Open a log → Spectrum",
+      "summary": "Examines selected signals by frequency, frequency versus throttle, or frequency versus motor RPM, and can overlay recorded filter settings and measured motor bands.",
+      "availability": "Frequency analysis needs suitable sampled fields. Throttle and RPM modes need their respective data; RPM mode additionally needs eRPM fields.",
+      "sourcePaths": [
+        "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumInspector.swift",
+        "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSettings.swift",
+        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisSpectrumAnalyzer.swift"
+      ]
+    },
+    {
+      "id": "system-response",
+      "name": "System Response",
+      "path": "Open a log → System Response",
+      "summary": "Estimates ordinary-flight step response from setpoint and gyro data, and exposes chirp frequency response, spectrograms, and a bounded tune score when a complete modern CHIRP payload is present.",
+      "availability": "Step Response needs sufficient setpoint and filtered-gyro excitation. Frequency Response needs complete supported CHIRP intervals and debug channels.",
+      "sourcePaths": [
+        "Airframe/App/Airframe/App/DocumentHome/Content/StepResponse/StepResponseInspector.swift",
+        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/StepResponse/AnalysisStepResponseCalculator.swift",
+        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Chirp/AnalysisFrequencyResponseCalculator.swift"
+      ]
+    },
+    {
+      "id": "map",
+      "name": "Map",
+      "path": "Open a log → Map",
+      "summary": "Replays a usable GPS route with the shared cursor, optional heading, home, and event markers, plus an altitude, speed, or distance timeline.",
+      "availability": "Requires at least two distinct retained GPS positions. Optional overlays require the matching recorded data.",
+      "sourcePaths": [
+        "Airframe/App/Airframe/App/DocumentHome/Content/Map/MapContainer.swift",
+        "Airframe/App/Airframe/App/DocumentHome/Content/Map/MapSettings.swift",
+        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/GPS/AnalysisGPSRoute.swift"
+      ]
+    }
+  ]
+}

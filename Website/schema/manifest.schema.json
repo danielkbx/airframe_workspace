@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://airframe.app/schema/manifest.schema.json",
+  "title": "Airframe locale manifest",
+  "type": "object",
+  "required": ["locale", "title", "description", "categories", "problems"],
+  "properties": {
+    "locale": { "type": "string", "pattern": "^[a-z]{2}(?:-[A-Z]{2})?$" },
+    "title": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "summary"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/id" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "problems": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "object", "required": ["id"] }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

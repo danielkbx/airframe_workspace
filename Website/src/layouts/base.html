@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000">
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}">
+  <link rel="canonical" href="{{canonical}}">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="{{assetPrefix}}images/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="{{assetPrefix}}css/site.css">
+  <script src="{{assetPrefix}}js/site.js" defer></script>
+</head>
+<body class="{{bodyClass}}">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  {{header}}
+  <main id="main-content" tabindex="-1">
+    {{main}}
+  </main>
+  {{footer}}
+  {{lightbox}}
+</body>
+</html>

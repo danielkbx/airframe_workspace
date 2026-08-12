@@ -1,0 +1,39 @@
+{
+  "id": "spectrum-reading",
+  "title": "A spectrum shows behaviour, not a culprit's mugshot",
+  "summary": "Frequency energy, throttle dependence, eRPM harmonics, filter positions, and downstream signals are complementary clues—not interchangeable verdicts.",
+  "blocks": [
+    {
+      "type": "table",
+      "caption": "What each Spectrum mode contributes",
+      "columns": ["Mode", "Useful question", "Important limit"],
+      "rows": [
+        ["Frequency", "Where is energy concentrated?", "A peak alone rarely identifies its mechanical cause."],
+        ["Frequency vs Throttle", "Does a ridge move as throttle changes?", "Throttle is only a proxy for motor speed."],
+        ["Frequency vs RPM", "Does energy track measured motor harmonics?", "Requires eRPM data and the correct motor pole count."]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Configured filter overlays show where recorded settings act. Comparing pre-filter gyro, filtered gyro, D term, and motor output can show what remains downstream. Every filter attenuates something and adds delay, so 'more filtering' is not a strategy; it is merely a direction."
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Reference guides are heuristic",
+      "text": "Prop-size bands and familiar dB references are context, not universal safety limits. Craft stiffness, mass, props, motor speed, sampling, windowing, and normalization all change the picture. Measured eRPM bands and the actual recorded filter configuration are stronger evidence when available."
+    }
+  ],
+  "sources": [
+    {"label": "Spectrum implementation", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/"},
+    {"label": "Spectrum modes and overlays", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSettings.swift"},
+    {"label": "Spectrum tuning evidence", "path": ".agents/knowledge/SPECTRUM_TUNING_GUIDES.md"},
+    {"label": "Betaflight RPM filter implementation", "path": "betaflight/src/main/flight/rpm_filter.c"}
+  ],
+  "reviewedAgainst": {
+    "appVersion": "0.1.0",
+    "betaflightVersion": "2026.6.1",
+    "betaflightCommit": "6dbc4218f",
+    "reviewDate": "2026-08-11"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://airframe.app/schema/views.schema.json",
+  "title": "Airframe view paths",
+  "type": "object",
+  "required": ["views"],
+  "additionalProperties": false,
+  "properties": { "views": { "type": "array", "items": { "type": "object", "required": ["id", "name", "path", "summary", "availability", "sourcePaths"], "additionalProperties": false, "properties": { "id": { "$ref": "common.schema.json#/$defs/id" }, "name": { "type": "string" }, "path": { "type": "string" }, "summary": { "type": "string" }, "availability": { "type": "string" }, "sourcePaths": { "type": "array", "items": { "type": "string" } } } } } }
+}

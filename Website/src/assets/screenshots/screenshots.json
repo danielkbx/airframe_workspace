@@ -1,0 +1,65 @@
+[
+  {
+    "id": "overview",
+    "source": "overview.png",
+    "alt": "Airframe overview with a loaded flight and its analysis tools",
+    "caption": "A flight, its timeline and the useful answers—without a maze of setup screens.",
+    "gallery": "flight-analysis"
+  },
+  {
+    "id": "graph-playback",
+    "source": "graph-playback.png",
+    "alt": "Airframe Graph showing gyro, motor and setpoint signals during playback",
+    "caption": "Follow recorded signals and craft state on the same timeline.",
+    "gallery": "flight-analysis"
+  },
+  {
+    "id": "spectrum",
+    "source": "spectrum.png",
+    "alt": "Airframe Spectrum view showing frequency energy across a flight",
+    "caption": "See where vibration energy lives instead of guessing from a noisy line.",
+    "gallery": "tuning"
+  },
+  {
+    "id": "step-response",
+    "source": "step-response.png",
+    "alt": "Airframe Step Response comparison for roll, pitch and yaw",
+    "caption": "Compare commanded and measured motion to spot overshoot and delay.",
+    "gallery": "tuning"
+  },
+  {
+    "id": "map",
+    "source": "map.png",
+    "alt": "Airframe Map showing the recorded flight path",
+    "caption": "Put an event back where it happened—not just when.",
+    "gallery": "flight-analysis"
+  },
+  {
+    "id": "flight-controller-import",
+    "source": "flight-controller-import.png",
+    "alt": "Airframe flight controller import sheet",
+    "caption": "Bring logs across from the flight controller and get on with the interesting bit.",
+    "gallery": "workflow"
+  },
+  {
+    "id": "filter-guides",
+    "source": "filter-guides.png",
+    "alt": "Airframe Graph with Betaflight filter guide overlays",
+    "caption": "Read filter boundaries alongside the signal they are meant to tame.",
+    "gallery": "tuning"
+  },
+  {
+    "id": "chirp-response",
+    "source": "chirp-response.png",
+    "alt": "Airframe Chirp Response analysis across control axes",
+    "caption": "Turn a chirp flight into a readable view of the craft's response.",
+    "gallery": "tuning"
+  },
+  {
+    "id": "chirp-spectrogram",
+    "source": "chirp-spectrogram.png",
+    "alt": "Airframe chirp spectrogram with frequency and time axes",
+    "caption": "See how frequency behaviour changes during the sweep.",
+    "gallery": "tuning"
+  }
+]

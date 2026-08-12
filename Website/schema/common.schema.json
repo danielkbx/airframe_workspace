@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://airframe.app/schema/common.schema.json",
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "pattern": "^https://" }
+      },
+      "oneOf": [{ "required": ["path"] }, { "required": ["url"] }]
+    },
+    "reviewedAgainst": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "appVersion": { "type": "string", "minLength": 1 },
+        "betaflightVersion": { "type": "string", "minLength": 1 },
+        "betaflightCommit": { "type": "string", "minLength": 7 },
+        "reviewDate": { "type": "string", "format": "date" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

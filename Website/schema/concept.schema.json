@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://airframe.app/schema/concept.schema.json",
+  "title": "Airframe reusable concept",
+  "type": "object",
+  "required": ["id", "title", "summary", "blocks", "sources", "reviewedAgainst"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "title": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string" },
+    "blocks": { "type": "array", "items": { "$ref": "block.schema.json" } },
+    "sources": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/source" } },
+    "reviewedAgainst": { "$ref": "common.schema.json#/$defs/reviewedAgainst" }
+  },
+  "additionalProperties": false
+}
