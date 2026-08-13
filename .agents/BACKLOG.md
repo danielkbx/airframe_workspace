@@ -1,6 +1,7 @@
 # Backlog
 
 - Add client-side search to `Inside Airframe` only when the guide corpus makes browsing insufficient; keep JSON as the content source and avoid a search service or CMS.
+- Add a clearly marked “Nerdy Tech Stuff” Inside Airframe article that explains the document format without presenting it as a permanent interoperability specification. Cover container versions, blobs, hashes, commits, export, recovery, compaction, and security boundaries; make any stable byte-format or third-party implementation commitment only after a separate product decision.
 
 Unapproved future ideas only. Promote an item to [TASKS.md](TASKS.md) or an approved section in [PLAN.md](PLAN.md) when the user selects it. Completed work belongs in Git, current behavior in `ARCHITECTURE.md`, stable decisions in `MEMORY.md`, and evidence in the Knowledge Base.
 
@@ -54,6 +55,7 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 ## Analysis and Presentation Follow-Ups
 
 - Post-1.0 only: implement the approved [Battery Sag Score plan](BATTERY_SAG_SCORE_PLAN.md). It adds one evidence-backed Good/Okay/Poor row to the existing Power card and explicitly does not estimate internal resistance or Battery Health.
+- Add a conservative Heading Consistency health check that compares firmware-quaternion nose heading with GPS course only across sustained, sufficiently fast, low-yaw, low-roll forward-flight evidence. Use circular error statistics and require a stable material offset; missing, sparse, or unstable evidence must remain not assessable. Report a neutral `Heading disagreement`, not `Compass miscalibrated`, because wind, sideslip, reverse/sideways flight, GPS error, initialization, and non-magnetometer yaw fusion can also separate nose and course. A directly matching FC configuration with `trust_mag = ON` may raise confidence in a compass calibration/alignment interpretation but must not be required for the log-only discrepancy finding. Validate thresholds against representative correctly calibrated and deliberately miscalibrated real logs before implementation.
 
 ### Spectrum
 

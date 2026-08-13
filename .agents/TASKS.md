@@ -101,6 +101,8 @@ Automated container and lifecycle work is complete. Remaining acceptance is envi
 
 - Map timeline source picker and source colors on the MAYA Betaflight 4.5.2 document on macOS and iPadOS.
 - Craft roll/pitch signs against the reference viewer on a representative real log.
+- Visually verify the completed refined-attitude policy in Graph and Map on Barney `LOG00006.BFL` around 339.596 seconds. The read-only algorithm check now selects gyro/accelerometer at 31.34° instead of the firmware quaternion's 85.62° and the full timeline reports mixed sources; confirm the running app no longer renders the Craft nearly edge-on and that trustworthy intervals remain stable.
+- Extend progressive Craft-store tests with injected loaders/cache to cover cache-hit startup, cache-disabled promotion, two-consumer refinement deduplication, provisional-generation races, refinement failure, and shutdown blocking late persistence. Exact-coverage rejection, refined-only Overview/CG use, active-cursor ±60-second provisional delivery, and cache-version invalidation are implemented.
 - Craft motor gauge colors against Graph colors while scrubbing.
 - Map Craft Preview on real magnetometer and GPS-only logs: verify nose/course conventions, multiplicative barometer/GPS height and map-zoom scaling, full/silhouette/point LOD hysteresis, standard/satellite contrast, fast scrub cadence, and Heading-off behavior on iPadOS and macOS.
 - Map Follow Craft on a representative long GPS route: verify the 70% free zone, visible-edge grace, offscreen start, one-shot smooth recentering, pause/resume behavior, direct pan/zoom/rotation/pitch interaction, Reduce Motion, Craft Preview independence, and absence of camera writes while the Craft remains inside the zone on macOS and iPadOS.
