@@ -84,7 +84,7 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 ### Map and Export
 
 - Add optional GPX export through CLI and app.
-- Consider follow camera, speed/altitude route coloring, geocoding/search, terrain/3D, and richer event detail only as separate features.
+- Consider speed/altitude route coloring, geocoding/search, terrain/3D, and richer event detail only as separate features.
 - Add video synchronization/export on the shared Graph playback timeline rather than a separate transport clock.
 - Add a macOS Quick Look extension for compact Blackbox summaries.
 
