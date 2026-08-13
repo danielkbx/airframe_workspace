@@ -1,5 +1,6 @@
 # Current Architecture
 
+- Private screenshot fixtures live under `fixtures/screenshots/`. `Basher Tuning.airframe` is a regular Airframe v2 container tracked through Git LFS; its manifest records source hashes, publication approval, semantic log roles, visible names, preset identities, and future UI-state requirements. `tools/screenshot-fixtures/` verifies and copies validated log/configuration blobs plus FC-import associations, writes the combined container, creates five portable preset archives, and reopens the output without changing the public app.
 - `CurrentSensorCalibrationAssistantState` is transient app-owned UI state with a pure nested calculator and route-specific steps. `DocumentHomeView.Overview.Container` supplies selected-log consumption, header Scale, and an associated-configuration-only fallback; `CurrentSensorCalibrationAssistantView` presents it through the shared `AssistantShell`, `AssistantHeading`, and `AssistantRow` components also used by FC import. The workflow owns no document data, cache, background work, or persistence.
 
 ## Airframe document storage

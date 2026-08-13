@@ -1,0 +1,63 @@
+{
+  "format" : "com.kumkju.airframe.presets",
+  "presets" : [
+    {
+      "i" : "AirframeSc02",
+      "n" : "Control Response",
+      "s" : {
+        "g" : {
+          "g" : [
+            {
+              "c" : {
+                "reader:I:gyroADC[0]:25" : 0,
+                "reader:I:gyroADC[1]:26" : 1,
+                "reader:I:gyroADC[2]:27" : 2
+              },
+              "n" : "Gyros",
+              "s" : [
+                "reader:I:gyroADC[0]:25",
+                "reader:I:gyroADC[1]:26",
+                "reader:I:gyroADC[2]:27"
+              ]
+            },
+            {
+              "c" : {
+                "reader:I:setpoint[0]:17" : 0,
+                "reader:I:setpoint[1]:18" : 1,
+                "reader:I:setpoint[2]:19" : 2
+              },
+              "n" : "Setpoint",
+              "s" : [
+                "reader:I:setpoint[0]:17",
+                "reader:I:setpoint[1]:18",
+                "reader:I:setpoint[2]:19"
+              ]
+            },
+            {
+              "c" : {
+                "reader:I:motor[0]:37" : 0,
+                "reader:I:motor[1]:38" : 1,
+                "reader:I:motor[2]:39" : 2,
+                "reader:I:motor[3]:40" : 3
+              },
+              "n" : "Motors",
+              "s" : [
+                "reader:I:motor[0]:37",
+                "reader:I:motor[1]:38",
+                "reader:I:motor[2]:39",
+                "reader:I:motor[3]:40"
+              ]
+            }
+          ],
+          "t" : [
+
+          ],
+          "v" : 1
+        },
+        "z" : 5
+      },
+      "u" : 1788739200
+    }
+  ],
+  "version" : 1
+}

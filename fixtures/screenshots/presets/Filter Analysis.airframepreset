@@ -1,0 +1,40 @@
+{
+  "format" : "com.kumkju.airframe.presets",
+  "presets" : [
+    {
+      "i" : "AirframeSc03",
+      "n" : "Filter Analysis",
+      "s" : {
+        "s" : {
+          "f" : [
+            "gyro",
+            "gyroPrefilter"
+          ],
+          "fr" : [
+            "gyro",
+            "gyroPrefilter"
+          ],
+          "ft" : [
+            "gyro"
+          ],
+          "h" : true,
+          "i" : 120,
+          "m" : "frequencyVsRPM",
+          "o" : [
+            "dtermLPF1",
+            "rpmNotch1",
+            "rpmNotch2",
+            "rpmNotch3"
+          ],
+          "v" : 4
+        },
+        "w" : [
+          0,
+          0.55000000000000004
+        ]
+      },
+      "u" : 1788739200
+    }
+  ],
+  "version" : 1
+}

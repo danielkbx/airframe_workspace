@@ -1,0 +1,26 @@
+{
+  "format" : "com.kumkju.airframe.presets",
+  "presets" : [
+    {
+      "i" : "AirframeSc04",
+      "n" : "CHIRP Analysis",
+      "s" : {
+        "r" : {
+          "fgh" : [
+
+          ],
+          "frgh" : [
+
+          ],
+          "frv" : "response",
+          "qc" : true,
+          "rc" : "all",
+          "sm" : true,
+          "v" : 6
+        }
+      },
+      "u" : 1788739200
+    }
+  ],
+  "version" : 1
+}

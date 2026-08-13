@@ -1,0 +1,27 @@
+{
+  "format" : "com.kumkju.airframe.presets",
+  "presets" : [
+    {
+      "i" : "AirframeSc05",
+      "n" : "Flight Map",
+      "s" : {
+        "m" : {
+          "followsCraftDuringPlayback" : false,
+          "groundSpeedUnit" : "kilometersPerHour",
+          "mapType" : "standard",
+          "showsAltitudeInstrument" : true,
+          "showsAttitudeInstrument" : true,
+          "showsCraftPreview" : true,
+          "showsEvents" : true,
+          "showsHeading" : true,
+          "showsHeadingInstrument" : true,
+          "showsHomePoint" : true,
+          "showsSpeedInstrument" : true,
+          "timelineSource" : "gpsAltitude"
+        }
+      },
+      "u" : 1788739200
+    }
+  ],
+  "version" : 1
+}

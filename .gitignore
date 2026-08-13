@@ -12,6 +12,7 @@ xcuserdata/
 
 # Local logs and private smoke fixtures
 fixtures/logs/
+!fixtures/screenshots/
 
 # Local editor and temporary files
 *.swp
