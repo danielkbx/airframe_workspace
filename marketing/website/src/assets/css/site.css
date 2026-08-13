@@ -295,6 +295,8 @@ h3 { font-size: clamp(1.35rem, 2vw, 1.85rem); font-weight: 600; }
 .inside-nav__label { margin: 0; color: var(--quiet); font-size: .75rem; text-transform: uppercase; }
 .inside-nav__links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 .inside-nav a { min-height: 44px; display: inline-flex; align-items: center; color: var(--muted); }
+.inline-control { display: inline-flex; align-items: baseline; gap: .28em; white-space: nowrap; }
+.inline-control svg { width: 1em; height: 1em; align-self: center; fill: none; stroke: currentColor; stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
 
 .lightbox { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); border: 0; background: #050505; color: var(--ink); z-index: var(--z-dialog); }
 .lightbox::backdrop { background: rgb(0 0 0 / .88); }

@@ -24,7 +24,7 @@
       "view": "overview",
       "steps": [
         "Open a log in an Airframe document.",
-        "Choose Presets in the document toolbar.",
+        "Choose the [[control:presets]] button in the document toolbar.",
         "Save the current setup, apply an existing preset, or open Manage Presets."
       ]
     },
@@ -56,7 +56,7 @@
       "type": "steps",
       "items": [
         {"title": "Arrange the analysis views", "text": "Choose the fields, ranges, modes, and presentation you want to reuse."},
-        {"title": "Open Presets", "text": "Choose Presets in the document toolbar, then choose Save Current Setup…"},
+        {"title": "Open Presets", "text": "Choose the [[control:presets]] button in the document toolbar, then choose Save Current Setup…"},
         {"title": "Choose the destination", "text": "Create a named user preset or deliberately select an existing user preset to overwrite. The built-in Default is never an overwrite destination."},
         {"title": "Save the snapshot", "text": "Choose Save. This updates the preset library only; it does not apply the preset, alter the current document, or change the setup remembered for future documents."}
       ]
@@ -69,7 +69,7 @@
     {
       "type": "steps",
       "items": [
-        {"title": "Choose a preset", "text": "Open the Presets toolbar menu and choose Default or a named user preset."},
+        {"title": "Choose a preset", "text": "Open the [[control:presets]] toolbar menu and choose Default or a named user preset."},
         {"title": "Receive the snapshot", "text": "Airframe atomically copies that analysis setup into the current document."},
         {"title": "Continue normally", "text": "Adjust the document for this flight without changing the preset. To update the library entry, use Save Current Setup… and explicitly overwrite it."}
       ]

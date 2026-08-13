@@ -95,10 +95,21 @@ test("links Airframe document terms without partial matches or self-links", () =
   assert.match(renderContentText("Airframe document", { ...context, locale: "de" }), /href="\/de\/inside-airframe\/airframe-document\/"/);
 });
 
+test("renders registered inline controls with visible accessible text", () => {
+  const html = renderContentText("Choose [[control:presets]] <safely>.");
+  assert.match(html, /class="inline-control"/);
+  assert.match(html, /<svg[^>]+aria-hidden="true"[^>]+focusable="false"/);
+  assert.match(html, /<span>Presets<\/span>/);
+  assert.match(html, /&lt;safely&gt;/);
+  assert.doesNotMatch(html, /<button|<a /);
+});
+
 test("rejects unresolved template values and broken content references", async () => {
   assert.throws(() => fillTemplate("{{known}} {{missing}}", { known: "yes" }), BuildError);
   const { root } = await fixture(); const project = await loadProject(root); project.locales.en.problems[0].blocks.push({ type: "image", asset: "missing" });
   await assert.rejects(validateProject(project), /unknown screenshot missing/);
+  const unknownControl = await loadProject(root); unknownControl.locales.en.problems[0].blocks[0].text = "Choose [[control:unknown]].";
+  await assert.rejects(validateProject(unknownControl), /unknown inline control unknown/);
   const invalidCrop = await loadProject(root); invalidCrop.screenshots[0].cropInsets = { top: 0, right: 0, bottom: 0, left: -1 };
   await assert.rejects(validateProject(invalidCrop), /cropInsets.left must be a non-negative integer/);
 });

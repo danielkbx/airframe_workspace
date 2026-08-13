@@ -26,6 +26,8 @@ Every problem guide has these fields:
 
 Supported block types are `lead`, `paragraph`, `heading`, `list`, `steps`, `callout`, `image`, `gallery`, `table`, `formula`, `viewPath`, `conceptReference`, `relatedProblems`, and `sources`. Content JSON never contains raw HTML.
 
+Structured text may use the registered inline-control token `[[control:presets]]`. It renders a non-interactive, non-breaking icon-and-name reference to the Presets control. The visible name supplies the accessible meaning, so the decorative inline SVG is `aria-hidden`. Unknown control IDs fail validation; inline controls never load external assets.
+
 Their exact shapes are:
 
 - `lead`: `{ "type": "lead", "text": "…" }`

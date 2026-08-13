@@ -7,6 +7,9 @@ export const BLOCK_TYPES = new Set(["lead", "paragraph", "heading", "list", "ste
 const PLACEHOLDER = /(?:\b(?:TODO|TBD|FIXME)\b|\[PLACEHOLDER(?:[^\]]*)\]|\{\{[^{}]+\}\}|example\.(?:com|invalid))/i;
 const IMAGE_WIDTHS = [640, 960, 1440];
 const CALLOUT_LABELS = { note: "Note", warning: "Warning", limit: "Limit", tip: "Tip" };
+const INLINE_CONTROLS = {
+  presets: `<span class="inline-control"><svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M2 4.5h3m3 0h8M2 9h8m3 0h3M2 13.5h5m3 0h6"/><circle cx="6.5" cy="4.5" r="1.5"/><circle cx="11.5" cy="9" r="1.5"/><circle cx="8.5" cy="13.5" r="1.5"/></svg><span>Presets</span></span>`
+};
 
 export class BuildError extends Error {
   constructor(messages) {
@@ -179,6 +182,9 @@ export async function validateProject(project, { production = false, checkAssets
 }
 
 function validateReferences(blocks, graph, at, errors) {
+  for (const match of JSON.stringify(blocks).matchAll(/\[\[control:([^\]]+)\]\]/g)) {
+    if (!Object.hasOwn(INLINE_CONTROLS, match[1])) errors.push(`${at}: unknown inline control ${match[1]}`);
+  }
   for (const [index, block] of asArray(blocks).entries()) {
     const location = `${at}.blocks[${index}]`;
     if (block.type === "image") check(block.asset, graph.screenshotIDs, "screenshot", location, errors);
@@ -274,15 +280,22 @@ function pictureSources(asset) {
 function urlFor(locale, defaultLocale, path = "/") { return locale === defaultLocale ? path : `/${locale}${path === "/" ? "/" : path}`; }
 export function renderContentText(value, context = {}) {
   const source = String(value ?? "");
-  if (context.problem?.id === "airframe-document") return escapeHTML(source);
   const target = urlFor(context.locale, context.defaultLocale, "/inside-airframe/airframe-document/");
-  const matches = [...source.matchAll(/\bAirframe documents?\b|(?<![A-Za-z0-9_-])\.airframe(?![A-Za-z0-9_-])/g)];
+  const pattern = context.problem?.id === "airframe-document"
+    ? /\[\[control:([^\]]+)\]\]/g
+    : /\[\[control:([^\]]+)\]\]|\bAirframe documents?\b|(?<![A-Za-z0-9_-])\.airframe(?![A-Za-z0-9_-])/g;
+  const matches = [...source.matchAll(pattern)];
   if (!matches.length) return escapeHTML(source);
   let rendered = "";
   let offset = 0;
   for (const match of matches) {
     rendered += escapeHTML(source.slice(offset, match.index));
-    rendered += `<a class="document-guide-link" href="${attrs(target)}">${escapeHTML(match[0])}</a>`;
+    if (match[1]) {
+      if (!Object.hasOwn(INLINE_CONTROLS, match[1])) throw new BuildError(`renderer: unknown inline control ${match[1]}`);
+      rendered += INLINE_CONTROLS[match[1]];
+    } else {
+      rendered += `<a class="document-guide-link" href="${attrs(target)}">${escapeHTML(match[0])}</a>`;
+    }
     offset = match.index + match[0].length;
   }
   return rendered + escapeHTML(source.slice(offset));
