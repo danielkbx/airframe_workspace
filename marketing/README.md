@@ -110,6 +110,7 @@ Every flight tells a story.
 - The in-app What's New entry uses numeric catalog ID `3` and covers four concise user-facing themes: CHIRP Analysis, performance, Acknowledgements, and broad UI improvements. Technical test instructions remain exclusive to TestFlight notes.
 - The next in-app What's New entry uses numeric catalog ID `4` and covers four concise user-facing themes: portable analysis presets, broader Bluetooth flight-controller import, new Overview tools, and performance/document reliability. Technical test instructions remain exclusive to TestFlight notes.
 - The next tester update changes only the TestFlight notes. The in-app What's New catalog remains unchanged at numeric catalog ID `4`.
+- The next in-app What's New entry uses numeric catalog ID `5` and covers the expanded Flight Map, GPS route export, original Blackbox field names in editors, and distinct Finder icons for Airframe documents and presets.
 - TestFlight notes describe only what is new. They use concise declarative release-note language, never testing instructions, requests, or `What to Test` framing.
 - What's New shows the app version below its title. Beta builds also show the build number; production builds do not.
 - TestFlight notes for build 47:
