@@ -402,6 +402,8 @@ Agents must update this file proactively when they learn a better command, workf
 
 # SwiftUI rendering-performance verification
 
+- In Swift Testing `#expect`, `collection.contains(where: \.booleanProperty)` can expand as a throwing `rethrows` call and fail compilation even though the key path itself is nonthrowing. Use the explicit closure `collection.contains { $0.booleanProperty }` inside the macro.
+
 - On Xcode 26.5, UI-test runs can return the simulator to Home and leave `xcodebuild` stuck finalizing or launching after `DebuggerLLDB.DebuggerVersionStore.StoreError` / `no debugger version`; this reproduced on both iPhone and newly booted iPad Pro runtimes. Another failure mode is `XCUIApplication.launch()` spending 60 seconds unable to terminate an old Airframe process. A completed iPad run in the same work session can still produce a valid `.xcresult`. Treat these as runner infrastructure: inspect the live simulator and result bundle, try one clean simulator or exact `simctl terminate`, then stop only the exact task-owned `xcodebuild` session rather than repeatedly churning runtimes.
 - A macOS app-hosted unit-test invocation can likewise finish every selected test and write the complete passing suite summary while `xcodebuild` remains alive indefinitely during finalization. Confirm the exact test cases and zero-failure summary in the redirected log, then terminate only that task-owned `xcodebuild` PID; do not discard the completed test evidence or kill unrelated Xcode services.
 

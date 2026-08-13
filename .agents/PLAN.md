@@ -1,5 +1,24 @@
 # Current Plan
 
+## Reusable Aviation Instruments And Map HUD (Implemented; Live Acceptance Pending 2026-08-13)
+
+### Think Before Coding
+
+- Keep instrument API, pure fixed-size projection, Canvas rendering, Map layout, cursor adaptation, and document/preset persistence as separate boundaries. Preserve the full attitude basis through the public contract and validate it before drawing.
+
+### Simplicity First
+
+- Own three independent renderers in `AirframeUI`: Heading Tape, generic Vertical Tape, and Attitude Indicator. Reuse Vertical Tape for Speed and Altitude; add no protocols, dependencies, cache, timer, task, or instrument ViewModel.
+
+### Surgical Changes
+
+- Add one `AviationInstruments` package area, one Map HUD/driver file, four additive default-on Map settings, localized inspector/accessibility captions, and focused tests. Preserve MapKit, route/annotation identity, Timeline, existing cache owners, and the independent Heading Cone setting.
+
+### Goal-Driven Execution
+
+- Pure projections enforce 13/11-tick bounds and finite attitude geometry, including North crossing, negative/extreme tapes, inverted/near-vertical attitude, invalid bases, and compact/standard HUD metrics. Package and focused app tests cover legacy defaults, independent persistence, preset archive round trips, Craft preparation policy, and equality-gated field publication. Complete macOS tests/build, iPad Simulator build, and live playback/performance acceptance before closing the remaining task.
+- The Map-only GS unit control keeps the reusable Vertical Tape passive, converts canonical m/s to km/h only in the presentation leaf, and persists its additive default-m/s setting through documents and presets. Its 44-point semantic Button intercepts only the unit area.
+
 ## iOS/iPadOS-Native Aircraft Settings (Implemented 2026-08-10)
 
 ### Think Before Coding

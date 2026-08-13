@@ -47,6 +47,11 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 
 ## Live Acceptance Pending
 
+### Reusable Aviation Instruments And Map HUD
+
+- On macOS with representative GPS/barometer/attitude logs, verify every instrument individually and together on standard/satellite maps, missing signals, negative relative altitude, Heading North crossing, Craft Preview off with Attitude on, Heading Cone independent from Heading Tape, compact/large windows, GS unit switching without disturbing adjacent Map gestures, document reopen, and preset apply/import/export of both speed units.
+- Profile at least 15 seconds of playback plus rapid scrubbing on a long GPS log. Confirm only enabled binary lookups run, unchanged GPS fields do not publish, Attitude updates invalidate only Attitude, Map/route/annotations/Timeline do not rebuild because of HUD state, and resize performs only bounded Canvas projection. Remove any temporary diagnostics.
+
 ### Step Response Horizontal Zoom
 
 - On iPad hardware, verify touch-anchored pinch, two-finger pan, double-tap reset, the existing one-finger range measurement, VoiceOver adjustment, and hardware-keyboard Zoom commands at 1x...10x.
