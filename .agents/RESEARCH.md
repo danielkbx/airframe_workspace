@@ -8,7 +8,7 @@ Durable research lives in the top-level thematic [Knowledge Base](../knowledge/R
 |---|---|---|
 | [PID Tuning Principles](../knowledge/PID_TUNING_PRINCIPLES.md) | UAV Tech and Chris Rosser evidence for PID-F signal flow, gain relationships, response interpretation, historical guidance, and Airframe relevance | 2026-08-05 |
 | [Spectrum Tuning Guides](../knowledge/SPECTRUM_TUNING_GUIDES.md) | Sources and evidence for filter delay, dB references, prop-size dependence, guide profiles, uncertainties, and validation | 2026-08-05 |
-| [Blackbox Format and Compatibility](../knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md) | Frame types, writer/viewer audit, headers, units, firmware versions, CHIRP debug payload generations, ESC-free hardware logging, SITL virtual logs, and compatibility baseline | 2026-08-06 |
+| [Blackbox Format and Compatibility](../knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md) | Frame types, writer/viewer audit, headers, units, firmware versions, Dynamic/RPM notch generations, CHIRP debug payload generations, ESC-free hardware logging, SITL virtual logs, and compatibility baseline | 2026-08-15 |
 | [Upstream Analysis Tools](../knowledge/UPSTREAM_ANALYSIS_TOOLS.md) | Blackbox Explorer, PIDtoolbox, CHIRP/Autotune, spectrum algorithms, and related parser references | 2026-08-05 |
 | [Flight Controller Connectivity](../knowledge/FLIGHT_CONTROLLER_CONNECTIVITY.md) | Configurator transport, MSP/CLI, BLE/USB, FlashFS, hardware validation, and helpers | 2026-08-06 |
 | [Apple Platforms and CI](../knowledge/APPLE_PLATFORMS_AND_CI.md) | iPadOS USB feasibility and Xcode Cloud entitlement findings | 2026-08-01 |

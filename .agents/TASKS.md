@@ -47,6 +47,11 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 
 ## Live Acceptance Pending
 
+### Firmware-Faithful Dynamic and RPM Notch Overlays
+
+- On macOS and physical iPad, verify Frequency and Frequency vs Throttle with Dynamic plus all three RPM harmonics, observed/modelled/configured-only evidence styles, multiple slots, Roll-only targeting, narrow/wide windows, hover/highlight, and mode-switch selection persistence. At rest only center/configuration lines are visible; the matching attenuation ribbon or field appears only when that filter is expanded and highlighted. Verify expanded state across document reopen and preset application. Frequency vs RPM must retain only its existing harmonic diagonals.
+- Profile a maximum 300-second range with seven Dynamic slots and eight motors across three RPM harmonics. Resize and zoom must only reproject prepared grids, cancellation must be prompt, and repeated open/use/close must leave no analysis or cache publication alive.
+
 ### Reusable Aviation Instruments And Map HUD
 
 - On macOS with representative GPS/barometer/attitude logs, verify every instrument individually and together on standard/satellite maps, missing signals, negative relative altitude, Heading North crossing, Craft Preview off with Attitude on, Heading Cone independent from Heading Tape, compact/large windows, GS unit switching without disturbing adjacent Map gestures, document reopen, and preset apply/import/export of both speed units.

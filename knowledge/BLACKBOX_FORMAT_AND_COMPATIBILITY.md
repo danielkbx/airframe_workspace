@@ -1,7 +1,7 @@
 # Blackbox Format and Compatibility
 
 - Status: active
-- Last reviewed: 2026-08-07
+- Last reviewed: 2026-08-15
 - Scope: Betaflight Blackbox framing, writer/viewer compatibility, headers, version routing, and Airframe reader behavior
 - Normative decisions: `../.agents/MEMORY.md`
 - Related implementation: `Airframe/Packages/BlackboxReader/`
@@ -20,6 +20,9 @@
 | BFC-008 | A physical FC can write disarmed Blackbox logs without an attached ESC: `blackbox_mode = ALWAYS` starts logging whenever the logger is stopped, while `MOTOR_TEST` starts from non-disarm `motor_disarmed[]` command values and does not require ESC feedback. | BF-SRC | A | 2026.6.1 | Hardware-generated parser fixtures can be captured from a USB-powered FC; motor/eRPM response data remains unavailable without the corresponding hardware feedback. | verified |
 | BFC-009 | SITL includes `USE_BLACKBOX_VIRTUAL`; the virtual backend writes sequential `LOGnnnnn.BFL` files in the process working directory. | BF-SRC, BF-SITL-DOC | A/B | 2026.6.1 | SITL is a hardware-free source of firmware-generated logs, with simulated signals determined by the connected bridge/model. | verified |
 | BFC-010 | A preallocated multi-log FlashFS file can contain valid logs around one header truncated at an erase-block boundary; the observed 8 MiB source had four markers, one header cut at exactly 1 MiB, and three readable logs. | Physical FC source, AF-SRC | A | Betaflight 4.5.5 and 2025.12.5 source on 2026-08-07 | Isolate marker-delimited candidates during import, retain surrounding valid logs and original candidate indices, and report the skipped candidate instead of rejecting the whole source. | verified |
+| BFC-011 | Dynamic Notch uses a biquad through 4.6/2025.12 and a TPT-SVF in 2026.6; FFT_FREQ exposes at most slots 1–3 in `debug[0...2]` without axis on 4.4/4.5, then slots 1–7 in `debug[1...7]` with `gyro_debug_axis`. | Tagged BF source audit | A | 4.4.3 through 2026.6.1 | Route slot layout, maximum count, axis targeting, and response kernel by verified generation. | verified |
+| BFC-012 | RPM filtering has no logged `eRPM[]`/harmonic weights in 4.4, adds weighted biquads and `eRPM[]` in 4.5, uses scheduler-corrected coefficient dt in 4.6/2025.12, and uses a specialized weighted TPT-SVF in 2026.6. | Tagged BF source audit | A | 4.4.3 through 2026.6.1 | Prefer RPM_FILTER centers, reconstruct from eRPM only where available, apply Q/weight/fade as firmware does, and expose reconstruction evidence. | verified |
+| BFC-013 | The nominal filter loop period is `looptime * pid_process_denom`; 2026.6 RPM updates multiply it by `schedulerGetCycleTimeMultiplier()`. | Tagged BF source audit and private reference log | A | 4.4.3 through 2026.6.1 | Use PID looptime for coefficients and 0.48-Nyquist RPM clamp; estimate corrected runtime dt only from robust time/iteration deltas. | verified |
 
 ## Format and Writer Findings
 
@@ -57,6 +60,14 @@ Other verified semantics:
 - GPS altitude is decimeters, `baroAlt` centimeters, GPS speed centimeters per second, and coordinates degrees times 10,000,000.
 - A combined-IMU accelerometer name may cautiously imply gyro identity only for known combined parts; `AUTO`, `NONE`, and standalone accelerometers do not.
 
+### Dynamic and RPM notch compatibility
+
+Betaflight 4.4–2025.12 builds Dynamic and RPM notches with `biquadFilterUpdate`. Its harmonic weight is a sample-domain crossfade between the full notch output and the input, so the equivalent frequency response is complex `weight * Hnotch + (1 - weight)` rather than a dB or Q scaling. BF 4.4 has no configurable harmonic-weight header and therefore implies exactly 100%; later missing weight headers are not replaced by a current default. Fade multiplies harmonic weight after clamping `(center - minHz) / fadeRangeHz` to 0...1.
+
+Betaflight 2026.6 replaces Dynamic Notch with `svfNotchUpdate`/`svfNotchApply` and RPM with the separately optimized `rpmNotchUpdate`/`rpmNotchApply`. The latter computes `input -= q * weight * bandpass`, which remains algebraically equivalent to the same complex crossfade but must use the TPT-SVF state response. Coefficient construction uses Betaflight's Float `sincosf_approx`; Airframe ports that approximation while using ordinary complex evaluation only to measure the frozen filter's response.
+
+`FFT_FREQ` is incomplete observation before 4.6: only three centers are logged and the tracked gyro axis is absent. Those generations can show neutral segmented center tracks but cannot claim an axis-specific attenuation field. Modern logs expose the axis and up to seven centers. `RPM_FILTER` debug values are already firmware-PT1-filtered motor frequencies; otherwise 4.5+ `eRPM[]` permits a modeled PT1 reconstruction. BF 4.4 without RPM_FILTER debug remains configured-only.
+
 ## Version Routing
 
 Debug catalogs route `<4.4` to 4.3, 4.4.x to 4.4, 4.5.x to 4.5, legacy 4.6.x to the inspected development catalog, 2025.12.x to 2025.12, and 2026.6.x or later to 2026.6. Missing versions intentionally use newest-known 2026.6; unmapped values remain unknown. In 2025.12, values 96–99 end with AUTOPILOT_POSITION/CHIRP/FLASH_TEST_PRBS/MAVLINK_TELEMETRY; the final 2026.6.1 catalog assigns a different tail through 101 (`AUTOPILOT_STOP`). Unreleased 2026.12-alpha appends `PITOT` at 102; it is not part of stable 2026.6 compatibility.
@@ -73,8 +84,8 @@ Debug catalogs route `<4.4` to 4.3, 4.4.x to 4.4, 4.5.x to 4.5, legacy 4.6.x to 
 | Source ID | Title | Author/project | Version/date | URL or local path | Accessed | Notes |
 |---|---|---|---|---|---|---|
 | BF-DOC | Blackbox logging and internals | Betaflight | current docs | https://betaflight.com/docs/wiki/guides/current/Black-Box-logging-and-usage and https://betaflight.com/docs/development/Blackbox-Internals | 2026-08-01 | Official format context |
-| BF-SRC | Blackbox writer | Betaflight | tag `2026.6.1`, commit `6dbc4218fd6bc33bf16ea32c670304d4f89321d5` | `upstreams/betaflight/src/main/blackbox/` and `src/main/fc/rc_modes.h` | 2026-08-05 | Primary stable writer and mode-layout evidence |
+| BF-SRC | Firmware, filters, and Blackbox writer | Betaflight | checkout `64113c6117f7ddacb39514bb9f4e5cf2af9fe952`; tags 4.4.3, 4.5.5, 2025.12.5, and 2026.6.1 audited with `git show` | `upstreams/betaflight/src/main/`, especially `common/filter.*`, `flight/dyn_notch_filter.c`, `flight/rpm_filter.c`, and `blackbox/` | 2026-08-15 | Primary stable writer, debug-layout, and filter-equation evidence |
 | BF-SITL-DOC | SITL target README | Betaflight | commit `6dbc4218fd6bc33bf16ea32c670304d4f89321d5` | `upstreams/betaflight/src/platform/SIMULATOR/target/SITL/README.md` | 2026-08-06 | Official hardware-free simulator setup; implementation details are verified in BF-SRC. |
-| BLV | Official viewer parser/model | Betaflight | commit `1222587e162fd2c881ee2ea3d74ec91c2397891d` | `upstreams/blackbox-log-viewer/src/flightlog_parser.js`, `flightlog.js`, and field definitions | 2026-08-05 | Viewer code unchanged from prior pin; intervening commits are workflow/lockfile-only |
+| BLV | Official viewer parser/model | Betaflight | checkout `78dba36ba9eeb4f3cbffcc7bdb482e5a2d7f0c6a` | `upstreams/blackbox-log-viewer/src/flightlog_parser.js`, `flightlog.js`, and field definitions | 2026-08-15 | Current upstream reference checkout |
 | BFT | Blackbox tools | Betaflight | current upstream | https://github.com/betaflight/blackbox-tools | 2026-08-01 | Candidate golden-output oracle |
 | AF-SRC | Airframe Reader | Airframe | working tree observed 2026-08-01 | `Airframe/Packages/BlackboxReader/` | 2026-08-01 | Current product behavior |

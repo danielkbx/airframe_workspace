@@ -1,5 +1,27 @@
 # Current Plan
 
+## Firmware-Faithful Dynamic and RPM Notch Overlays (Implemented 2026-08-15; Live Visual/Profile Acceptance Pending)
+
+### Think Before Coding
+
+- Route Betaflight 4.4, 4.5, 4.6, 2025.12, and 2026.6 through explicit firmware models while also checking the segment's actual headers and recorded fields. Unknown generations retain observed centers and configured limits but never receive an assumed attenuation formula.
+- Treat each selected log segment's Blackbox headers and time series as authoritative. Imported FC configuration never replaces historical notch settings.
+
+### Simplicity First
+
+- One semantic overlay model owns configuration, evidence, segmented tracks, and bounded dB grids. One dependency-free response kernel covers the historical biquad and current TPT-SVF state equations, weighted complex crossfade, fade, cascades, and Betaflight's coefficient trig approximation.
+- Frequency and Frequency vs Throttle reuse pane-targeted render primitives; Frequency vs RPM preserves its existing center diagonals and selection state without adding an attenuation field.
+
+### Surgical Changes
+
+- Existing static filter overlays and three RPM harmonic selections remain compatible. Dynamic Notch adds one persisted, default-off selection. RPM response cache semantics advance to version 2 and Dynamic response uses its own version-1 dataset.
+- Spectrum cache shutdown is terminal and rejects late publications. No `.airframe` document data, external dependency, or upstream reference checkout is modified.
+
+### Goal-Driven Execution
+
+- Reader, Analysis, Captions, and AirframeUI package suites pass, as do focused app settings/cache tests and macOS/iOS Simulator builds. A private BF 2026.6.1 document confirms Dynamic count 1, Q 2.20, 90–650 Hz, observed Roll `debug[1]`, three modeled RPM harmonics, Q 3.50, 100% weights, 50 Hz fade, 150 Hz LPF, and a 250 µs PID looptime.
+- A synthetic maximum grid (1,024 snapshots, 2,048 bins, seven Dynamic slots, and three 8-motor RPM cascades) completed in 7.845 seconds in a debug Swift test after coefficient and unit-circle preparation were hoisted out of the inner notch loop. Remaining acceptance is a live macOS/iPad visual pass plus a 300-second document Time Profiler run. Verify resize/zoom do not restart analysis and repeated close rejects every late cache publication.
+
 ## Reusable Aviation Instruments And Map HUD (Implemented; Live Acceptance Pending 2026-08-13)
 
 ### Think Before Coding
