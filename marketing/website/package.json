@@ -6,6 +6,7 @@
   "scripts": {
     "build": "node scripts/cli.mjs build",
     "build:production": "node scripts/cli.mjs build --production",
+    "serve": "npm run build && node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
     "validate": "node scripts/cli.mjs validate"
   },

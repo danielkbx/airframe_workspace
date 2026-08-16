@@ -37,7 +37,7 @@
       "type": "steps",
       "items": [
         {"title": "Recorded evidence", "text": "The Blackbox header and recorded frames provide firmware, hardware, logging, power, flight, GPS, field-availability, and data-quality facts. A plain .bbl or .bfl can supply only what travelled inside that recording."},
-        {"title": "Aircraft context", "text": "An Airframe document can add the aircraft name, propeller size, and motor layout. These details help interpret the setup; they are aircraft settings, not values imported from the flight controller."},
+        {"title": "Aircraft context", "text": "You can add the aircraft name, propeller size, propeller blade count, and motor layout. Airframe may suggest Blade Count or Motor Layout when the recording contains enough evidence; review and save the values you want to keep with the document."},
         {"title": "Captured FC configuration", "text": "When a matching configuration was captured during flight-controller import, Overview can add settings that are not guaranteed to exist in the log header. Without it, Airframe stays with the recorded evidence."},
         {"title": "Derived findings", "text": "Airframe runs only the checks supported by the available fields and configuration. A check that lacks its required evidence cannot produce a healthy or unhealthy verdict."}
       ]
@@ -50,7 +50,7 @@
     {
       "type": "steps",
       "items": [
-        {"title": "Aircraft", "text": "Confirm the aircraft identity, propeller size, and motor layout. They provide the physical context needed by craft presentation and aircraft-specific analysis."},
+        {"title": "Aircraft", "text": "Confirm the aircraft identity, propeller size, propeller blade count, and motor layout. They provide the physical context needed by craft presentation and applicable aircraft-specific guides or analysis."},
         {"title": "Flight controller and hardware", "text": "Review the Betaflight version, firmware build, board, MCU family, gyro rate, and detected sensors when those facts are present."},
         {"title": "Blackbox and configuration", "text": "Check the logging device, mode, effective rate, loop time, motor protocol, bidirectional DShot, idle setup, and receiver protocol where the log or associated configuration exposes them."},
         {"title": "Power and flight evidence", "text": "Use cell-count context, start and end voltage, used capacity, current, duration, throttle, GPS, modes, and disarms to understand the conditions under which the setup was recorded."},
@@ -77,7 +77,7 @@
     },
     {"type": "conceptReference", "concept": "log-evidence-quality"},
     {"type": "conceptReference", "concept": "configuration-provenance"},
-    {"type": "relatedProblems", "problems": ["chase-vibration-and-noise", "judge-control-response", "find-what-happened-at-a-moment"]},
+    {"type": "relatedProblems", "problems": ["aircraft-settings", "chase-vibration-and-noise", "judge-control-response", "find-what-happened-at-a-moment"]},
     {"type": "sources"}
   ],
   "sources": [
@@ -88,5 +88,5 @@
     {"label": "Blackbox compatibility evidence", "path": "knowledge/BLACKBOX_FORMAT_AND_COMPATIBILITY.md"},
     {"label": "Betaflight battery source", "path": "upstreams/betaflight/src/main/sensors/battery.c"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-16"}
 }

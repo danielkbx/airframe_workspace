@@ -1,5 +1,60 @@
 # Current Plan
 
+## Spectrum Blade-Pass Harmonics (Implemented And Documented 2026-08-16; App Visual Acceptance Pending)
+
+### Think Before Coding
+
+- Keep physical meaning and reference frame explicit. With blade count `B`, the fundamental blade-pass order is `B×` mechanical motor frequency; its second and third harmonics are `2B×` and `3B×`. Configured RPM-notch harmonics remain actual Betaflight gyro filters even when their geometry coincides with a blade-pass guide.
+- Treat a conservative automatic blade-count result as immediately useful transient aircraft context. A stored user value remains authoritative, but Save is not a prerequisite for rendering guides when detection already has a result.
+
+### Simplicity First
+
+- Reuse the existing Spectrum Guides section, document-wide visibility setting, overlay renderer, info popover, and hover/pin behavior. Store only the three individual blade-pass selections in the existing Spectrum settings payload.
+
+### Surgical Changes
+
+- In Frequency vs RPM, always offer the fundamental plus second and third blade-pass harmonics as independent Guide rows whenever either a stored numeric blade count or an automatic two-/three-blade result is available. A stored value wins. Derive optional fourth through sixth rows from that effective blade count, recorded mechanical-RPM span, and Nyquist: an additional order must remain in-band over at least 25% of that span. Label motor orders directly, render only selected lines that intersect the current frequency window, and keep Filters unchanged. Each row follows the shared sidebar selection layout with its color dot left and selection circle at the trailing edge; line, chip, selection accent, and dot share a harmonic-specific shade from one green family. Show the effective count beside the size profile, for example `5″ Freestyle, 3 Blades`; when neither stored nor inferred, show `Other / Unknown` instead of hiding the blade context. Migrate Spectrum settings storage from version 5 to 6 with only the first three selected by default.
+
+### Goal-Driven Execution
+
+- Focused Spectrum model/settings tests pin harmonic multiplication, adaptive higher-order availability, default-off extra selections, persistence/migration, visible-window rejection, invalid inputs, harmonic color roles, inferred-count fallback, and stored-count precedence. All 49 focused app tests, 197 AirframeUI tests, 40 AirframeCaptions tests, the macOS test build, and the iOS Simulator build pass; live app visual acceptance remains. The public wiki now explains what the guides show, how to interpret moving ridges, harmonic numbering, individual selection, automatic-count availability, and the distinction from real RPM-notch filtering. Its real macOS capture shows the current green-family fundamental, second, and third guide rows and lines.
+
+## Website Wiki: Aircraft Settings And Spectrum Interpretation (Implemented And Refined 2026-08-16)
+
+### Think Before Coding
+
+- Separate optional aircraft context from Spectrum interpretation. The Aircraft Settings guide explains what users can add and where that context helps. The Spectrum guide explains the three views, visual patterns, blade-pass orders, and the limits of those observations without turning either article into implementation documentation.
+
+### Simplicity First
+
+- Keep the English Getting Started guide at `/inside-airframe/aircraft-settings/` focused on aircraft context and publish the foundational Tuning guide `/inside-airframe/read-spectrum/` for interpretation. Reuse existing structured blocks, retain the `overview` screenshot ID, add only `blade-pass-guide`, and leave renderer, schema, templates, CSS, and JavaScript unchanged.
+
+### Surgical Changes
+
+- Keep the real macOS Overview capture in Aircraft Settings and place the current full-window Frequency-vs-RPM capture in Read Spectrum. The new Spectrum article teaches Frequency, Frequency vs Throttle, and Frequency vs RPM before introducing `3×`, `6×`, and `9×`, their individual controls, their green guide lines, and the distinction from RPM-notch filters. Adjacent vibration and filter guides link to this shared foundation.
+
+### Goal-Driven Execution
+
+- The seven website tests, content validation, and 20-page build pass. Desktop DOM review confirms both routes, their headings, tables, links, intrinsically sized screenshots, and absence of horizontal overflow; narrow browser automation remains pending because the collaborative preview could not resize its existing tab. Aircraft Settings now stays on optional context and confirmation, while Read Spectrum covers the three views, the fundamental and higher blade-pass orders, ridge classification, individual selection and hover highlighting, and the RPM-notch distinction.
+
+## Propeller Blade Count And Blade-Pass Guide (Implemented 2026-08-16; Real-Log Classification Acceptance Pending)
+
+### Think Before Coding
+
+- Treat blade count as user-owned aircraft metadata. Frequency analysis may supply evidence for a draft suggestion but cannot uniquely determine every blade count because motor, structural, and higher-order blade harmonics overlap.
+
+### Simplicity First
+
+- Reuse propeller size's document-default/log-override storage, Overview row, shared Aircraft Settings save flow, `Choose …` wording, and existing Spectrum RPM coordinate conversion. Offer only two- versus three-blade suggestions; keep four blades and ambiguity manual.
+
+### Surgical Changes
+
+- Add one additive state key, one dependency-free analysis outcome, localized captions, and one dashed `B×` Frequency-vs-RPM guide. Do not alter FFT results, cache formats, automatic motor-layout persistence, or upstream repositories.
+
+### Goal-Driven Execution
+
+- Synthetic analyzer tests cover strong two-blade, strong three-blade, ambiguous, and insufficient-RPM-span cases. Full BlackboxAnalysis and AirframeCaptions suites, focused document-state repository/store tests, and macOS/iOS builds pass. Overview/Spectrum now own the live Blade and Layout inference state: the Aircraft card and an open Aircraft Settings dialog show inline row spinners, the dialog stops adopting a field after manual input, and an adopted result gets an info-button tooltip/popover instead of a separate explanation row. Layout inference no longer persists before Save. A live large-log pass confirmed the complete cached Frequency-vs-RPM heatmap and blade-pass diagonal. That pass also isolated the reported AppKit constraint loop to SwiftUI's native macOS inspector hosting rather than the sheet or overlay; macOS now uses a stable 320-point in-hierarchy sidebar while iOS/iPadOS retains the native inspector. The dedicated macOS XCUITest compiles but remains skipped by the runner's established foreground-activation gate. Git LFS is available and the curated macOS website captures now cover the saved aircraft card and confirmed `Blade Pass · 3×` guide. Remaining acceptance is classification against labeled two-, three-, and four-blade real logs plus populated/empty iOS/iPadOS visual review.
+
 ## Firmware-Faithful Dynamic and RPM Notch Overlays (Implemented 2026-08-15; Live Visual/Profile Acceptance Pending)
 
 ### Think Before Coding
@@ -67,6 +122,50 @@
 - iPad and iPhone previews cover the platform-specific presentation. A focused UI test opens a real Airframe document, verifies the navigation title, both labeled pickers, semantic Cancel/Save actions, captures the sheet, and verifies Cancel dismissal.
 - The focused UI test passes on the iPad (A16) iOS 26.5 Simulator. Its screenshot verifies the grouped background, labeled rows, explanatory footer, centered title, and leading/trailing toolbar actions.
 - The macOS app build passes. The iPhone 17 Pro iOS 26.5 build completes, but a compact-width UI-test rerun hit an Xcode 26.5 debugger/test-session finalization failure after the simulator returned to Home; compact live acceptance remains part of the general iPad/iPhone audit.
+
+## Polar Frequency vs Throttle Exploration (Planned 2026-08-08)
+
+### Think Before Coding
+
+- Treat this as an alternate projection of the existing `frequencyVsThrottle` heatmap, not a new analysis mode. `Frequency vs RPM` remains Cartesian. The existing per-axis panes, FFT results, heatmap normalization, intensity, Hanning option, signal selection, overlays, frequency window, range measurement, loading/error behavior, and cache identity keep their semantics.
+- Add a `Frequency vs Throttle` presentation enum with `Cartesian` and `Polar`. Use these standard coordinate-system names in the English UI. Show its menu-style picker in the Spectrum `View` section only while `Frequency vs Throttle` is active. Default existing and new state to `Cartesian`.
+- Map frequency monotonically to radius and throttle clockwise from 12 o'clock. Treat heatmap rows as angular cells: the 0% cell begins immediately clockwise/right of the seam and the 100% cell ends immediately counterclockwise/left of it. The cells never share the same painted angle even though their outer boundaries meet at 12 o'clock.
+- Define projection behavior before rendering: each axis gets one centered square polar plot; the visible frequency window maps to the available radial span, with a nonzero lower bound producing an annulus. Frequency rings retain absolute labels, and throttle spokes are labeled at useful percentages without duplicating the 0%/100% seam label.
+- Classify cadence per `doc/ui-performance.md`: heatmap values and bitmap colors are semantic prepared input; Cartesian/polar warping, rings, labels, overlays, and pane layout are geometry work; crosshair, pan, zoom, and range-selection feedback are interaction work. No FFT, bitmap rebuild, document scan, or persistence may occur merely because the presentation changes or geometry updates.
+- Scope the first implementation to iPadOS under the current platform rule; preserve the frozen macOS presentation. Keep the presentation setting platform-local in behavior even if its storage type is shared. Reconfirm macOS scope before implementation if the experiment is intended on both platforms.
+- Ownership remains unchanged: render values and interaction state are document/view scoped, existing compute tasks and result cache retain shutdown responsibility, and the polar renderer introduces no long-lived cache. Persistent caching does not improve this geometry-only projection and must not be added.
+
+### Simplicity First
+
+- Reuse `StackedHeatmapRenderModel` and each pane's existing immutable `SpectrumHeatmapImage`. Add a dedicated polar heatmap surface and a small pure projection model instead of branching throughout the Cartesian canvas.
+- Warp the prepared rectangular bitmap into bounded polar wedges at draw time, clipped per pane. If SwiftUI `Canvas` cannot transform the bitmap accurately and smoothly, prepare one polar `CGImage` per pane off-main only when the heatmap image, intensity, or output resolution class changes; do not rasterize on pointer, pan, zoom, or every resize tick.
+- Centralize forward and inverse transforms: `(frequency, throttle) -> point` and `point -> (frequency, throttle)`. Use them for bitmap/wedges, rings, spokes, filter overlays, marker chips, crosshair readout, hit testing, zoom anchoring, pan, and radial range selection so visual and interactive semantics cannot drift.
+- Convert existing throttle-mode overlays by meaning: fixed-frequency vertical lines become rings; throttle-dependent frequency curves become polar paths; highlighted/normal opacity and line styles remain unchanged. RPM-only diagonal overlays remain on the Cartesian RPM heatmap.
+- Preserve one graph per available Roll/Pitch/Yaw axis. Use the existing stacked vertical order and titles; each pane reserves a square plot inside its band rather than stretching the circle.
+
+### Surgical Changes
+
+- Add the localized `Cartesian`/`Polar` captions, picker title, help/accessibility text, and stable accessibility identifier through `AirframeCaptions` and `.xcstrings` only.
+- Extend Spectrum settings/storage by one backward-compatible field and storage-version bump. Decode older state as `Cartesian`; include the choice in document and preset round trips without changing analysis/cache keys. Switching presentation rebuilds projection only.
+- Keep `StackedHeatmapSurfaceCanvas` and its tests unchanged for Cartesian and RPM rendering. Add sibling polar projection/surface/crosshair types in `AirframeUI`, selected only by the `frequencyVsThrottle` iPad surface.
+- Adapt the existing interaction layer rather than broadening the static renderer's observations. Crosshair motion stays in a leaf overlay; it shows frequency plus throttle and repeats the corresponding radial/angular guides in each axis pane. Pointer positions outside the circle or inside an annular hole produce no heatmap readout.
+- Preserve frequency zoom limits, reset, accessibility adjustment, and persisted window. Pinch/scroll zoom is radius-anchored; frequency pan changes the radial window. Do not assign rotation or angular panning because throttle always represents the fixed 0...100% circle.
+- Preserve X-range measurement as frequency-range measurement. In Polar, the committed selection is a radial interval within the active pane; publish the same frequency-domain selection and existing heatmap result behavior. Keep measurement gesture precedence, filter-chip exclusions, pointer exit, and reset behavior intact.
+- Keep marker chips readable outside the circle and collision-bounded. Derive their anchors from the polar geometry, but preserve their IDs, highlight linkage, labels, and selection behavior.
+- Do not modify `BlackboxAnalysis`, raw matrices, result-cache formats, upstream reference repositories, document format version, Cartesian visual output, or unrelated Spectrum modes.
+
+### Goal-Driven Execution
+
+1. Lock projection semantics with pure tests: cardinal throttle angles, separate 0%/100% seam cells, frequency-radius round trips, annular windows, boundary clamping, pane hit testing, and square fitting at narrow/wide sizes.
+2. Add settings/caption tests: old storage defaults to `Cartesian`, new state and presets round-trip both values, the picker appears only for `Frequency vs Throttle` on iPadOS, and no presentation change alters compute/cache identity.
+3. Render heatmap cells plus grid in the polar surface. Golden or pixel probes verify frequency increases outward, throttle increases clockwise, the final throttle bin stays left of 12 o'clock, no seam overlap/gap is visible, circles remain circular, and Roll/Pitch/Yaw keep independent panes.
+4. Add overlay tests for fixed-frequency rings and throttle-dependent curves, including clipping to the frequency window and highlighted/normal styles.
+5. Add inverse-projection and interaction tests for crosshair values, outside/hole rejection, radial zoom anchor, pan/reset, radial range selection, marker-chip exclusion, accessibility adjustment, and pointer exit.
+6. Run focused AirframeUI and app settings/model tests, then the complete relevant package suites and iOS Simulator build. The macOS build must still pass and its Spectrum UI/output must remain unchanged.
+7. Perform live iPad visual and interaction acceptance in portrait, landscape, narrow split view, and full width with one-, two-, and three-axis signal groups. Verify Dynamic Type, VoiceOver, Reduce Motion, touch/pencil/pointer, 0%/100% seam readability, zoomed annuli, overlays, chips, intensity, Hanning changes, and range measurement.
+8. Profile a representative large log with SwiftUI Instruments/Time Profiler while switching projection, resizing, moving the pointer, measuring, zooming, and panning. Require no FFT or bitmap-color rebuild for projection/geometry/interaction-only changes, flat static-layer redraw counts during pointer motion, visible-output-bounded projection, coalesced persistence outside direct manipulation, and prompt release after repeated open/use/close cycles.
+
+Success: On iPadOS, `Frequency vs Throttle` can switch between `Cartesian` and `Polar`; Polar shows one correct circular heatmap per axis with frequency radial and throttle clockwise from 12 o'clock, keeps 0% and 100% visually distinct at the seam, preserves every existing applicable control and interaction, and introduces no document-scale work at interaction cadence. Cartesian, RPM mode, and macOS remain unchanged.
 
 ## iOS Recent Documents (Implemented; Provider Acceptance Pending 2026-08-08)
 

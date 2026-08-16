@@ -26,6 +26,7 @@
         "Begin with Frequency to locate concentrated and broadband energy across suitable signals and axes.",
         "Switch to Frequency vs Throttle to see whether ridges move as propulsion load changes.",
         "Use Frequency vs RPM when eRPM was logged; confirm motor pole count before trusting mechanical-frequency alignment.",
+        "When a numeric blade count is available, compare the individually selectable blade-pass guides with the observed ridges across changing RPM.",
         "Measure a narrower time range when the suspected behaviour was brief.",
         "Return to Graph to see whether the energy coincides with a move, propwash recovery, impact, or motor-anomaly interval."
       ]
@@ -38,6 +39,7 @@
       "rows": [
         ["Ridge moves with throttle", "A propulsion-linked effect is plausible.", "Throttle is not measured motor speed, and several mechanical sources can move with load."],
         ["Ridge follows measured eRPM harmonics", "Motor-speed linkage is stronger when eRPM and motor poles are sound.", "The exact prop, motor, bearing, frame part, or mounting fault responsible."],
+        ["Ridge follows a blade-pass guide", "The energy scales with motor speed at that expected blade-pass order when eRPM, motor poles, and blade count are sound.", "A particular damaged prop, motor, bearing, mount, or frame part as the source."],
         ["Narrow peak stays nearly fixed", "A possible structural or component resonance deserves inspection.", "That the frame alone caused it; antennas, mounts, cracked parts, props, and other structures can resonate."],
         ["Energy is broadband", "Turbulence, impacts, rough mechanics, or several overlapping sources may be present.", "A single filter or component as the cure."],
         ["Energy exists only in a short range", "The event context matters more than a whole-flight average.", "That the rest of the flight shares the same behaviour."]
@@ -70,16 +72,17 @@
     },
     {"type": "conceptReference", "concept": "spectrum-reading"},
     {"type": "conceptReference", "concept": "log-evidence-quality"},
-    {"type": "relatedProblems", "problems": ["judge-filter-tune", "find-what-happened-at-a-moment", "setup-health-check"]},
+    {"type": "relatedProblems", "problems": ["read-spectrum", "aircraft-settings", "judge-filter-tune", "find-what-happened-at-a-moment"]},
     {"type": "sources"}
   ],
   "sources": [
     {"label": "Spectrum analyzer", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisSpectrumAnalyzer.swift"},
+    {"label": "Propeller blade-count analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisPropellerBladeCount.swift"},
     {"label": "RPM-notch analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisRPMNotch.swift"},
     {"label": "Spectrum inspector and availability", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumInspector.swift"},
     {"label": "Spectrum evidence and limitations", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
     {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"},
     {"label": "Betaflight DShot implementation", "path": "upstreams/betaflight/src/main/drivers/dshot.c"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-16"}
 }

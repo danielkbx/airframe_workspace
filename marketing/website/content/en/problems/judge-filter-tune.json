@@ -26,8 +26,9 @@
       "steps": [
         "Choose a representative flight range and confirm logging quality, required signals, eRPM availability, and motor pole count.",
         "Use Frequency to compare unfiltered gyro, filtered gyro, D term, and motor output where those stages were recorded.",
-        "Use Frequency vs Throttle and Frequency vs RPM to distinguish load-linked behaviour from measured motor harmonics and more stationary peaks.",
+        "Use Frequency vs Throttle and Frequency vs RPM to distinguish load-linked behaviour from measured motor harmonics, expected blade-pass orders, and more stationary peaks.",
         "Overlay recorded filter positions and measured RPM-notch harmonics when their provenance is valid.",
+        "Treat every Blade Pass line as an interpretation guide. The RPM Notch lines represent filters that actually processed the gyro signal; the Blade Pass lines do not.",
         "Inspect gyro, D-term, and total filter delay alongside the attenuation achieved.",
         "Return to Graph when residual energy is concentrated in a short manoeuvre or saturation interval."
       ]
@@ -73,7 +74,7 @@
     {"type": "conceptReference", "concept": "spectrum-reading"},
     {"type": "conceptReference", "concept": "configuration-provenance"},
     {"type": "conceptReference", "concept": "log-evidence-quality"},
-    {"type": "relatedProblems", "problems": ["chase-vibration-and-noise", "judge-control-response", "setup-health-check"]},
+    {"type": "relatedProblems", "problems": ["read-spectrum", "chase-vibration-and-noise", "judge-control-response", "aircraft-settings"]},
     {"type": "sources"}
   ],
   "sources": [
@@ -86,5 +87,5 @@
     {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"},
     {"label": "Betaflight tuning principles", "url": "https://betaflight.com/docs/wiki/guides/current/Freestyle-Tuning-Principles"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-16"}
 }

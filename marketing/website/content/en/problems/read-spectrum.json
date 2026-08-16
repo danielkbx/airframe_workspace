@@ -1,0 +1,154 @@
+{
+  "id": "read-spectrum",
+  "slug": "read-spectrum",
+  "status": "published",
+  "category": "tuning",
+  "order": 35,
+  "title": "How do I read Spectrum?",
+  "summary": "Use Frequency, Frequency vs Throttle, and Frequency vs RPM together to locate energy, see how it moves with load, and test whether it follows measured motor speed.",
+  "questions": [
+    "What does each Spectrum view tell me?",
+    "How do I read peaks, vertical bands, and diagonal ridges?",
+    "What do blade-pass guides show?",
+    "How are guides different from recorded filters?"
+  ],
+  "viewPaths": ["spectrum", "graph", "overview"],
+  "concepts": ["spectrum-reading", "log-evidence-quality"],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "Spectrum is most useful as a sequence of questions. Frequency locates the energy, Frequency vs Throttle shows whether it changes with propulsion load, and Frequency vs RPM tests whether it follows measured motor speed at a consistent mechanical order."
+    },
+    {"type": "image", "asset": "spectrum"},
+    {"type": "heading", "level": 2, "title": "Three views answer three different questions"},
+    {
+      "type": "table",
+      "caption": "Choose the view for the question",
+      "columns": ["View", "Question it answers", "Important limit"],
+      "rows": [
+        ["Frequency", "At which frequencies is energy concentrated across the selected flight range?", "A peak shows where energy exists, not what physical part caused it."],
+        ["Frequency vs Throttle", "Does the frequency move as throttle and propulsion load change?", "Throttle is a useful proxy, not measured motor speed."],
+        ["Frequency vs RPM", "Does the energy follow measured motor speed at a consistent order?", "The interpretation depends on usable eRPM data and the correct motor-pole count."]
+      ]
+    },
+    {
+      "type": "viewPath",
+      "view": "spectrum",
+      "steps": [
+        "Choose a representative flight range and a signal that answers the question, such as unfiltered gyro, filtered gyro, D term, or motor output.",
+        "Begin with Frequency to locate narrow peaks, broad elevated regions, and differences between axes or signal stages.",
+        "Switch to Frequency vs Throttle to see whether a peak becomes a ridge that moves with load.",
+        "Use Frequency vs RPM when eRPM is available to compare the ridge with measured motor orders and blade-pass guides.",
+        "Repeat the comparison across axes, signals, and a narrower flight range before drawing a conclusion."
+      ]
+    },
+    {"type": "heading", "level": 2, "title": "Read shapes before naming causes"},
+    {
+      "type": "paragraph",
+      "text": "Frequency is the horizontal axis in all three views. In the two heatmaps, Throttle or motor RPM is the vertical axis. A frequency that stays fixed therefore appears as a vertical band; a frequency that rises with throttle or RPM forms a diagonal or curved ridge."
+    },
+    {
+      "type": "table",
+      "caption": "A practical visual vocabulary",
+      "columns": ["Pattern", "What it supports", "What to check next"],
+      "rows": [
+        ["Narrow peak in Frequency", "Energy is concentrated near one frequency.", "Check whether it becomes stationary, load-linked, or RPM-linked in a heatmap."],
+        ["Vertical band in a heatmap", "The frequency remains nearly fixed while Throttle or RPM changes.", "Investigate a possible resonance or another source that is not scaling with the selected vertical axis."],
+        ["Diagonal or curved ridge in Frequency vs Throttle", "The behaviour changes with propulsion load.", "Use Frequency vs RPM to test measured motor-speed linkage."],
+        ["Straight diagonal ridge in Frequency vs RPM", "The energy follows a consistent multiple of mechanical motor frequency.", "Compare it with motor orders and the available blade-pass guides."],
+        ["Broad cloud or raised region", "Noise is spread across frequencies or several sources overlap.", "Compare signal stages, axes, manoeuvres, and physical condition rather than looking for one culprit."],
+        ["Isolated spot or short fragment", "The behaviour may belong to a brief event rather than the whole flight.", "Narrow the timeline range and return to Graph for event context."]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Heatmap colour is strength within this view",
+      "text": "A brighter region means more displayed energy for the current signal, range, windowing, and intensity. It is not a universal vibration limit and should not be compared as an absolute rating across unrelated logs."
+    },
+    {"type": "heading", "level": 2, "title": "Blade-pass guides mark expected mechanical orders"},
+    {"type": "image", "asset": "blade-pass-guide"},
+    {
+      "type": "paragraph",
+      "text": "Every blade passes the same point once per motor revolution. A three-blade prop therefore produces three blade passes per revolution, placing its fundamental blade-pass order at 3× mechanical motor frequency. The diagonal guide shows where that relationship should appear throughout the RPM range."
+    },
+    {
+      "type": "formula",
+      "expression": "blade-pass frequency = mechanical motor frequency × blade count",
+      "explanation": "Higher blade-pass harmonics repeat the same relationship at integer multiples of the fundamental.",
+      "variables": [
+        {"symbol": "mechanical motor frequency", "meaning": "Motor revolutions per second derived from logged eRPM and the configured motor-pole count"},
+        {"symbol": "blade count", "meaning": "The numeric count found by Airframe or selected in Aircraft Settings"}
+      ]
+    },
+    {
+      "type": "table",
+      "caption": "Blade-pass guides for a three-blade prop",
+      "columns": ["Guide", "Motor order", "What it represents"],
+      "rows": [
+        ["Blade Pass", "3×", "The fundamental: three blade passes per revolution."],
+        ["Blade Pass 2nd", "6×", "The second harmonic of the blade-pass pattern."],
+        ["Blade Pass 3rd", "9×", "The third harmonic of the blade-pass pattern."]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "Blade count and harmonic count are different things",
+      "text": "Three blades place the fundamental at 3×; they do not limit the signal to three harmonics. Airframe normally offers the fundamental plus its second and third harmonics. Further harmonics can appear when enough of their line fits within the recorded RPM and frequency range."
+    },
+    {
+      "type": "viewPath",
+      "view": "spectrum",
+      "steps": [
+        "Open Frequency vs RPM for a log with usable eRPM data.",
+        "Open Guides. The Profile row shows the propeller-size profile and blade count currently used; Other / Unknown means no numeric count is available.",
+        "Use each Blade Pass checkbox to show or hide that harmonic. Hover a row to highlight its matching line.",
+        "Follow a ridge across changing RPM instead of judging alignment at a single point.",
+        "Check whether it follows the fundamental, a higher blade-pass harmonic, another motor order, or no RPM-dependent diagonal."
+      ]
+    },
+    {
+      "type": "table",
+      "caption": "What blade-pass alignment can tell you",
+      "columns": ["What you see", "What it supports", "What it does not prove"],
+      "rows": [
+        ["A ridge follows one guide", "The energy scales with motor speed at that expected blade-pass order.", "Which prop, motor, bearing, mount, or frame part created it."],
+        ["A ridge runs parallel between guides", "The energy is RPM-linked, but not at the displayed blade-pass order.", "That the blade count is wrong or that one specific component is responsible."],
+        ["A vertical ridge crosses the guides", "Its frequency remains nearly fixed rather than scaling like those blade-pass orders.", "A unique resonance source without further evidence."],
+        ["No ridge follows a guide", "There is no clearly concentrated ridge at those expected orders in this signal and range.", "That the props or motors are healthy."]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Alignment narrows the pattern, not the damaged part",
+      "text": "A matching ridge is consistent with blade-pass-related excitation, but it cannot identify a particular component. Incorrect eRPM or motor-pole data also shifts every apparent mechanical order."
+    },
+    {"type": "heading", "level": 2, "title": "Guides and filters answer different questions"},
+    {
+      "type": "table",
+      "caption": "Two layers that may share the same diagonal",
+      "columns": ["Layer", "What it means", "What it does"],
+      "rows": [
+        ["Blade Pass guide", "An expected mechanical order calculated from motor RPM and blade count.", "Helps you interpret the heatmap; it does not filter the gyro signal."],
+        ["RPM Notch filter", "A recorded Betaflight filter harmonic driven by per-motor eRPM.", "Represents filtering that was actually applied to the gyro signal during the flight."]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "After classifying the shape, continue with the question it raises. Use the vibration guide to investigate likely source classes, the filter guide to compare attenuation and delay, and Graph when the behaviour belongs to a particular moment."
+    },
+    {"type": "relatedProblems", "problems": ["aircraft-settings", "chase-vibration-and-noise", "judge-filter-tune", "find-what-happened-at-a-moment"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Spectrum analyzer", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisSpectrumAnalyzer.swift"},
+    {"label": "Spectrum modes and inspector", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumInspector.swift"},
+    {"label": "Spectrum surface and blade-pass overlays", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSurface.swift"},
+    {"label": "Propeller blade-count analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisPropellerBladeCount.swift"},
+    {"label": "Spectrum evidence and limitations", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
+    {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-16"}
+}

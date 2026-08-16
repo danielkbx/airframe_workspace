@@ -1,8 +1,8 @@
 # Spectrum Tuning Guides
 
 - Status: implemented as an explicitly heuristic guide layer; not validated across craft classes
-- Last reviewed: 2026-08-05
-- Scope: filter delay, spectrum interpretation, setup-specific visual guides, measured motor bands, and cautious user-facing terminology
+- Last reviewed: 2026-08-16
+- Scope: filter delay, spectrum interpretation, setup-specific visual guides, propeller blade-pass evidence, measured motor bands, and cautious user-facing terminology
 - Normative decisions: `../.agents/MEMORY.md` after implementation approval
 - Related implementation: `Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/` and `Airframe/Packages/AirframeUI/Sources/AirframeUI/Spectrum/`
 
@@ -35,6 +35,8 @@ Airframe should therefore present setup profiles as manually selected, explicitl
 | STG-015 | A raw-gyro spectrum can understate the practical effect of residual motor noise because D amplifies high-frequency content; BF 4.5 guidance recommends checking filtered gyro and downstream D-term or motor spectra. | BF45, CR45-FILTER | B/C | Logs with comparable downstream signals | Prefer multi-stage evidence over declaring a filter tune complete from one raw spectrum. | verified |
 | STG-016 | Rosser's compared “Easy” and “AOS” BF 4.5 filter configurations demonstrate a tradeoff among phase delay, useful-signal attenuation, quiet-zone transmission, and motor-noise rejection; neither curve is a universal optimum. | CR45-FILTER | C | Illustrated BF 4.5 configurations | Use the comparison as explanatory context only; do not expose either configuration as an Airframe default. | verified |
 | STG-017 | The Rosser deck labels content through roughly `90 Hz` as useful flight movement/propwash for its example and separates a quiet zone from motor noise. Those boundaries depend on craft and analysis context. | CR45-FILTER | C | Illustrated example | Do not turn `90 Hz` or the depicted zones into global classification thresholds. | heuristic |
+| STG-018 | Blade-pass frequency is the number of blades multiplied by mechanical revolutions per second. The same spectral line can also be an integer motor/propeller harmonic, so frequency alone does not uniquely identify blade count. | NASA-BPF, BF-CLI, BF45 | A/B | Logs with valid eRPM and motor-pole metadata | Render a confirmed `B×` guide; infer only a conservative suggestion from order evidence and never silently persist it. | verified |
+| STG-019 | Betaflight's documented RPM-filter examples distinguish typical two- and three-blade harmonic weighting, while fourth order can overlap the second harmonic of a two-blade propeller. | BF-CLI, BF45, Airframe inference | B/D | Betaflight logs with unfiltered gyro and eRPM | Restrict automatic suggestions to clearly separated two-versus-three order evidence; keep four blades manual. | partially verified |
 
 ## Source Essence
 
@@ -67,6 +69,7 @@ The deck's blade-count weight examples, Dynamic Notch bounds, `90 Hz` useful-sig
 ## Uncertainties and Non-Claims
 
 - Propeller diameter is not reliably encoded in a Blackbox log; profile selection is manual.
+- Propeller blade count is not uniquely encoded by a spectral peak. A two-blade higher harmonic can occupy the same order as a four-blade fundamental, and structural or motor harmonics may compete with blade passage.
 - Diameter alone does not determine useful bands. KV, voltage, prop pitch/blade count, frame stiffness, mass, motor condition, mounting, and firmware settings matter.
 - Absolute dB values depend on signal units, normalization, sample rate, windowing, and estimator. Comparisons are meaningful only when analysis semantics are compatible.
 - `50 Hz` is neither a universal boundary between flight motion and noise nor a universal lower cutoff.
@@ -82,6 +85,7 @@ The deck's blade-count weight examples, Dynamic Notch bounds, `90 Hz` useful-sig
 
 - Static prop-size profiles are an implemented Grade `D` educational layer. They are not filter recommendations and do not produce pass/fail or safety verdicts.
 - Actual eRPM-derived harmonic occupancy, configured filter overlays, filter delay, and compatible per-signal measurements are stronger evidence than a selected profile.
+- A stored numeric blade count adds a blade-pass diagonal at `bladeCount × mechanical motor frequency` in Frequency vs RPM. A two-/three-blade estimate may be offered only as a user-confirmed draft when native unfiltered gyro, valid eRPM/pole conversion, RPM stability/span, observation coverage, local peak strength, and winner margin all pass conservative gates. Four blades and ambiguous results stay `Other / Unknown` or user-selected.
 - The current profile UI renders only neutral motion/control context plus measured evidence; causal `Possible Resonance` and `Motor / Propeller Noise` regions are deliberately not shown.
 - Automatic resonance detection remains unimplemented until representative logs validate a conservative behavior-based detector.
 - Future Filter Review and Filter Score work is specified in [the active roadmap](../.agents/PLAN.md#measure-5-spectrum-filter-review). This topic supplies evidence and limitations; product interfaces and execution order do not live here.
@@ -92,6 +96,7 @@ The deck's blade-count weight examples, Dynamic Notch bounds, `90 Hz` useful-sig
 - Vary KV, voltage, blade count/pitch, frame/mass, and filter configuration where practical.
 - Compare only spectra with compatible units, normalization, windowing, sample rate, and estimator semantics.
 - Validate downstream gyro, D-term, and motor-output evidence before grading harmonic-weight or filter-efficiency claims.
+- Validate blade-count thresholds against labeled two-, three-, and four-blade real logs across craft classes before broadening the detector or strengthening confidence wording.
 
 ## Source Register
 
@@ -111,3 +116,4 @@ The deck's blade-count weight examples, Dynamic Notch bounds, `90 Hz` useful-sig
 | UAVT | Tuning hub and PID Tuning Principles | UAV Tech | October 2020 guide; site and PDF rechecked 2026-08-05 | https://theuavtech.com/tuning/ and https://theuavtech.com/wp-content/uploads/2020/10/UAV-Tech-PID-Tuning-Principles.pdf | 2026-08-05 | Canonical expert hub; distinguishes general principles and craft-specific practice, and lists antennas, cracked frames, and other peaks as Dynamic Notch targets |
 | BF45 | Betaflight 4.5 Release Notes | Betaflight | 4.5 release documentation | https://betaflight.com/docs/wiki/release/Betaflight-4-5-Release-Notes | 2026-08-05 | Official context for RPM harmonic weights, residual downstream noise, and version scope |
 | CR45-FILTER | BF 4.5 Tuning Guide Part 1: Filters | Chris Rosser | created 2024-03-20 | `sources/chris-rosser/BF-4.5-Filter-Tuning.pdf`; https://www.youtube.com/watch?v=E3s5XYk3M74 | 2026-08-05 | Expert secondary source; private archived Patreon deck, public companion video, integrity data in source README |
+| NASA-BPF | A Method for Predicting Blade-Vortex Interaction Noise of a Helicopter Rotor | NASA | 1977 | https://ntrs.nasa.gov/api/citations/19770023806/downloads/19770023806.pdf | 2026-08-15 | Primary acoustics reference for blade-passage frequency as blade count times rotational frequency; rotor context, used only for the kinematic relation |

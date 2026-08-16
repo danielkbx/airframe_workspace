@@ -4,7 +4,7 @@
       "id": "overview",
       "name": "Overview",
       "path": "Open a log → Overview",
-      "summary": "Combines recorded flight data with aircraft details and any available flight-controller configuration, organized by topic. Review basics such as propeller size and motor layout alongside setup checks, warnings, and flight facts before going deeper.",
+      "summary": "Combines recorded flight data with aircraft details and any available flight-controller configuration, organized by topic. Review basics such as propeller size, blade count, and motor layout alongside setup checks, warnings, and flight facts before going deeper.",
       "availability": "Available for opened Betaflight logs. Individual cards appear only when their source data exists.",
       "sourcePaths": [
         "Airframe/App/Airframe/App/DocumentHome/Content/Overview/OverviewContainer.swift",
@@ -39,8 +39,8 @@
       "id": "spectrum",
       "name": "Spectrum",
       "path": "Open a log → Spectrum",
-      "summary": "Examines selected signals by frequency, frequency versus throttle, or frequency versus motor RPM, and can overlay recorded filter settings and measured motor bands.",
-      "availability": "Frequency analysis needs suitable sampled fields. Throttle and RPM modes need their respective data; RPM mode additionally needs eRPM fields.",
+      "summary": "Examines selected signals by frequency, frequency versus throttle, or frequency versus motor RPM, and can overlay recorded filter settings, measured motor bands, and individually selectable blade-pass orders.",
+      "availability": "Frequency analysis needs suitable sampled fields. Throttle and RPM modes need their respective data; RPM mode additionally needs eRPM fields. Each mode shows its applicable Guides in the sidebar. Profile ranges require a supported propeller size; blade-pass guides require an Airframe document, enabled Guides, and a numeric blade count found by Airframe or selected in Aircraft Settings.",
       "sourcePaths": [
         "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumInspector.swift",
         "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSettings.swift",

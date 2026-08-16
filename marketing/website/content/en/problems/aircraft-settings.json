@@ -1,0 +1,79 @@
+{
+  "id": "aircraft-settings",
+  "slug": "aircraft-settings",
+  "status": "published",
+  "category": "getting-started",
+  "order": 15,
+  "title": "How does Airframe use aircraft settings?",
+  "summary": "Optionally add propeller size, blade count, and motor layout to give Overview, the craft presentation, and aircraft-aware guides useful physical context.",
+  "questions": [
+    "Which aircraft details can I add?",
+    "What can Airframe suggest automatically?",
+    "Where does Airframe use these details?",
+    "When should I correct an automatic result?"
+  ],
+  "viewPaths": ["overview", "spectrum", "graph"],
+  "concepts": [],
+  "blocks": [
+    {
+      "type": "lead",
+      "text": "Aircraft Settings add optional physical context to the logs in an Airframe document. Propeller size makes frequency regions more relevant to the craft, blade count enables expected blade-pass orders, and motor layout keeps the craft presentation oriented correctly."
+    },
+    {"type": "image", "asset": "overview"},
+    {
+      "type": "viewPath",
+      "view": "overview",
+      "steps": [
+        "Save the raw log as an Airframe document if it is not already part of one.",
+        "Open Overview and find the Aircraft card.",
+        "Choose Customize and select the Propeller Size used for the recording.",
+        "Review Propeller Blades and Motor Layout. A spinner means Airframe is still examining the log for a possible value.",
+        "Use the info button to review an automatic result, correct anything that does not match the aircraft, and choose Save if you want to keep those values with the document."
+      ]
+    },
+    {"type": "heading", "level": 2, "title": "Three settings, three roles"},
+    {
+      "type": "table",
+      "caption": "Where each aircraft setting helps",
+      "columns": ["Setting", "What it adds", "What to choose"],
+      "rows": [
+        ["Propeller Size", "Frequency regions suited to the size and type of craft.", "Choose the closest supported profile."],
+        ["Propeller Blades", "Expected blade-pass orders in Frequency vs RPM.", "Choose 2, 3, 4, or Other / Unknown. Airframe may find 2 or 3 from the log."],
+        ["Motor Layout", "The matching craft orientation and layout-aware results such as the center-of-gravity estimate.", "Choose the layout that matches the aircraft or review Airframe's result."]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "Automatic blade detection is deliberately conservative",
+      "text": "Airframe can identify two- or three-blade props when the log contains a clear relationship between frequency and motor RPM. A detected count is immediately available to the Spectrum guides. Four blades and recordings without clear enough evidence remain choices for you to make."
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "Other / Unknown is a useful answer",
+      "text": "Choose Other / Unknown when none of the listed options describes the aircraft or when you cannot verify the value. Airframe keeps the missing context visible instead of building a guide from a guess."
+    },
+    {"type": "heading", "level": 2, "title": "Aircraft context makes views more specific"},
+    {
+      "type": "paragraph",
+      "text": "Overview shows the effective aircraft details beside the recorded setup evidence. Graph uses Motor Layout for the craft presentation. Spectrum uses Propeller Size for craft-specific frequency regions and a numeric Blade Count for blade-pass guides. These details add context; they do not change the recorded data, FFT, Filter Delay, System Response, Tune Score, or automatic ratings."
+    },
+    {
+      "type": "paragraph",
+      "text": "The Spectrum guide explains how Frequency, Frequency vs Throttle, and Frequency vs RPM answer different questions, and how to compare a moving ridge with the blade-pass lines."
+    },
+    {"type": "relatedProblems", "problems": ["read-spectrum", "airframe-document", "setup-health-check", "chase-vibration-and-noise"]},
+    {"type": "sources"}
+  ],
+  "sources": [
+    {"label": "Aircraft document state", "path": "Airframe/App/Airframe/App/DocumentStateStore.swift"},
+    {"label": "Overview aircraft state", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/OverviewContainer.swift"},
+    {"label": "Overview Aircraft card", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Overview/OverviewCards.swift"},
+    {"label": "Aircraft Settings dialog", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumInspector.swift"},
+    {"label": "Propeller blade-count analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisPropellerBladeCount.swift"},
+    {"label": "Spectrum blade-pass overlay", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSurface.swift"},
+    {"label": "Graph craft presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Graph/GraphCraftSection.swift"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-16"}
+}

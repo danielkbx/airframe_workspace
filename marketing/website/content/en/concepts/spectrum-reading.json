@@ -10,7 +10,7 @@
       "rows": [
         ["Frequency", "Where is energy concentrated?", "A peak alone rarely identifies its mechanical cause."],
         ["Frequency vs Throttle", "Does a ridge move as throttle changes?", "Throttle is only a proxy for motor speed."],
-        ["Frequency vs RPM", "Does energy track measured motor harmonics?", "Requires eRPM data and the correct motor pole count."]
+        ["Frequency vs RPM", "Does energy follow a measured motor order or one of the expected blade-pass orders as RPM changes?", "Requires eRPM data and the correct motor pole count; blade-pass guides additionally need a numeric blade count."]
       ]
     },
     {
@@ -33,6 +33,10 @@
       "text": "Configured filter overlays show where recorded settings act. Comparing unfiltered gyro, filtered gyro, D term, and motor output can show what remains downstream. Every filter attenuates something and adds delay, so 'more filtering' is not a strategy; it is merely a direction."
     },
     {
+      "type": "paragraph",
+      "text": "When Airframe has a numeric blade count—either found from the log or selected in Aircraft Settings—Frequency vs RPM adds individually selectable blade-pass guides. The fundamental lies at B× mechanical motor frequency; higher guides lie at 2B×, 3B×, and, when enough of the recorded range is visible, further harmonics. A ridge following one of these diagonals supports motor-speed linkage at that blade-pass order. It is not automatic source identification, a filter response, or a rating."
+    },
+    {
       "type": "callout",
       "tone": "warning",
       "title": "Reference guides are heuristic",
@@ -42,8 +46,10 @@
   "sources": [
     {"label": "Spectrum implementation", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/"},
     {"label": "Spectrum modes and overlays", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSettings.swift"},
+    {"label": "Propeller blade-count analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisPropellerBladeCount.swift"},
+    {"label": "Blade-pass overlay", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSurface.swift"},
     {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
     {"label": "Betaflight RPM filter implementation", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-16"}
 }

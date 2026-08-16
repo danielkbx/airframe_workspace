@@ -9,8 +9,8 @@
   {
     "id": "overview",
     "source": "overview.png",
-    "alt": "Airframe Overview organizing aircraft details, flight-controller configuration, flight facts, and health checks",
-    "caption": "The log and available setup data, organized into one general health check.",
+    "alt": "Airframe Overview showing propeller size, blade count, motor layout, flight-controller configuration, flight facts, and health checks",
+    "caption": "Confirm the aircraft context beside the recorded setup evidence before deeper analysis.",
     "gallery": "flight-analysis"
   },
   {
@@ -39,6 +39,13 @@
     "source": "spectrum.png",
     "alt": "Airframe Spectrum view showing frequency energy across a flight",
     "caption": "See where vibration energy lives instead of guessing from a noisy line.",
+    "gallery": "tuning"
+  },
+  {
+    "id": "blade-pass-guide",
+    "source": "blade-pass-guide.png",
+    "alt": "Airframe Frequency vs RPM heatmap with selectable green blade-pass guides in the Guides sidebar",
+    "caption": "Compare measured energy ridges with the expected fundamental and higher blade-pass orders as motor RPM changes.",
     "gallery": "tuning"
   },
   {

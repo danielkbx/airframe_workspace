@@ -100,6 +100,7 @@ Automated container and lifecycle work is complete. Remaining acceptance is envi
 - Cross-volume replacement fallback.
 - Large real-world document performance and Instruments profiling.
 - Live-profile the 2026-08-07 Spectrum interaction fix with a representative large log: zoom deeply, pan by drag/trackpad/wheel, resize the window, and confirm no `exportedPackageState`, `updateMetadata`, FFT, or semantic preparation appears during direct manipulation. Confirm one state publication after the interaction boundary or one-second quiet period.
+- The curated Git-LFS fixture and refreshed macOS website captures now visually cover saved Propeller Blades in Overview plus the combined profile/count summary and three individually selected green blade-pass harmonics in Frequency vs RPM. Still accept populated/empty iOS/iPadOS Overview and Aircraft Settings, the optional two-/three-blade suggestion wording, inferred guides before Save, and labeled two-, three-, and four-blade real logs before broadening inference beyond the conservative current detector. The focused Aircraft Settings and Read Spectrum wiki guides passed desktop DOM/layout review; repeat both at a narrow viewport when collaborative preview resizing is available.
 - Exact picker/exporter behavior listed as manual in [DOCUMENT_IO_MATRIX.md](DOCUMENT_IO_MATRIX.md).
 
 ## Maintenance

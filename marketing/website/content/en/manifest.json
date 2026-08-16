@@ -22,11 +22,13 @@
   "problems": [
     "airframe-document",
     "get-logs-off-the-flight-controller",
+    "aircraft-settings",
     "setup-health-check",
     "calibrate-current-sensor",
     "reuse-analysis-setups",
     "find-what-happened-at-a-moment",
     "compare-recorded-values",
+    "read-spectrum",
     "chase-vibration-and-noise",
     "judge-filter-tune",
     "judge-control-response",

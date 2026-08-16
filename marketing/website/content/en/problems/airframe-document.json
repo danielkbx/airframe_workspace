@@ -38,7 +38,7 @@
       "items": [
         {"title": "Multiple logs", "text": "Keep flights that belong together in one file instead of rebuilding the same working set every time."},
         {"title": "Views and analysis settings", "text": "Keep selected fields, graph and table layouts, Spectrum settings, ranges, and other persistent view state with the work."},
-        {"title": "Names, notes, and aircraft context", "text": "Keep log names, notes, propeller size, motor layout, and other document-owned aircraft settings beside the recordings they describe."},
+        {"title": "Names, notes, and aircraft context", "text": "Keep log names, notes, propeller size, propeller blade count, motor layout, and other document-owned aircraft settings beside the recordings they describe."},
         {"title": "Available FC evidence", "text": "Keep captured Betaflight configuration and flight-controller import information with the logs when those details are available."}
       ]
     },
@@ -72,7 +72,7 @@
       "type": "paragraph",
       "text": "Reproducible derived-data caches stay in the device's cache storage rather than inside the Airframe document. They can be discarded and rebuilt, and they are not required to export the included logs."
     },
-    {"type": "relatedProblems", "problems": ["get-logs-off-the-flight-controller", "setup-health-check"]},
+    {"type": "relatedProblems", "problems": ["get-logs-off-the-flight-controller", "aircraft-settings", "setup-health-check"]},
     {"type": "sources"}
   ],
   "sources": [
@@ -81,5 +81,5 @@
     {"label": "Log export action", "path": "Airframe/App/Airframe/App/DocumentHome/Sidebar.swift"},
     {"label": "Airframe container implementation", "path": "Airframe/Packages/AirframeContainer/Sources/AirframeContainer/"}
   ],
-  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-12"}
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-16"}
 }

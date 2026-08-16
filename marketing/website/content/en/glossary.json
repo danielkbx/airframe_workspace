@@ -64,6 +64,13 @@
       "source": {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"}
     },
     {
+      "id": "blade-pass-frequency",
+      "term": "Blade-pass frequency",
+      "definition": "Mechanical motor frequency multiplied by propeller blade count. Airframe shows the fundamental at B× in Frequency vs RPM, with higher blade-pass harmonics at 2B×, 3B×, and sometimes beyond when the recorded range allows it.",
+      "aliases": ["blade-passing frequency", "BPF"],
+      "source": {"label": "Airframe blade-pass overlay", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSurface.swift"}
+    },
+    {
       "id": "nyquist-limit",
       "term": "Nyquist limit",
       "definition": "Half the effective sample rate: the highest frequency a sampled signal can represent without aliasing. Airframe reports the observed logging-rate context in Overview.",

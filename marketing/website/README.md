@@ -18,11 +18,13 @@ npm run validate
 npm run build
 ```
 
-The preview build is written to `dist/`. Serve that directory with any static file server, for example:
+Build and serve the local preview at `http://localhost:8080`:
 
 ```sh
-python3 -m http.server 8080 --directory dist
+npm run serve
 ```
+
+The command rebuilds the site before serving `dist/`. Set `PORT` to use another port, for example `PORT=8081 npm run serve`.
 
 `npm run build:production` adds publication gates. It intentionally fails until `domain`, `contactEmail`, and `appStoreURL` in `site.config.json` contain the real release values. It also rejects visible placeholder markers.
 
