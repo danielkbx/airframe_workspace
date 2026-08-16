@@ -280,6 +280,12 @@ Do not collapse source, segment, session, and runtime-window identity.
 - App tests cover document/package invariants, state routing, commands, and view-model behavior.
 - External oracle comparison is supplementary, not the source of implementation structure.
 
+## Unreadable-log feedback
+
+- `DocumentHomeView.LogContext.FlightDataAvailability` is the shared app-private gate for completed logs without a strictly increasing main-frame timestamp range. `LogDataView` keeps Table, Graph, Map, Spectrum, System Response, and their inspectors out of the view tree in that state, preventing their analysis tasks from starting; playback modes retain only the compact disabled Timeline. Overview instead keeps valid header/configuration cards, adds a compact warning, and terminates flight-dependent checks rather than leaving spinners active.
+- The shared canvas state contains the explanatory text and compact verified diagnostics. Its action and concise privacy confirmation explicitly say that Airframe prepares a support email and sends nothing automatically, avoiding the implication of direct in-app transmission. In globally unusable non-Overview modes, the state replaces the complete mode layout so an empty Timeline, inspector, and their dividers cannot fragment the window. `LogFeedbackCoordinator` is document-view-owned so mode switches preserve consent/preparation while context replacement and shutdown cancel work and reject delayed publication. On macOS, `NSSharingService.didShareItems` is only a handoff acknowledgement, so the coordinator retains the temporary attachment until replacement or document shutdown rather than deleting it before Mail consumes the URL.
+- App-private `DocumentHomeView.LogContext.FeedbackSource` retains the original display filename and complete source `Data` copy-on-write. Feedback requires explicit consent. Sources below 10 MiB are staged byte-identically; larger sources are streamed through system zlib as level-9 gzip, then streamed back through SHA-256 and byte-count verification before native Mail/share presentation. Every terminal path removes the private temporary directory.
+
 ## Log Health Checks
 
 - `BlackboxAnalysis/Health/` owns plausibility checks beyond `ReaderLogQuality`: `BlackboxAnalysisWorkspace.healthReport(using:)` aggregates typed `AnalysisHealthFinding`s (motorPolesMismatch, motorDesync, logDataGaps, erpmWithoutRPMFilter, batteryChargeLowAtArm) plus first-class skip reasons.
