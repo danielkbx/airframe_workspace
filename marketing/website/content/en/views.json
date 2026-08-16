@@ -39,12 +39,15 @@
       "id": "spectrum",
       "name": "Spectrum",
       "path": "Open a log → Spectrum",
-      "summary": "Examines selected signals by frequency, frequency versus throttle, or frequency versus motor RPM, and can overlay recorded filter settings, measured motor bands, and individually selectable blade-pass orders.",
+      "summary": "Examines selected signals by frequency, frequency versus throttle, or frequency versus motor RPM. It can overlay recorded filter settings, tracked Dynamic and RPM notch centres, firmware-matched calculated attenuation, measured motor bands, and individually selectable blade-pass orders.",
       "availability": "Frequency analysis needs suitable sampled fields. Throttle and RPM modes need their respective data; RPM mode additionally needs eRPM fields. Each mode shows its applicable Guides in the sidebar. Profile ranges require a supported propeller size; blade-pass guides require an Airframe document, enabled Guides, and a numeric blade count found by Airframe or selected in Aircraft Settings.",
       "sourcePaths": [
         "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumInspector.swift",
         "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSettings.swift",
-        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisSpectrumAnalyzer.swift"
+        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisSpectrumAnalyzer.swift",
+        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlay.swift",
+        "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlayWorkspace.swift",
+        "Airframe/Packages/BlackboxReader/Sources/BlackboxReader/ReaderNotchDebugMapping.swift"
       ]
     },
     {

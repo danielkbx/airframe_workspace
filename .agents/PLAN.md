@@ -1,5 +1,23 @@
 # Current Plan
 
+## Website Wiki: Dynamic And RPM Notch Overlays (Implemented 2026-08-16)
+
+### Think Before Coding
+
+- Keep recorded spectrum energy, tracked filter centres, firmware-matched calculated attenuation, and evidence quality conceptually separate. Never describe the grey response field as measured post-filter energy.
+
+### Simplicity First
+
+- Extend the existing filter-tune guide and add one reusable notch-overlay concept. Reuse the current content schema, gallery, screenshot registry, and static renderer without adding routes, CSS, JavaScript, or dependencies.
+
+### Surgical Changes
+
+- The private screenshot fixture now includes the publication-approved BF 2026.6.1 source as the neutral `Notch Filter Tune` role. Two matched Frequency-vs-Throttle captures show the collapsed line-only state and the expanded, highlighted Dynamic-notch attenuation state; the raw source remains private.
+
+### Goal-Driven Execution
+
+- Fixture reconstruction and semantic notch validation pass for seven named segments, five presets, and seven future UI states. All seven website tests, content validation, and the 20-page preview build pass. The guide and glossary explain Q, Weight, Fade, LPF, all evidence labels, Spectrum-mode differences, version limits, cascaded notches, and why predicted attenuation cannot certify a tune or physical safety.
+
 ## Spectrum Blade-Pass Harmonics (Implemented And Documented 2026-08-16; App Visual Acceptance Pending)
 
 ### Think Before Coding

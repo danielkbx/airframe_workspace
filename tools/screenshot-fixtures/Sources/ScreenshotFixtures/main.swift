@@ -59,6 +59,7 @@ struct FixtureManifest: Decodable {
         let sheet: String?
         let popover: String?
         let expandedSections: [String]
+        let hoverTarget: String?
         let readyElements: [String]
     }
     struct Panel: Decodable { let visible: Bool; let width: Double }
@@ -197,7 +198,16 @@ func makePresetFiles(_ manifest: FixtureManifest, root: URL) throws {
         ["n": "Setpoint", "s": ["reader:I:setpoint[0]:17", "reader:I:setpoint[1]:18", "reader:I:setpoint[2]:19"], "c": ["reader:I:setpoint[0]:17": 0, "reader:I:setpoint[1]:18": 1, "reader:I:setpoint[2]:19": 2]],
         ["n": "Motors", "s": ["reader:I:motor[0]:37", "reader:I:motor[1]:38", "reader:I:motor[2]:39", "reader:I:motor[3]:40"], "c": ["reader:I:motor[0]:37": 0, "reader:I:motor[1]:38": 1, "reader:I:motor[2]:39": 2, "reader:I:motor[3]:40": 3]]
     ], "t": []]
-    let spectrum: [String: Any] = ["v": 4, "m": "frequencyVsRPM", "f": ["gyro", "gyroPrefilter"], "ft": ["gyro"], "fr": ["gyro", "gyroPrefilter"], "i": 120.0, "h": true, "o": ["dtermLPF1", "rpmNotch1", "rpmNotch2", "rpmNotch3"]]
+    let spectrum: [String: Any] = [
+        "v": 5,
+        "m": "frequencyVsThrottle",
+        "f": ["gyro", "gyroPrefilter"],
+        "ft": ["gyroPrefilter"],
+        "fr": ["gyro", "gyroPrefilter"],
+        "i": 120.0,
+        "h": true,
+        "o": ["dynamicNotch", "rpmNotch1", "rpmNotch2", "rpmNotch3"],
+    ]
     let map: [String: Any] = [
         "mapType": "standard", "followsCraftDuringPlayback": false, "showsCraftPreview": true, "showsHeading": true,
         "showsHomePoint": true, "showsEvents": true, "showsAltitudeInstrument": true, "showsSpeedInstrument": true,
@@ -375,7 +385,68 @@ func validate(_ manifestPath: String) throws {
             throw FixtureError.invalidManifest("CHIRP capability for \(log.displayName): \(status); CHIRP debug candidates: \(candidates)")
         }
     }
+    for log in fixture.logs where log.roles.contains("spectrum-notch-overlays") {
+        guard let sourceConfig = fixture.sources.first(where: { $0.id == log.source }) else {
+            throw FixtureError.invalidManifest("notch-overlay source")
+        }
+        let sourceFixture = try openSource(sourceConfig, relativeTo: root)
+        guard sourceFixture.metadata.logs.indices.contains(log.sourceLogIndex) else {
+            throw FixtureError.invalidManifest("notch-overlay sourceLogIndex")
+        }
+        let descriptor = sourceFixture.metadata.logs[log.sourceLogIndex]
+        guard let reference = sourceFixture.references[descriptor.path] else { throw FixtureError.missingEntry(descriptor.path) }
+        let reader = BlackboxReader(configuration: .init(compatibilityMode: .bestEffortDataVersion2))
+        let importSet = try reader.open(data: sourceFixture.reader.read(reference), sourceName: descriptor.originalFilename)
+        guard let decodedLog = reader.decodedLogs(in: importSet).first(where: { $0.id.segmentIndex == log.segment }) else {
+            throw FixtureError.invalidManifest("notch-overlay segment \(log.segment)")
+        }
+        let info = try decodedLog.flightInfo()
+        guard let start = info.firstMainFrameTime, let end = info.lastMainFrameTime else {
+            throw FixtureError.invalidManifest("notch-overlay time range")
+        }
+        let workspace = BlackboxAnalysisWorkspace(decodedLog: decodedLog)
+        let dynamic = try workspace.dynamicNotchOverlay(
+            fromMainFrameTime: start,
+            throughMainFrameTime: end,
+            mode: .frequencyVsThrottle,
+            using: info.scan.index
+        )
+        guard dynamic.configuration.firmwareModel == .betaflight2026SVF,
+              dynamic.configuration.count == 1,
+              approximately(dynamic.configuration.q, 2.2),
+              approximately(dynamic.configuration.minimumHz, 90),
+              approximately(dynamic.configuration.maximumHz, 650),
+              approximately(dynamic.configuration.targetLooptimeMicroseconds, 250),
+              dynamic.evidence == .observed,
+              dynamic.tracks.contains(where: { $0.axis == 0 && !$0.segments.isEmpty }),
+              !dynamic.attenuation.isEmpty else {
+            throw FixtureError.invalidManifest("Dynamic Notch capability for \(log.displayName)")
+        }
+        let rpm = try workspace.rpmNotchOverlay(
+            fromMainFrameTime: start,
+            throughMainFrameTime: end,
+            mode: .frequencyVsThrottle,
+            using: info.scan.index
+        )
+        guard rpm.configuration.firmwareModel == .betaflight2026SVF,
+              rpm.configuration.count == 3,
+              approximately(rpm.configuration.q, 3.5),
+              approximately(rpm.configuration.minimumHz, 80),
+              rpm.configuration.weights == [100, 100, 100],
+              approximately(rpm.configuration.fadeRangeHz, 50),
+              approximately(rpm.configuration.lowpassHz, 150),
+              approximately(rpm.configuration.targetLooptimeMicroseconds, 250),
+              rpm.evidence == .modeled,
+              Set(rpm.tracks.compactMap(\.harmonic)) == Set([1, 2, 3]),
+              rpm.attenuation.count == 3 else {
+            throw FixtureError.invalidManifest("RPM Filter capability for \(log.displayName)")
+        }
+    }
     print("Validated \(fixture.document.displayName): \(fixture.logs.count) named segments, \(fixture.presets.count) presets, \(fixture.futureUIStates.count) future UI states")
+}
+
+func approximately(_ actual: Double?, _ expected: Double, tolerance: Double = 0.001) -> Bool {
+    actual.map { abs($0 - expected) <= tolerance } ?? false
 }
 
 func inventory(_ documentPath: String) throws {

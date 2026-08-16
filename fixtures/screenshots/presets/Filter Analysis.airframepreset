@@ -15,18 +15,18 @@
             "gyroPrefilter"
           ],
           "ft" : [
-            "gyro"
+            "gyroPrefilter"
           ],
           "h" : true,
           "i" : 120,
-          "m" : "frequencyVsRPM",
+          "m" : "frequencyVsThrottle",
           "o" : [
-            "dtermLPF1",
+            "dynamicNotch",
             "rpmNotch1",
             "rpmNotch2",
             "rpmNotch3"
           ],
-          "v" : 4
+          "v" : 5
         },
         "w" : [
           0,

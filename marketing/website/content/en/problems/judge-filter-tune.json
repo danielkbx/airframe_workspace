@@ -13,13 +13,13 @@
     "How much delay accompanies the achieved attenuation?"
   ],
   "viewPaths": ["spectrum", "graph", "overview"],
-  "concepts": ["spectrum-reading", "configuration-provenance", "log-evidence-quality"],
+  "concepts": ["spectrum-reading", "notch-overlay-reading", "configuration-provenance", "log-evidence-quality"],
   "blocks": [
     {
       "type": "lead",
-      "text": "A filter tune is not judged by the number of enabled filters, the quietest single trace, or the smallest delay estimate. The useful question is what entered the signal path, what was attenuated, what remained downstream, and what response delay accompanied that result."
+      "text": "A filter tune is not judged by the number of enabled filters, the quietest single trace, or the smallest delay estimate. First separate what the log measured from what Airframe calculates: the heatmap shows recorded energy, notch lines show tracked filter centres, and the grey overlay shows the expected attenuation of the matching Betaflight filter model."
     },
-    {"type": "image", "asset": "filter-guides"},
+    {"type": "gallery", "assets": ["notch-overlays-lines", "notch-overlays-attenuation"]},
     {
       "type": "viewPath",
       "view": "spectrum",
@@ -27,11 +27,27 @@
         "Choose a representative flight range and confirm logging quality, required signals, eRPM availability, and motor pole count.",
         "Use Frequency to compare unfiltered gyro, filtered gyro, D term, and motor output where those stages were recorded.",
         "Use Frequency vs Throttle and Frequency vs RPM to distinguish load-linked behaviour from measured motor harmonics, expected blade-pass orders, and more stationary peaks.",
-        "Overlay recorded filter positions and measured RPM-notch harmonics when their provenance is valid.",
+        "Enable Dynamic Notch or the useful RPM harmonics and read their centre lines before adding another visual layer.",
         "Treat every Blade Pass line as an interpretation guide. The RPM Notch lines represent filters that actually processed the gyro signal; the Blade Pass lines do not.",
-        "Inspect gyro, D-term, and total filter delay alongside the attenuation achieved.",
+        "Expand one notch row and highlight it to reveal its calculated attenuation; moving away hides the grey area but keeps the lines.",
+        "Compare the expected filter action with filtered gyro, D term, motor output, and the reported gyro, D-term, and total delay.",
         "Return to Graph when residual energy is concentrated in a short manoeuvre or saturation interval."
       ]
+    },
+    {"type": "heading", "level": 2, "title": "Read the line first, then reveal the attenuation"},
+    {
+      "type": "table",
+      "caption": "Line versus attenuation area",
+      "columns": ["What you see", "Question it answers", "Keep in mind"],
+      "rows": [
+        ["Centre line", "Which frequency did the notch follow?", "The line does not measure how much noise exists there."],
+        ["Grey attenuation area", "How strongly and how widely should that recorded filter configuration reduce nearby frequencies?", "It is calculated from firmware and log evidence, not measured output energy."],
+        ["Evidence label", "Was the centre observed, rebuilt from logged data, or known only from configuration?", "Evidence quality is not a pass/fail judgement of the tune."]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The quiet default is deliberate. Selected filters keep their centre lines visible. Their grey attenuation appears only while that filter is expanded and highlighted, so several Dynamic slots and per-motor RPM notches do not obscure the heatmap. Airframe saves expanded rows in the document and in portable presets."
     },
     {"type": "heading", "level": 2, "title": "Judge the result, not the number of filters"},
     {
@@ -72,6 +88,7 @@
       "text": "Motor temperature, damaged-prop tolerance, loose parts, bearing condition, and thermal headroom require physical checks and cautious repeat flights. A quiet result is evidence from one recording, not a safety certificate."
     },
     {"type": "conceptReference", "concept": "spectrum-reading"},
+    {"type": "conceptReference", "concept": "notch-overlay-reading"},
     {"type": "conceptReference", "concept": "configuration-provenance"},
     {"type": "conceptReference", "concept": "log-evidence-quality"},
     {"type": "relatedProblems", "problems": ["read-spectrum", "chase-vibration-and-noise", "judge-control-response", "aircraft-settings"]},
@@ -81,6 +98,9 @@
     {"label": "Spectrum analyzer", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisSpectrumAnalyzer.swift"},
     {"label": "Filter-delay analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisFilterDelay.swift"},
     {"label": "RPM-notch analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisRPMNotch.swift"},
+    {"label": "Firmware-faithful notch overlays", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlay.swift"},
+    {"label": "Notch track and attenuation analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlayWorkspace.swift"},
+    {"label": "Versioned notch debug mapping", "path": "Airframe/Packages/BlackboxReader/Sources/BlackboxReader/ReaderNotchDebugMapping.swift"},
     {"label": "Filter configuration presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumFilterConfiguration.swift"},
     {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
     {"label": "PID tuning evidence", "path": "knowledge/PID_TUNING_PRINCIPLES.md"},

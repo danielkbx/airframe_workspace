@@ -77,6 +77,20 @@
     "gallery": "tuning"
   },
   {
+    "id": "notch-overlays-lines",
+    "source": "notch-overlays-lines.png",
+    "alt": "Airframe Frequency versus Throttle spectrum with Dynamic and RPM notch filters selected but collapsed, leaving only their centre lines over the heatmap",
+    "caption": "Keep the tracked centres visible without covering the measured spectrum.",
+    "gallery": "tuning"
+  },
+  {
+    "id": "notch-overlays-attenuation",
+    "source": "notch-overlays-attenuation.png",
+    "alt": "The same Airframe spectrum with Dynamic Notch expanded and highlighted, revealing its grey calculated attenuation around the centre track",
+    "caption": "Expand and highlight one filter when you want to inspect its calculated attenuation.",
+    "gallery": "tuning"
+  },
+  {
     "id": "chirp-response",
     "source": "chirp-response.png",
     "alt": "Airframe Chirp Response analysis across control axes",

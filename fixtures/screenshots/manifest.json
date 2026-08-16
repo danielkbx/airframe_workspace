@@ -11,25 +11,26 @@
   },
   "sources": [
     {
-      "id": "tuning",
-      "path": "../logs/Screenshot Sources/Tuning Source.airframe",
-      "sha256": "84c2e1afb0a9050dbf75361d2e10c915bf3fad350fd975deaa66f4c64b73894c",
+      "id": "baseline",
+      "path": "../logs/Screenshot Sources/Baseline Screenshot Source.airframe",
+      "sha256": "f4ecd5dd0feef1e301b242a1099dd50852dede8f263b1ec99bb867dc462c1383",
       "publicationApproved": true
     },
     {
-      "id": "gps",
-      "path": "../logs/Screenshot Sources/GPS Source.airframe",
-      "sha256": "b3a0e2f8fcbfa4e987b165f701d0cc8198297e826313d210a9aa7baf03256853",
+      "id": "notch-overlays",
+      "path": "../logs/Screenshot Sources/Notch Overlay Source.airframe",
+      "sha256": "36f60a66a521c93c7786923516bfa387f7760cae5fd47e69498670b1402a1e86",
       "publicationApproved": true
     }
   ],
   "logs": [
-    {"source": "tuning", "sourceLogIndex": 1, "segment": 0, "displayName": "Baseline Flight", "roles": ["overview-rich", "step-response-baseline", "current-calibration"]},
-    {"source": "tuning", "sourceLogIndex": 5, "segment": 0, "displayName": "Filter Tune", "roles": ["spectrum-rpm", "step-response-filter-revision"]},
-    {"source": "tuning", "sourceLogIndex": 10, "segment": 0, "displayName": "PID Tune", "roles": ["step-response-pid-revision"]},
-    {"source": "gps", "sourceLogIndex": 1, "segment": 0, "displayName": "Long Range Test", "roles": ["gps-route", "event-rich"], "propellerSize": "sixToSevenInchLongRange"},
-    {"source": "tuning", "sourceLogIndex": 7, "segment": 0, "displayName": "CHIRP Tune", "roles": ["chirp-complete", "event-rich"]},
-    {"source": "tuning", "sourceLogIndex": 0, "segment": 0, "displayName": "Motor Setup Check", "roles": ["motor-problem", "spectrum-rpm"]}
+    {"source": "baseline", "sourceLogIndex": 0, "segment": 0, "displayName": "Baseline Flight", "roles": ["overview-rich", "step-response-baseline", "current-calibration"]},
+    {"source": "baseline", "sourceLogIndex": 1, "segment": 0, "displayName": "Filter Tune", "roles": ["spectrum-rpm", "step-response-filter-revision"]},
+    {"source": "notch-overlays", "sourceLogIndex": 0, "segment": 0, "displayName": "Notch Filter Tune", "roles": ["spectrum-notch-overlays"]},
+    {"source": "baseline", "sourceLogIndex": 2, "segment": 0, "displayName": "PID Tune", "roles": ["step-response-pid-revision"]},
+    {"source": "baseline", "sourceLogIndex": 5, "segment": 0, "displayName": "Long Range Test", "roles": ["gps-route", "event-rich"], "propellerSize": "sixToSevenInchLongRange"},
+    {"source": "baseline", "sourceLogIndex": 3, "segment": 0, "displayName": "CHIRP Tune", "roles": ["chirp-complete", "event-rich"]},
+    {"source": "baseline", "sourceLogIndex": 4, "segment": 0, "displayName": "Motor Setup Check", "roles": ["motor-problem", "spectrum-rpm"]}
   ],
   "presets": [
     {"id": "AirframeSc01", "name": "Flight Review", "file": "presets/Flight Review.airframepreset"},
@@ -42,6 +43,8 @@
     "overview": {"logRole": "overview-rich", "view": "overview", "preset": "Flight Review", "sidebar": {"visible": true, "width": 250}, "inspector": {"visible": false, "width": 320}, "timeline": null, "graphViewport": null, "spectrumFrequencyWindow": null, "mapCamera": null, "scrollTarget": "airframe.log.overview.aircraft", "sheet": null, "popover": null, "expandedSections": [], "readyElements": ["airframe.log.view.overview"]},
     "graph-playback": {"logRole": "event-rich", "view": "graph", "preset": "Control Response", "sidebar": {"visible": true, "width": 250}, "inspector": {"visible": true, "width": 330}, "timeline": {"startMicros": 21000000, "endMicros": 92000000, "cursorMicros": 53515963}, "graphViewport": {"lowerFraction": 0.30, "upperFraction": 0.62}, "spectrumFrequencyWindow": null, "mapCamera": null, "scrollTarget": null, "sheet": null, "popover": null, "expandedSections": ["craft"], "readyElements": ["airframe.log.view.graph.surface", "airframe.log.inspector.graph.craft"]},
     "spectrum": {"logRole": "spectrum-rpm", "view": "spectrum", "preset": "Filter Analysis", "sidebar": {"visible": true, "width": 250}, "inspector": {"visible": true, "width": 330}, "timeline": null, "graphViewport": null, "spectrumFrequencyWindow": {"lowerFraction": 0.0, "upperFraction": 0.55}, "mapCamera": null, "scrollTarget": null, "sheet": null, "popover": null, "expandedSections": ["guides"], "readyElements": ["airframe.log.view.spectrum.surface", "airframe.log.inspector.spectrum.mode"]},
+    "spectrum-notch-lines": {"logRole": "spectrum-notch-overlays", "view": "spectrum", "preset": "Filter Analysis", "sidebar": {"visible": true, "width": 250}, "inspector": {"visible": true, "width": 390}, "timeline": null, "graphViewport": null, "spectrumFrequencyWindow": {"lowerFraction": 0.0, "upperFraction": 0.65}, "mapCamera": null, "scrollTarget": "airframe.log.inspector.spectrum.filter.dynamicNotch", "sheet": null, "popover": null, "expandedSections": [], "hoverTarget": null, "readyElements": ["airframe.log.view.spectrum.surface", "airframe.log.inspector.spectrum.filter.dynamicNotch"]},
+    "spectrum-notch-attenuation": {"logRole": "spectrum-notch-overlays", "view": "spectrum", "preset": "Filter Analysis", "sidebar": {"visible": true, "width": 250}, "inspector": {"visible": true, "width": 390}, "timeline": null, "graphViewport": null, "spectrumFrequencyWindow": {"lowerFraction": 0.0, "upperFraction": 0.65}, "mapCamera": null, "scrollTarget": "airframe.log.inspector.spectrum.filter.dynamicNotch", "sheet": null, "popover": null, "expandedSections": ["dynamicNotch"], "hoverTarget": "dynamicNotch", "readyElements": ["airframe.log.view.spectrum.surface", "airframe.log.inspector.spectrum.filter.dynamicNotch.details"]},
     "chirp-response": {"logRole": "chirp-complete", "view": "stepResponse", "preset": "CHIRP Analysis", "sidebar": {"visible": true, "width": 250}, "inspector": {"visible": true, "width": 350}, "timeline": {"startMicros": 21544587, "endMicros": 110903593, "cursorMicros": 53515963}, "graphViewport": null, "spectrumFrequencyWindow": null, "mapCamera": null, "scrollTarget": null, "sheet": null, "popover": null, "expandedSections": ["frequency-response", "guides"], "readyElements": ["airframe.log.view.frequencyresponse.surface"]},
     "flight-map": {"logRole": "gps-route", "view": "map", "preset": "Flight Map", "sidebar": {"visible": true, "width": 250}, "inspector": {"visible": true, "width": 320}, "timeline": {"startMicros": 0, "endMicros": 996038904, "cursorMicros": 498019452}, "graphViewport": null, "spectrumFrequencyWindow": null, "mapCamera": {"latitude": 0, "longitude": 0, "distanceMeters": 900, "pitchDegrees": 35, "headingDegrees": 0}, "scrollTarget": null, "sheet": null, "popover": null, "expandedSections": ["route", "hud"], "readyElements": ["airframe.log.view.map"]}
   }

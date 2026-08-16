@@ -1,0 +1,107 @@
+{
+  "id": "notch-overlay-reading",
+  "title": "What the notch overlay is actually showing",
+  "summary": "The bright spectrum, the tracked centre lines, and the grey attenuation area answer three different questions. Read them separately before judging the filter result.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "The heatmap is measured evidence from the selected part of the log. A notch centre line shows the frequency that the filter followed. The grey area is different: Airframe calculates the expected filter attenuation from the recorded Betaflight version, filter settings, and available tracking data. It is not a second measurement of the signal after filtering."
+    },
+    {"type": "heading", "level": 3, "title": "Two layers: tracked centre and calculated attenuation"},
+    {
+      "type": "table",
+      "caption": "Read the overlay in layers",
+      "columns": ["Layer", "What it means", "What it does not mean"],
+      "rows": [
+        ["Centre line", "The frequency followed by a Dynamic or RPM notch, when the log contains enough tracking evidence.", "It does not show how much noise exists there."],
+        ["Grey area", "The attenuation Airframe calculates around the centre from Q, weight, fade, looptime, and the matching Betaflight filter model.", "It is not measured post-filter energy and does not prove that the tune is safe."],
+        ["Search or minimum boundary", "A configured limit is known even though the exact tracked centre is unavailable.", "It is not an invented tracking line."]
+      ]
+    },
+    {"type": "heading", "level": 3, "title": "Why the grey area appears only on highlight"},
+    {
+      "type": "paragraph",
+      "text": "Selected filters always keep their useful centre lines or configured boundaries visible. To see the calculated attenuation, expand that filter in the sidebar and highlight its row. Moving away hides the grey area again. This keeps several Dynamic and RPM notch lines readable without covering the heatmap. Expanded rows are saved with the document and in portable presets."
+    },
+    {"type": "heading", "level": 3, "title": "Dynamic Notch and RPM Filter solve different tracking jobs"},
+    {
+      "type": "table",
+      "caption": "Where the centres come from",
+      "columns": ["Filter", "What it follows", "Important limit"],
+      "rows": [
+        ["Dynamic Notch", "Spectral peaks found by Betaflight inside its search range.", "Following a peak does not identify the loose part, resonance, or other source that created it."],
+        ["RPM Filter", "Per-motor harmonics derived from bidirectional-DShot eRPM.", "Correct motor poles and usable eRPM evidence are required; one harmonic contains several motor notches."],
+        ["Several notches", "All active Dynamic slots or motor notches work together.", "The grey area shows their combined calculated attenuation rather than one notch in isolation."]
+      ]
+    },
+    {"type": "heading", "level": 3, "title": "What the sidebar values mean"},
+    {
+      "type": "table",
+      "columns": ["Value", "Plain meaning"],
+      "rows": [
+        ["Search Range", "The frequencies in which the Dynamic Notch is allowed to look for peaks."],
+        ["Notches", "How many peaks the Dynamic Notch can follow at the same time."],
+        ["Minimum", "The lowest centre frequency allowed for an RPM notch."],
+        ["Q", "The notch width. A higher Q is narrower; a lower Q is wider."],
+        ["Weight", "How strongly that RPM harmonic is blended in. Zero percent disables that harmonic."],
+        ["Fade", "How gently the RPM notch reaches its full weight above the minimum frequency."],
+        ["LPF", "How strongly Betaflight smooths the motor-frequency value used by the RPM Filter."],
+        ["Evidence", "How directly the centre and attenuation are supported by this particular log."]
+      ]
+    },
+    {"type": "heading", "level": 3, "title": "Evidence says how much Airframe really knows"},
+    {
+      "type": "table",
+      "columns": ["Evidence", "Meaning"],
+      "rows": [
+        ["Observed", "The tracked centre was recorded in the log, including its Gyro axis when Betaflight recorded that information."],
+        ["Partially observed", "A tracked centre was recorded, but an important detail such as its Gyro axis or every configured slot is missing."],
+        ["Modeled", "Airframe rebuilt the centre from recorded values such as eRPM and the matching firmware behaviour; the exact internal updates were not logged."],
+        ["Configured only", "The filter settings or limits are known, but the flight did not record enough data to draw where the notch actually moved."],
+        ["Unsupported firmware model", "The log comes from a firmware generation whose exact filter response Airframe does not claim to know. No precise attenuation area is invented."]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "note",
+      "title": "Evidence describes the overlay, not the quality of the tune",
+      "text": "Observed is more direct than Modeled, but neither label says that the filter settings are good. Judge the outcome by comparing input noise, filtered gyro, D term, motor output, and filter delay over the same flight range."
+    },
+    {"type": "heading", "level": 3, "title": "The Spectrum modes show different parts of the story"},
+    {
+      "type": "table",
+      "columns": ["Mode", "Notch presentation"],
+      "rows": [
+        ["Frequency", "Centre curves remain visible. An expanded and highlighted filter adds a thin attenuation ribbon at the bottom of each applicable axis pane."],
+        ["Frequency vs Throttle", "Centre tracks and their attenuation follow occupied throttle bins. Empty, unflown bins remain empty and disconnected."],
+        ["Frequency vs RPM", "The existing RPM harmonic diagonals remain. No new attenuation area is shown, and Dynamic Notch is unavailable in this mode."]
+      ]
+    },
+    {"type": "heading", "level": 3, "title": "Why the Betaflight version matters"},
+    {
+      "type": "table",
+      "columns": ["Betaflight generation", "What Airframe can use"],
+      "rows": [
+        ["4.4 and 4.5", "Older Dynamic-notch debug data can record only part of the configured slots and does not identify the Gyro axis. Airframe keeps those tracks neutral and does not draw axis-specific attenuation."],
+        ["4.6 and 2025.12", "Newer debug layouts can record more Dynamic slots and the tracked Gyro axis when the required fields are present."],
+        ["2026.6", "Betaflight uses a different notch-filter core. Airframe calculates its response with that matching model rather than a generic approximation."],
+        ["Unknown newer generation", "Airframe may still show recorded centres or configured limits, but withholds an exact attenuation area until the filter model is verified."]
+      ]
+    },
+    {
+      "type": "callout",
+      "tone": "limit",
+      "title": "An overlay cannot identify a physical fault or certify safety",
+      "text": "Use it to understand where a filter acted and how much attenuation its model predicts. Loose hardware, damaged props, bearing condition, motor temperature, and thermal headroom still require physical checks and cautious repeat flights."
+    }
+  ],
+  "sources": [
+    {"label": "Firmware-faithful notch overlay model", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlay.swift"},
+    {"label": "Dynamic and RPM notch track analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlayWorkspace.swift"},
+    {"label": "Versioned Blackbox debug mapping", "path": "Airframe/Packages/BlackboxReader/Sources/BlackboxReader/ReaderNotchDebugMapping.swift"},
+    {"label": "Spectrum notch presentation", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumInspector.swift"},
+    {"label": "Betaflight Dynamic Notch implementation", "path": "upstreams/betaflight/src/main/flight/dyn_notch_filter.c"},
+    {"label": "Betaflight RPM Filter implementation", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"}
+  ],
+  "reviewedAgainst": {"appVersion": "0.1.0", "betaflightVersion": "2026.6.1", "betaflightCommit": "6dbc4218f", "reviewDate": "2026-08-16"}
+}

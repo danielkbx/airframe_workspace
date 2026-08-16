@@ -101,16 +101,30 @@
     {
       "id": "rpm-filter",
       "term": "RPM Filter",
-      "definition": "A per-motor harmonic filter driven by measured eRPM. Judging its alignment requires valid eRPM data and the correct motor pole count.",
+      "definition": "A set of per-motor harmonic notches driven by eRPM. Airframe can show logged or reconstructed centres and calculate their combined response when the firmware model and required values are known.",
       "aliases": ["RPM filtering"],
       "source": {"label": "Betaflight RPM filter", "path": "upstreams/betaflight/src/main/flight/rpm_filter.c"}
     },
     {
       "id": "dynamic-notch",
       "term": "Dynamic Notch",
-      "definition": "A filter that tracks remaining spectral peaks. Following a peak does not identify its mechanical cause, so source evidence and physical inspection remain separate questions.",
+      "definition": "One or more notches that track spectral peaks inside a configured search range. Following a peak does not identify its mechanical cause, so source evidence and physical inspection remain separate questions.",
       "aliases": ["dynamic notch filter"],
-      "source": {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"}
+      "source": {"label": "Airframe notch overlay model", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlay.swift"}
+    },
+    {
+      "id": "notch-q",
+      "term": "Notch Q",
+      "definition": "A notch-width setting. A higher Q makes the notch narrower around its centre frequency; a lower Q makes it wider.",
+      "aliases": ["filter Q", "Q factor"],
+      "source": {"label": "Betaflight filter implementation", "path": "upstreams/betaflight/src/main/common/filter.c"}
+    },
+    {
+      "id": "filter-evidence",
+      "term": "Filter evidence",
+      "definition": "Airframe's description of whether a filter centre was observed in the log, partly observed, reconstructed from logged data, or known only from configuration.",
+      "aliases": ["notch evidence"],
+      "source": {"label": "Airframe notch overlay evidence", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlay.swift"}
     },
     {
       "id": "step-response",

@@ -30,7 +30,7 @@
     },
     {
       "type": "paragraph",
-      "text": "Configured filter overlays show where recorded settings act. Comparing unfiltered gyro, filtered gyro, D term, and motor output can show what remains downstream. Every filter attenuates something and adds delay, so 'more filtering' is not a strategy; it is merely a direction."
+      "text": "Filter centre lines show where a recorded or reconstructed notch moved; an expanded and highlighted filter can also show its firmware-matched calculated attenuation. That grey area is a model of the filter response, not measured post-filter energy. Comparing unfiltered gyro, filtered gyro, D term, and motor output can show what actually remains downstream. Every filter attenuates something and adds delay, so 'more filtering' is not a strategy; it is merely a direction."
     },
     {
       "type": "paragraph",
@@ -46,6 +46,7 @@
   "sources": [
     {"label": "Spectrum implementation", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/"},
     {"label": "Spectrum modes and overlays", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSettings.swift"},
+    {"label": "Firmware-faithful notch overlays", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisNotchOverlay.swift"},
     {"label": "Propeller blade-count analysis", "path": "Airframe/Packages/BlackboxAnalysis/Sources/BlackboxAnalysis/Spectrum/AnalysisPropellerBladeCount.swift"},
     {"label": "Blade-pass overlay", "path": "Airframe/App/Airframe/App/DocumentHome/Content/Spectrum/SpectrumSurface.swift"},
     {"label": "Spectrum tuning evidence", "path": "knowledge/SPECTRUM_TUNING_GUIDES.md"},
