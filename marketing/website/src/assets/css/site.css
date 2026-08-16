@@ -174,7 +174,7 @@ h3 { font-size: clamp(1.35rem, 2vw, 1.85rem); font-weight: 600; }
 .support-details { margin-top: 74px; padding-top: 42px; border-top: 1px solid var(--line); }
 .support-details h2 { max-width: 660px; font-size: clamp(1.8rem, 4vw, 3.1rem); }
 .support-details address { color: var(--muted); font-style: normal; }
-.callout, .community-note {
+.callout {
   --callout-signal: var(--accent);
   position: relative;
   margin-top: 68px;
@@ -189,7 +189,7 @@ h3 { font-size: clamp(1.35rem, 2vw, 1.85rem); font-weight: 600; }
   box-shadow: -7px 0 18px -13px var(--callout-signal), 0 7px 18px -13px var(--callout-signal);
   color: var(--muted);
 }
-.callout::after, .community-note::after {
+.callout::after {
   content: "";
   position: absolute;
   left: -3px;
@@ -240,9 +240,6 @@ h3 { font-size: clamp(1.35rem, 2vw, 1.85rem); font-weight: 600; }
 .ack-list h2 { margin-bottom: 16px; font-size: clamp(1.55rem, 3vw, 2.35rem); }
 .ack-list p { max-width: 680px; color: var(--muted); }
 .ack-list .text-link { font-size: .9rem; }
-.community-note { margin-top: 94px; }
-.community-note h2 { font-size: clamp(1.8rem, 4vw, 3.1rem); }
-.community-note p:not(.eyebrow) { max-width: 670px; }
 
 .inside-index { padding-top: clamp(56px, 7vw, 88px); }
 .inside-index .text-page__header { width: var(--shell); margin: 0 auto clamp(56px, 7vw, 84px); }
@@ -338,7 +335,7 @@ h3 { font-size: clamp(1.35rem, 2vw, 1.85rem); font-weight: 600; }
 
 @media (max-width: 480px) {
   body { font-size: 16px; }
-  .callout, .community-note { padding: 10px 22px 24px; }
+  .callout { padding: 10px 22px 24px; }
   .site-footer__nav { grid-template-columns: 1fr; }
   .hero__actions { align-items: stretch; flex-direction: column; }
   .hero__actions > * { width: 100%; justify-content: center; }
