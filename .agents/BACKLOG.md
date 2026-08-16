@@ -8,7 +8,7 @@ Unapproved future ideas only. Promote an item to [TASKS.md](TASKS.md) or an appr
 ## Near-Term Cleanup
 
 - Re-evaluate the fixed macOS Log inspector after a SwiftUI/AppKit update. Restore a resizable native inspector only if the exact large Airframe Spectrum + cached Frequency-vs-RPM heatmap reproduction remains stable; do not reintroduce the retired overlaying AppKit split.
-- Remove `LegacyAirframeConverter.swift`, `Convert Legacy File…`, legacy fixtures, and compatibility/migration/isolation tests after testers have converted their files. Rename remaining package-era type names at the same time; keep the logical metadata identifier `com.kumkju.airframe.document`.
+- In a future Airframe version, remove `LegacyAirframeConverter.swift`, legacy fixtures, and compatibility/migration/isolation tests after testers have converted their files. Rename remaining package-era type names at the same time; keep the logical metadata identifier `com.kumkju.airframe.document`.
 - Surface `AirframeContainer` recovery/locator issues in a user-visible diagnostic.
 - Add a transient Flight Controller import diagnostics view for uptime, temperature, CPU load, voltage, I2C errors, and arming-disable flags. Do not persist these runtime values.
 
