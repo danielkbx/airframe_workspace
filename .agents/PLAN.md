@@ -1,5 +1,23 @@
 # Current Plan
 
+## Copyable Start Coordinates And Resilient Reverse Geocoding (Implemented; Live Acceptance Pending 2026-08-17)
+
+### Think Before Coding
+
+- Coordinate interoperability is the invariant: render latitude then longitude with fixed five-digit POSIX decimal points and one comma separator, independent of the UI locale. Reverse-geocoded place names remain optional, non-persisted runtime data.
+
+### Simplicity First
+
+- Reuse the existing document-owned `FlightLocationStore`, shared Overview/Map environment boundary, MapKit client, bounded LRU, memory-pressure hook, and shutdown path. Add only one shared formatter and one injectable `NWPathMonitor` seam; add no setting, dependency, or persisted state.
+
+### Surgical Changes
+
+- Overview and Map inspector now share selectable `48.13720, 11.57550` text. The Overview coordinate row no longer navigates so selection is reliable. The store suppresses known-offline requests, uses a capped 30/60/120/240/300-second retry schedule, immediately retries after unavailable-to-available network recovery, deduplicates requests, and cancels network/request/retry work on eviction or shutdown.
+
+### Goal-Driven Execution
+
+- Focused `LogViewSelectionTests` cover format, caching, request deduplication, offline suppression, immediate network recovery, capped backoff, automatic retry-to-success, memory-pressure cancellation, and permanent shutdown. Remaining acceptance is one live macOS offline/open/reconnect/copy-paste/close pass with a writable GPS document.
+
 ## Website Wiki: Dynamic And RPM Notch Overlays (Implemented 2026-08-16)
 
 ### Think Before Coding

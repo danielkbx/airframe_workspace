@@ -49,7 +49,7 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 
 ### Flight Location Card
 
-- On macOS with a writable GPS `.airframe` document, verify the new Location card follows GPS, keeps Apple attribution readable, and switches to Map from the location row, coordinate row, and compact map without changing cursor, playback, camera, or Map settings. Verify City/Region/Country and the expanded Map inspector metrics with complete and partial Apple results, offline fallback, repeated Overview/Map switching with one request, raw-log exclusion, and close during an active request.
+- On macOS with a writable GPS `.airframe` document, verify the Location card follows GPS, keeps Apple attribution readable, and switches to Map from the place row, header More action, and compact map without changing cursor, playback, camera, or Map settings. Verify the coordinate row is selectable, copies exactly as fixed-five-digit `latitude, longitude`, and pastes directly into Google Maps without triggering Map navigation. Verify City/Region/Country and the expanded Map inspector metrics with complete and partial Apple results, offline open followed by automatic recovery without closing the document, repeated Overview/Map switching with one request, raw-log exclusion, and close during an active request or scheduled retry.
 
 ### Firmware-Faithful Dynamic and RPM Notch Overlays
 
