@@ -45,7 +45,7 @@
       "rows": [
         ["Stability Margin", "Phase margin on each supported axis.", "It describes modeled closed-loop margin in this recording, not damaged-prop or thermal tolerance."],
         ["Robustness", "Peak sensitivity on each axis.", "It is not a reward for maximum gain or bandwidth."],
-        ["Damping", "Closed-loop resonance plus derived-step overshoot and settling evidence.", "Similar damping symptoms can still involve filtering, Feedforward, saturation, or mechanics."],
+        ["Damping", "The weakest of closed-loop resonance, derived-step overshoot, and settling evidence; at least two of the three must be available.", "Similar damping symptoms can still involve filtering, Feedforward, saturation, or mechanics."],
         ["Tracking Fidelity", "Low-frequency gain and final error from the derived response.", "Good tracking does not make the other components optional."]
       ]
     },

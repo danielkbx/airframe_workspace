@@ -13,7 +13,7 @@
       "columns": ["Evidence", "Meaning", "Limit"],
       "rows": [
         ["Accepted and candidate windows", "How much of the selected flight contributed to the estimate.", "More windows do not make dissimilar manoeuvres comparable."],
-        ["Normalized peak", "The highest value of the averaged response; values above 1 contain overshoot in the estimate.", "Peak alone does not identify P, D, Feedforward, filtering, or mechanics as the cause."],
+        ["Normalized peak", "The highest value of the averaged unit-step estimate; values above 1 indicate the response exceeded the commanded level.", "Peak alone does not identify P, D, Feedforward, filtering, or mechanics as the cause."],
         ["Half-response latency", "Time until the estimate first reaches half of its steady-state value.", "Filtering, plant dynamics, control authority, and estimator quality all contribute."],
         ["10–90% rise time", "Time between the first 10% and 90% crossings.", "Unavailable crossings remain unavailable rather than being inferred."]
       ]

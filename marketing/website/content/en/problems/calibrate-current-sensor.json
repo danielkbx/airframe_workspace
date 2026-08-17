@@ -36,7 +36,7 @@
     {
       "type": "steps",
       "items": [
-        {"title": "Use an ADC current sensor", "text": "In Betaflight Configurator, Current Meter Source must be ADC. This capacity-based Scale correction does not apply to Virtual, ESC, MSP, or None sources."},
+        {"title": "Use an ADC current sensor", "text": "In Betaflight Configurator, Current Meter Source must be ADC. Airframe's assistant supports only the ADC source and rejects Virtual, ESC, MSP, and None sources."},
         {"title": "Keep the current Scale", "text": "The calculation needs the Scale used during the measured flight. Do not change it before completing the calculation. Airframe prefers the Scale recorded in the flight header and can fall back to a suitable associated configuration."},
         {"title": "Start genuinely full", "text": "Use a fully charged battery. Airframe cannot infer battery chemistry or a full charge from voltage, so it asks you to confirm this explicitly before reusing the selected log's USED MAH."},
         {"title": "Use meaningful capacity", "text": "Make a normal flight that uses a meaningful portion of the battery, then land with your usual safety reserve. Do not deep-discharge the battery for calibration."},
@@ -94,7 +94,7 @@
       "type": "callout",
       "tone": "limit",
       "title": "This corrects Scale only",
-      "text": "The workflow does not calibrate current offset, prove charger accuracy, diagnose wiring or sensor faults, or make non-ADC current sources more accurate. Resolve those issues separately before trusting the result."
+      "text": "The workflow does not calibrate current offset and assumes the configured offset is zero or small; a large offset makes the proportional correction less accurate. It also does not prove charger accuracy, diagnose wiring or sensor faults, or make non-ADC current sources more accurate. Resolve those issues separately before trusting the result."
     },
     {"type": "relatedProblems", "problems": ["setup-health-check", "compare-recorded-values"]},
     {"type": "sources"}

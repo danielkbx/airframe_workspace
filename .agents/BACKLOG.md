@@ -1,11 +1,21 @@
 # Backlog
 
+- QuickLook preview and thumbnail extensions for `.bbl`/`.bfl`/`.airframe` (user deferred 2026-08-17 in favor of Spotlight first). The building blocks are ready and marked **[QL-reusable]** in `SPOTLIGHT_INDEXING.md`: the unused `ReaderHeaderPreviewOptions.quickLook` preset, the `AirframeSpotlight` mapper/`ContainerMetadataSummary`, and the ExtensionKit target-wiring recipe.
+- Retest the Spotlight import extension end-to-end on a release macOS and a real iOS device; on the 2026-08-17 macOS 27 beta host the OS-side BackgroundTaskManagement registration for third-party import extensions fails (details in `SPOTLIGHT_INDEXING.md`). Then verify the no-duplicate-results contract between importer and enrichment items.
+
 - Add client-side search to `Inside Airframe` only when the guide corpus makes browsing insufficient; keep JSON as the content source and avoid a search service or CMS.
 - Add a clearly marked “Nerdy Tech Stuff” Inside Airframe article that explains the document format without presenting it as a permanent interoperability specification. Cover container versions, blobs, hashes, commits, export, recovery, compaction, and security boundaries; make any stable byte-format or third-party implementation commitment only after a separate product decision.
 
 Unapproved future ideas only. Promote an item to [TASKS.md](TASKS.md) or an approved section in [PLAN.md](PLAN.md) when the user selects it. Completed work belongs in Git, current behavior in `ARCHITECTURE.md`, stable decisions in `MEMORY.md`, and evidence in the Knowledge Base.
 
-## Near-Term Cleanup
+## Audit Findings 2026-08-16 (performance, cache, stability, security)
+
+Four-domain source audit against the documented invariants. All documented performance, cache-lifecycle, close-boundary, and save-panel invariants were verified as correctly implemented; the offline file-parsing surface (BBL/BFL, container, presets) verified clean against bounds/overflow/allocation/DoS classes. Unfixed findings, by priority:
+
+- Security H1: `SpeedyBeeControlProtocol.swift:132` traps on attacker-declared varint length (`Int(decoded.value)` before bounds check); reachable pre-auth from a hostile BLE peripheral or Wi-Fi AP. Bound the varint shift and use overflow-checked conversion.
+- Security H2/H3/H4 (live SpeedyBee path): unbounded BLE control-buffer growth in `SpeedyBeeControlChannel.swift:169-191`; download receive loop without overall deadline or cancellation checks (`SpeedyBeeWiFiClient.swift:328-398`); quadratic `isComplete` scan and ~4 GB `reserveCapacity` driven by attacker-declared STAT size, non-terminating for `packetCount > 65_536` (`SpeedyBeeDataPacket.swift`).
+- Security M1–M4: dataflash download `UInt32` overflow with unsanitized `usedBytes` (`BetaflightClient.swift:1227-1261`); unbounded control-read loops (`SpeedyBeeWiFiClient.swift:428-471`); short packet data regions accepted silently corrupting assembled BBL (`SpeedyBeeDataPacket.swift:47-56,143-158`); unvalidated peripheral-chosen SSID flows into Wi-Fi join and UI (`SpeedyBeeWiFiInfo.swift:19-27`).
+- Cache F1/F2 (high): `MainFrameChunkCache.swift:69-84` spawns untracked per-chunk disk writes that survive document close and re-persists already-cached chunks on
 
 - Re-evaluate the fixed macOS Log inspector after a SwiftUI/AppKit update. Restore a resizable native inspector only if the exact large Airframe Spectrum + cached Frequency-vs-RPM heatmap reproduction remains stable; do not reintroduce the retired overlaying AppKit split.
 - In a future Airframe version, remove `LegacyAirframeConverter.swift`, legacy fixtures, and compatibility/migration/isolation tests after testers have converted their files. Rename remaining package-era type names at the same time; keep the logical metadata identifier `com.kumkju.airframe.document`.
@@ -52,6 +62,8 @@ Detailed SpeedyBee protocol evidence remains in [SPEEDYBEE_REVERSE_ENGINEERING.m
 - Add large-log performance work only when profiling identifies a specific bottleneck.
 - Harden Graph/Timeline gap rendering against pathological logs with coalesced spans and bounded chip construction.
 - Consider scan-overview min/max envelopes only if profiling or fixtures show stride sampling hides material spikes.
+
+Code-audit findings 2026-08-16 (four parallel reviews: SwiftUI performance, cache efficiency, stability/lifecycle, security). Full report with `file:line` and per-item status is the standalone handoff [HANDOFF_CODE_AUDIT_2026-08-16.md](HANDOFF_CODE_AUDIT_2026-08-16.md). Almost all findings were implemented and verified on 2026-08-16 (see the handoff's implementation-status section). Two items remain deferred by choice and still need work: (1) test-gated removal of the macOS `com.apple.security.network.server` entitlement (may be required by SpeedyBee UDP receive; verify with a live WiFi import before removing); (2) cache F5, moving SHA256/encode off the global `DerivedDataCache` actor (efficiency-only, race risk, needs a careful refactor). The implemented `Airframe/` changes are uncommitted pending the changelog decision (public-commit gate).
 
 ## Analysis and Presentation Follow-Ups
 

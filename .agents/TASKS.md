@@ -47,6 +47,10 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 
 ## Live Acceptance Pending
 
+### Flight Location Card
+
+- On macOS with a writable GPS `.airframe` document, verify the new Location card follows GPS, keeps Apple attribution readable, and switches to Map from the location row, coordinate row, and compact map without changing cursor, playback, camera, or Map settings. Verify City/Region/Country and the expanded Map inspector metrics with complete and partial Apple results, offline fallback, repeated Overview/Map switching with one request, raw-log exclusion, and close during an active request.
+
 ### Firmware-Faithful Dynamic and RPM Notch Overlays
 
 - On macOS and physical iPad, verify Frequency and Frequency vs Throttle with Dynamic plus all three RPM harmonics, observed/modelled/configured-only evidence styles, multiple slots, Roll-only targeting, narrow/wide windows, hover/highlight, and mode-switch selection persistence. At rest only center/configuration lines are visible; the matching attenuation ribbon or field appears only when that filter is expanded and highlighted. Verify expanded state across document reopen and preset application. Frequency vs RPM must retain only its existing harmonic diagonals.
