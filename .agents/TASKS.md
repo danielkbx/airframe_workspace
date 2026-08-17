@@ -86,7 +86,7 @@ Only approved near-term work and unresolved acceptance gates belong here. Comple
 ### Inspector Scroll and Hover Stability
 
 - On macOS, confirm Graph, Table, Spectrum, and Step Response inspectors scroll without visible stutter.
-- Verify checkbox hit testing and the fixed 500 ms hover-highlight activation.
+- Verify the fixed 500 ms hover-highlight activation.
 - Pointer exit, explicit clear, and tap toggles must remain immediate.
 
 ### Graph Cache and Playback
