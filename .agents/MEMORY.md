@@ -198,6 +198,7 @@ This file stores durable decisions and constraints. It intentionally omits imple
 - Prefer async/await and structured concurrency.
 - Prefer Swift Testing for packages; XCTest is allowed for app tests, UI automation, and Xcode-specific facilities.
 - Use Semantic Versioning. Every package and Xcode target shares one version; Xcode targets inherit `MARKETING_VERSION` from `Base.xcconfig`.
+- Shipped bundle identifiers are centralized in `App/Configuration/BundleIdentifiers.xcconfig`: the app uses `com.kumkju.airframe` and the universal classic Spotlight import extension uses the explicitly registered App ID `com.kumkju.airframe.SpotlightImporter`. Target build settings reference the named xcconfig variables, while signing remains automatic for Debug, Beta, and Release on iOS/iPadOS and macOS.
 - Use typed, domain-specific errors and `throws` rather than Swift `Result` return values.
 - Keep large types in separate files; compact local subordinate types may remain with their owner.
 - One-line calls and declarations are preferred when they fit within 150 characters.
