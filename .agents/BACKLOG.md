@@ -17,7 +17,6 @@ Four-domain source audit against the documented invariants. All documented perfo
 - Security M1–M4: dataflash download `UInt32` overflow with unsanitized `usedBytes` (`BetaflightClient.swift:1227-1261`); unbounded control-read loops (`SpeedyBeeWiFiClient.swift:428-471`); short packet data regions accepted silently corrupting assembled BBL (`SpeedyBeeDataPacket.swift:47-56,143-158`); unvalidated peripheral-chosen SSID flows into Wi-Fi join and UI (`SpeedyBeeWiFiInfo.swift:19-27`).
 - Cache F1/F2 (high): `MainFrameChunkCache.swift:69-84` spawns untracked per-chunk disk writes that survive document close and re-persists already-cached chunks on
 
-- Re-evaluate the fixed macOS Log inspector after a SwiftUI/AppKit update. Restore a resizable native inspector only if the exact large Airframe Spectrum + cached Frequency-vs-RPM heatmap reproduction remains stable; do not reintroduce the retired overlaying AppKit split.
 - In a future Airframe version, remove `LegacyAirframeConverter.swift`, legacy fixtures, and compatibility/migration/isolation tests after testers have converted their files. Rename remaining package-era type names at the same time; keep the logical metadata identifier `com.kumkju.airframe.document`.
 - Surface `AirframeContainer` recovery/locator issues in a user-visible diagnostic.
 - Add a transient Flight Controller import diagnostics view for uptime, temperature, CPU load, voltage, I2C errors, and arming-disable flags. Do not persist these runtime values.

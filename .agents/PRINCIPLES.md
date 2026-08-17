@@ -69,6 +69,14 @@ All native UI work must follow [`UI_GUIDE.md`](UI_GUIDE.md).
 - Do not implement the collapsed state until that product decision is answered.
 - Never leave a collapsed macOS `Form` section empty; preserve the user-chosen summary or control.
 
+## Native macOS Inspector Rule
+
+Airframe document views on macOS must use SwiftUI's native `.inspector` presentation.
+
+- Do not replace the native inspector with an `HStack`, overlay, custom split view, fixed sidebar, or another simulated inspector without the user's prior explicit approval.
+- Layout, performance, constraint, or stability problems must be fixed locally in the affected inspector content or its publication boundaries. They do not authorize replacing the platform component.
+- Reviews must reject a non-native macOS inspector unless the repository records the user's explicit approval for that specific exception.
+
 ## SwiftUI Rendering Performance Rule
 
 All Canvas, `GeometryReader`, data-backed SwiftUI view, render-model, geometry-publication, resize, pointer/gesture, scroll, animation, and playback work must follow [`Airframe/doc/ui-performance.md`](../Airframe/doc/ui-performance.md). It is the single normative cross-feature source for UI cost models, preparation, invalidation boundaries, forbidden hot-path work, review, and profiling acceptance. Feature contracts may add stricter domain-specific invariants but must not restate or weaken it.
