@@ -143,6 +143,8 @@ Agents must update this file proactively when they learn a better command, workf
 - For Swift Packages, use `swift build` and `swift test` directly where possible.
 - Use `xcodebuild` for package or app scheme builds/tests when required.
 - Use `xcodeproj` for Xcode project file inspection or edits when appropriate.
+- Xcode 26.6's iOS and macOS Spotlight Import Extension templates both use classic `CSImportExtension` + `NSExtension` packaging. Never combine a `CSImportExtension` principal class with `EXTENSIONKIT_EXTENSION = YES`, `EXAppExtensionAttributes`, or `Extensions` placement: iPadOS then expects a Swift ExtensionKit `__swift5_entry` section and rejects the containing app with `MIInstallerErrorDomain` code 73. A shared multi-platform target works when embedded through the standard App Extensions copy phase into `PlugIns`; make macOS-only entitlements SDK-conditional.
+- Modern-importer invocation is `mdimport -m -y <uti> -u <file-url>`. Do not add `-d`: debug levels 1–3 are accepted only with legacy test mode `-t`, which does not exercise `CSImportExtension` modern importers.
 - The `xcodeproj` gem does not know the `name` attribute of `PBXFileSystemSynchronizedRootGroup` and drops `name = Packages` on every save (it warns about it). After any scripted project edit, restore `name = Packages;` and the `/* Packages */` comments in `project.pbxproj`, or Xcode shows the group as `../Packages`.
 - Use `xcrun simctl` for simulator lifecycle, app install/launch, screenshots, and log collection.
 - For simulator-related `xcodebuild`, do not pipe output to `grep`.
