@@ -111,6 +111,7 @@ Every flight tells a story.
 - The next in-app What's New entry uses numeric catalog ID `4` and covers four concise user-facing themes: portable analysis presets, broader Bluetooth flight-controller import, new Overview tools, and performance/document reliability. Technical test instructions remain exclusive to TestFlight notes.
 - The next tester update changes only the TestFlight notes. The in-app What's New catalog remains unchanged at numeric catalog ID `4`.
 - The next in-app What's New entry uses numeric catalog ID `5` and covers the expanded Flight Map, GPS route export, original Blackbox field names in editors, and distinct Finder icons for Airframe documents and presets.
+- The next in-app What's New entry uses numeric catalog ID `6` and covers Spotlight flight search, start-location access to Flight Map, clearer Overview checks, and sharper Spectrum guidance.
 - TestFlight notes describe only what is new. They use concise declarative release-note language, never testing instructions, requests, or `What to Test` framing.
 - What's New shows the app version below its title. Beta builds also show the build number; production builds do not.
 - TestFlight notes for build 47:
@@ -140,6 +141,7 @@ Every flight tells a story.
 - Only explicitly marked catalog releases trigger automatic presentation.
 - What's New uses monotonically increasing numeric catalog IDs independent of app versions and builds. The local and iCloud marker is stored under `lastSeenWhatsNewsCatalogId`; users receive every catalog entry with a higher ID, then the highest presented ID is retained.
 - A true first launch shows no What's New screen.
+- A true first-time user also sees no manual What's New action in About or Help. Existing users retain it, and it becomes permanently available after the first real update through the synchronized `hasWhatsNewHistory` marker.
 - Changes across skipped releases are combined by topic rather than presented as consecutive version pages.
 - What's New remains manually accessible through About and shows only the newest catalog entry so the manual view stays concise.
 - macOS also exposes `What's New in Airframe` in the Help menu for repeat viewing and testing; manual presentation never changes the synchronized seen marker.
